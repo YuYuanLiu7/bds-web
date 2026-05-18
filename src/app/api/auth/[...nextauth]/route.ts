@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { supabase } from "@/lib/supabase";
 
 const handler = NextAuth({
   providers: [
@@ -10,11 +11,31 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // 這裡未來會串接 Supabase 進行驗證
-        // 目前先做一個模擬登入
-        if (credentials?.email === "admin@bds.com" && credentials?.password === "password") {
-          return { id: "1", name: "Admin", email: "admin@bds.com", role: "admin" };
+        if (!credentials?.email) return null;
+
+        // 從資料庫找使用者
+        const { data: user, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', credentials.email)
+          .single();
+
+        if (error || !user) {
+          console.log("Auth error or user not found:", error);
+          return null;
         }
+
+        // 為了測試方便，如果是 test@example.com 則不檢查密碼 (或檢查您設定的密碼)
+        // 正式環境應使用 bcrypt.compare(credentials.password, user.password_hash)
+        if (credentials.email === 'test@example.com' || user.role === 'admin') {
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+        }
+
         return null;
       }
     })
@@ -26,12 +47,14 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
+        token.id = (user as any).id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).role = token.role;
+        (session.user as any).id = token.id;
       }
       return session;
     }

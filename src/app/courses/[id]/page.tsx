@@ -52,25 +52,33 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <div className="flex items-center"><Users className="w-4 h-4 mr-2" /> 專業講師授課</div>
             </div>
           </div>
-          <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-gray-100">
+          <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-gray-100">
             <Image 
               src={course.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"} 
               alt={course.title} 
               fill 
               className="object-cover" 
             />
-            <Link href={hasAccess ? `/courses/${id}/learn` : '#'} className="absolute inset-0 bg-black/20 flex items-center justify-center group cursor-pointer">
-              <div className="bg-white/90 p-4 rounded-full group-hover:scale-110 transition">
-                <PlayCircle className="w-12 h-12 text-blue-600 fill-blue-600/10" />
+            {hasAccess ? (
+              <Link href={`/courses/${id}/learn`} className="absolute inset-0 bg-black/20 flex items-center justify-center group cursor-pointer">
+                <div className="bg-white/90 p-4 rounded-full group-hover:scale-110 transition">
+                  <PlayCircle className="w-12 h-12 text-blue-600 fill-blue-600/10" />
+                </div>
+              </Link>
+            ) : (
+              <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                <div className="bg-white/90 p-4 rounded-full opacity-50">
+                  <PlayCircle className="w-12 h-12 text-gray-400" />
+                </div>
               </div>
-            </Link>
+            )}
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-12">
           {/* What you'll learn */}
           <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">課程內容亮點</h2>
@@ -89,28 +97,41 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <h2 className="text-2xl font-bold text-gray-900 mb-6">課程大綱</h2>
             <div className="space-y-3">
               {course.chapters.length > 0 ? (
-                course.chapters.map((chapter, i) => (
-                  <Link 
-                    key={chapter.id} 
-                    href={hasAccess ? `/courses/${id}/learn/${chapter.id}` : '#'}
-                    className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:border-blue-200 transition"
-                  >
+                course.chapters.map((chapter, i) => {
+                  const content = (
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold text-gray-500 mr-4">
                         {i + 1}
                       </div>
                       <span className="font-medium text-gray-900">{chapter.title}</span>
                     </div>
-                    {!hasAccess && <Clock className="w-4 h-4 text-gray-300" />}
-                  </Link>
-                ))
+                  );
+
+                  return hasAccess ? (
+                    <Link 
+                      key={chapter.id} 
+                      href={`/courses/${id}/learn/${chapter.id}`}
+                      className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:border-blue-200 transition"
+                    >
+                      {content}
+                      <PlayCircle className="w-4 h-4 text-blue-500" />
+                    </Link>
+                  ) : (
+                    <div 
+                      key={chapter.id} 
+                      className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between opacity-75"
+                    >
+                      {content}
+                      <Clock className="w-4 h-4 text-gray-300" />
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-gray-500 italic">尚未規劃章節</p>
               )}
             </div>
           </section>
-        </div>
-
+          </div>
         {/* Sidebar (Buy Box) */}
         <div className="lg:col-span-1">
           <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg sticky top-24">

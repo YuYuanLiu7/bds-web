@@ -17,23 +17,32 @@ export async function getPublishedCourses(): Promise<Course[]> {
 }
 
 export async function getCourseById(id: string): Promise<CourseWithChapters | null> {
-  const { data, error } = await supabase
+  // 分開抓取以確保錯誤訊息清晰
+  const { data: course, error: courseError } = await supabase
     .from('courses')
-    .select('*, chapters(*)')
+    .select('*')
     .eq('id', id)
     .single();
 
-  if (error) {
-    console.error('Error fetching course:', error);
+  if (courseError) {
+    console.error('Error fetching course details:', courseError.message, courseError.details);
     return null;
   }
 
-  // Sort chapters by order_index
-  if (data && data.chapters) {
-    data.chapters.sort((a: any, b: any) => a.order_index - b.order_index);
+  const { data: chapters, error: chaptersError } = await supabase
+    .from('chapters')
+    .select('*')
+    .eq('course_id', id)
+    .order('order_index', { ascending: true });
+
+  if (chaptersError) {
+    console.error('Error fetching chapters:', chaptersError.message);
   }
 
-  return data;
+  return {
+    ...course,
+    chapters: chapters || []
+  };
 }
 
 export async function checkCourseAccess(userId: string, courseId: string): Promise<boolean> {
