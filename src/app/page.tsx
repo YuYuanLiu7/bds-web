@@ -1,65 +1,93 @@
-import Image from "next/image";
+import CourseCard from "@/components/CourseCard";
+
+const FEATURED_COURSES = [
+  {
+    id: "1",
+    title: "【產業大講堂】硬體 ODM 體系深度解密",
+    thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800",
+    price: 1200,
+    category: "產業知識",
+    instructor: "BDS 團隊"
+  },
+  {
+    id: "2",
+    title: "【圍爐夜話】外商遠端工作的求職策略與面試技巧",
+    thumbnail: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800",
+    price: 800,
+    category: "職涯策略",
+    instructor: "BDS 團隊"
+  },
+  {
+    id: "3",
+    title: "【新手村】半導體通路業務入門手冊",
+    thumbnail: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+    price: 2500,
+    category: "專業技能",
+    instructor: "BDS 團隊"
+  }
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div>
+      {/* Hero Section */}
+      <section className="bg-white py-20 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            提升職涯競爭力，從 <span className="text-blue-600">Doing</span> 開始
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+            專為硬體、半導體、醫材產業打造的業務開發與銷售學習平台。我們不只教知識，更教你如何實戰。
           </p>
+          <div className="flex justify-center gap-4">
+            <button className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-blue-700 transition">
+              探索課程
+            </button>
+            <button className="bg-gray-100 text-gray-900 px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-200 transition">
+              關於我們
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Featured Courses */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">精選課程</h2>
+            <p className="text-gray-500">最新、最熱門的產業實戰課程</p>
+          </div>
+          <button className="text-blue-600 font-bold hover:underline">查看全部課程 →</button>
         </div>
-      </main>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {FEATURED_COURSES.map((course) => (
+            <CourseCard key={course.id} {...course} />
+          ))}
+        </div>
+      </section>
+
+      {/* Stats / Why Us */}
+      <section className="bg-blue-600 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div className="text-4xl font-bold text-white mb-2">50+</div>
+            <div className="text-blue-100">在線課程</div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-white mb-2">3000+</div>
+            <div className="text-blue-100">學員好評</div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-white mb-2">20+</div>
+            <div className="text-blue-100">資深講師</div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-white mb-2">100%</div>
+            <div className="text-blue-100">實戰導向</div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
