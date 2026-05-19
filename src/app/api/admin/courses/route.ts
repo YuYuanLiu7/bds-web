@@ -1,0 +1,72 @@
+import { supabase } from "@/lib/supabase";
+import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession();
+    if (!session || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { title, description, price, category, thumbnail_url } = body;
+
+    const { data, error } = await supabase
+      .from('courses')
+      .insert([{ title, description, price: parseInt(price), category, thumbnail_url, is_published: true }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const session = await getServerSession();
+    if (!session || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, title, description, price, category, thumbnail_url } = body;
+
+    const { data, error } = await supabase
+      .from('courses')
+      .update({ title, description, price: parseInt(price), category, thumbnail_url })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession();
+    if (!session || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    const { error } = await supabase
+      .from('courses')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return NextResponse.json({ message: "Course deleted" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
