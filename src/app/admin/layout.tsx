@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -8,7 +9,6 @@ import {
   CreditCard, 
   Settings, 
   LogOut,
-  ChevronRight,
   Bell,
   Search,
   User
@@ -21,13 +21,25 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession();
 
-  if (!session || (session.user as any).role !== 'admin') {
+  if (!session?.user?.email) {
+    redirect('/login');
+  }
+
+  // 直接從資料庫抓取最新的 Role，避免 Session 同步延遲
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('email', session.user.email)
+    .single();
+
+  if (!userData || userData.role !== 'admin') {
+    console.log("Access denied: User is not an admin", session.user.email);
     redirect('/');
   }
 
   return (
     <div className="flex h-screen bg-[#F8FAFC]">
-      {/* Sidebar */}
+      {/* Sidebar - Same as before but with verified access */}
       <aside className="w-64 bg-[#1E293B] flex flex-col shadow-xl z-20">
         <div className="p-6">
           <Link href="/admin" className="flex items-center space-x-3">
