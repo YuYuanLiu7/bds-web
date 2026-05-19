@@ -29,7 +29,15 @@ function LoginContent() {
       setError('登入失敗，請檢查您的帳號密碼。');
       setLoading(false);
     } else {
-      router.push('/courses');
+      // 獲取最新 session 以確認 role
+      const res = await fetch('/api/auth/session');
+      const session = await res.json();
+      
+      if (session?.user?.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/courses');
+      }
       router.refresh();
     }
   };

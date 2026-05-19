@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Save, Image as ImageIcon, Video, Trash2, Plus } from 'lucide-react';
 import Image from 'next/image';
@@ -31,7 +31,8 @@ interface CourseModalProps {
 export default function CourseModal({ course, isOpen, onClose }: CourseModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Course>(course || {
+  const [deletedChapters, setDeletedChapters] = useState<string[]>([]);
+  const [formData, setFormData] = useState<Course>({
     title: '',
     description: '',
     thumbnail_url: '',
@@ -39,6 +40,25 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     category: '業務新手村',
     chapters: []
   });
+
+  // 當 isOpen 或 course 改變時，同步 formData
+  useEffect(() => {
+    if (isOpen) {
+      if (course) {
+        setFormData(course);
+      } else {
+        setFormData({
+          title: '',
+          description: '',
+          thumbnail_url: '',
+          price: 0,
+          category: '業務新手村',
+          chapters: []
+        });
+      }
+      setDeletedChapters([]);
+    }
+  }, [isOpen, course]);
 
   if (!isOpen) return null;
 
@@ -59,6 +79,10 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
   };
 
   const handleRemoveChapter = (index: number) => {
+    const chapterToRemove = formData.chapters[index];
+    if (chapterToRemove.id) {
+      setDeletedChapters([...deletedChapters, chapterToRemove.id]);
+    }
     const newChapters = formData.chapters.filter((_, i) => i !== index);
     setFormData({ ...formData, chapters: newChapters });
   };
@@ -79,21 +103,34 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
       if (!res.ok) throw new Error('儲存失敗');
 
-      // 儲存章節 (這部分邏輯可以再優化為一併處理)
       const savedCourse = await res.json();
       const courseId = formData.id || savedCourse.id;
 
-      for (const chapter of formData.chapters) {
+      // 1. 刪除被移除的章節
+      for (const chapterId of deletedChapters) {
+        await fetch(`/api/admin/chapters?id=${chapterId}`, {
+          method: 'DELETE',
+        });
+      }
+
+      // 2. 新增或更新章節
+      for (let i = 0; i < formData.chapters.length; i++) {
+        const chapter = formData.chapters[i];
         await fetch('/api/admin/chapters', {
           method: chapter.id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...chapter, course_id: courseId }),
+          body: JSON.stringify({ 
+            ...chapter, 
+            course_id: courseId,
+            order_index: i + 1 // 重新計算順序
+          }),
         });
       }
 
       onClose();
       router.refresh();
     } catch (err) {
+      console.error(err);
       alert('儲存出錯了，請稍後再試');
     } finally {
       setLoading(false);
@@ -124,6 +161,15 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                   onChange={e => setFormData({...formData, title: e.target.value})}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
                   placeholder="例如：半導體業務入門"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">課程描述</label>
+                <textarea 
+                  value={formData.description}
+                  onChange={e => setFormData({...formData, description: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition min-h-[100px]"
+                  placeholder="請輸入課程詳細介紹..."
                 />
               </div>
               <div>
