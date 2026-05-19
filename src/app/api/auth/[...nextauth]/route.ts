@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "@/lib/supabase";
+import bcrypt from "bcryptjs";
 
 const handler = NextAuth({
   providers: [
@@ -11,7 +12,7 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
         // 從資料庫找使用者
         const { data: user, error } = await supabase
@@ -25,18 +26,20 @@ const handler = NextAuth({
           return null;
         }
 
-        // 為了測試方便，如果是 test@example.com 則不檢查密碼 (或檢查您設定的密碼)
-        // 正式環境應使用 bcrypt.compare(credentials.password, user.password_hash)
-        if (credentials.email === 'test@example.com' || user.role === 'admin') {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          };
+        // 驗證加密後的密碼
+        const isValid = await bcrypt.compare(credentials.password, user.password_hash);
+
+        if (!isValid) {
+          console.log("Invalid password for user:", credentials.email);
+          return null;
         }
 
-        return null;
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
       }
     })
   ],
