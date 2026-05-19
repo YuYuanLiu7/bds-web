@@ -26,7 +26,7 @@ export default function Navbar() {
               登入
             </Link>
             <Link
-              href="/register"
+              href="/signup"
               className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition"
             >
               註冊
