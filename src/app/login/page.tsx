@@ -82,7 +82,7 @@ function LoginContent() {
               />
             </div>
             <div>
-              <label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-1">密碼</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">密碼</label>
               <input
                 id="password"
                 name="password"

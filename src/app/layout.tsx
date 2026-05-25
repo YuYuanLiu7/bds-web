@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
 
 const geistSans = Geist({
@@ -37,11 +38,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <main className="flex-grow">{children}</main>
-          <footer className="bg-white border-t border-gray-200 py-8">
-            <div className="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
-              © {new Date().getFullYear()} BDS (By Doing So). All rights reserved.
-            </div>
-          </footer>
+          <Footer />
         </Providers>
       </body>
     </html>

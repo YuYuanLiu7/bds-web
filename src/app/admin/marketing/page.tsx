@@ -1,0 +1,105 @@
+'use client';
+
+import { useState } from 'react';
+import { Tag, Search, Plus, Ticket, HelpCircle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+
+export default function AdminMarketingPage() {
+  const [coupons, setCoupons] = useState([
+    { id: '1', name: 'BDS 新生見面禮', code: 'BDSNEW500', discount: '折價 NT$ 500', limit: '無限次數', used: 45, status: 'active', end: '無期限' },
+    { id: '2', name: '半導體實戰營早鳥優惠', code: 'EARLYBIRD88', discount: '全單打 88 折', limit: '限量 50 張', used: 32, status: 'active', end: '2026-06-10' },
+    { id: '3', name: '醫材沙龍推廣促銷', code: 'SALON100', discount: '折價 NT$ 100', limit: '限量 100 張', used: 15, status: 'active', end: '2026-05-30' }
+  ]);
+
+  return (
+    <div className="space-y-6 select-none font-sans text-slate-700">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
+        <div>
+          <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
+            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>sell</span>
+            行銷
+          </h1>
+          <p className="text-slate-400 text-xs mt-1 font-semibold">建立促銷折扣代碼、行銷優惠券以提高學員的轉單與購買意願。</p>
+        </div>
+        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center cursor-pointer active:scale-98">
+          <Plus className="w-4 h-4 mr-1.5" /> 新增優惠券
+        </button>
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        
+        {/* Table List */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="text-xs text-slate-400 font-bold">
+            共 <span className="text-slate-700 font-extrabold">{coupons.length}</span> 項，顯示 <span className="text-slate-700 font-extrabold">1-{coupons.length}</span>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <table className="w-full text-left border-collapse table-fixed">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 h-12">
+                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/2">優惠券名稱 / 代碼</th>
+                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">折扣詳情</th>
+                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">限制 / 已使用次數</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {coupons.map((coupon) => (
+                  <tr key={coupon.id} className="hover:bg-slate-50/50 transition">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold text-[10px]">
+                          發送中
+                        </span>
+                      </div>
+                      <Link href={`/admin/marketing/${coupon.id}`} className="block font-bold text-blue-600 hover:text-blue-800 transition text-sm mt-1.5 leading-snug">
+                        {coupon.name}
+                      </Link>
+                      <div className="text-slate-400 text-xs font-semibold font-mono uppercase mt-1">代碼: {coupon.code}</div>
+                    </td>
+                    <td className="px-6 py-4 text-rose-600 font-extrabold text-sm">
+                      {coupon.discount}
+                    </td>
+                    <td className="px-6 py-4 space-y-1 text-slate-400 font-semibold text-xs">
+                      <div className="flex items-center text-slate-500">
+                        {coupon.limit} (到期: {coupon.end})
+                      </div>
+                      <div className="flex items-center">
+                        <Ticket className="w-3.5 h-3.5 mr-1 text-slate-300" />
+                        已折抵使用: <span className="text-slate-600 font-bold ml-1">{coupon.used} 次</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Filter Aside */}
+        <div className="lg:col-span-1 lg:order-first">
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            <h3 className="font-bold text-slate-800 text-sm pb-2.5 border-b border-slate-50">行銷篩選</h3>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">優惠券名稱</label>
+                <input 
+                  type="text" 
+                  placeholder="搜尋優惠券名稱"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
+                />
+              </div>
+              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-sm transition active:scale-95 flex items-center justify-center cursor-pointer">
+                <Search className="w-3.5 h-3.5 mr-1" /> 搜尋行銷
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
