@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Save, Image as ImageIcon, Link2, Calendar, User, Eye, Tag, FileText, CheckCircle2 } from 'lucide-react';
+import { 
+  X, Save, Image as ImageIcon, Link2, Calendar, User, Eye, Tag, FileText, CheckCircle2,
+  Bold, Heading2, Heading3, Palette, Link as LinkIcon, Sparkles
+} from 'lucide-react';
 
 interface Article {
   id?: string;
@@ -27,6 +30,43 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertText = (before: string, after: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentVal = formData.content;
+    const selectedText = currentVal.substring(start, end);
+
+    const replacement = before + selectedText + after;
+    const newVal = currentVal.substring(0, start) + replacement + currentVal.substring(end);
+
+    setFormData(prev => ({ ...prev, content: newVal }));
+
+    // Re-focus and position cursor
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + before.length + selectedText.length + after.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  const handleLink = () => {
+    const url = prompt('請輸入連結網址：', 'https://');
+    if (url) {
+      insertText('[', `](${url})`);
+    }
+  };
+
+  const handleImage = () => {
+    const url = prompt('請輸入圖片網址：', 'https://');
+    if (url) {
+      insertText('![', `](${url})`);
+    }
+  };
   const [formData, setFormData] = useState<Article>({
     title: '',
     author: 'BDS 編輯部',
@@ -327,19 +367,123 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                 </select>
               </div>
 
-              {/* Content Block */}
+              {/* Content Block with Word-style Toolbar */}
               <div className="md:col-span-3">
                 <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-wider flex items-center">
                   <FileText className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  文章內文 (支援 Markdown 語法)
+                  文章內文 (支援 Word 風格工具列與 Markdown 語法)
                 </label>
-                <textarea 
-                  required
-                  value={formData.content}
-                  onChange={e => setFormData({...formData, content: e.target.value})}
-                  className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition min-h-[300px] text-xs font-mono leading-relaxed"
-                  placeholder="### 一、 第一段標題&#10;&#10;可以使用 Markdown 的標題、清單、粗體等格式編寫您的部落格完整內文..."
-                />
+                
+                <div className="flex flex-col w-full">
+                  {/* Toolbar */}
+                  <div className="bg-slate-50 border border-slate-200 border-b-0 rounded-t-2xl px-3 py-2 flex items-center justify-between flex-wrap gap-2 select-none">
+                    <div className="flex items-center space-x-1 flex-wrap gap-y-1">
+                      
+                      {/* Bold */}
+                      <button
+                        type="button"
+                        title="粗體 (選取後點選)"
+                        onClick={() => insertText('**', '**')}
+                        className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center"
+                      >
+                        <Bold className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="w-px h-3 bg-slate-200 mx-1"></div>
+
+                      {/* Heading 2 */}
+                      <button
+                        type="button"
+                        title="標題二"
+                        onClick={() => insertText('## ')}
+                        className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center font-bold text-xs"
+                      >
+                        <Heading2 className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Heading 3 */}
+                      <button
+                        type="button"
+                        title="標題三"
+                        onClick={() => insertText('### ')}
+                        className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center font-bold text-xs"
+                      >
+                        <Heading3 className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="w-px h-3 bg-slate-200 mx-1"></div>
+
+                      {/* Link */}
+                      <button
+                        type="button"
+                        title="插入連結"
+                        onClick={handleLink}
+                        className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center"
+                      >
+                        <LinkIcon className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Image */}
+                      <button
+                        type="button"
+                        title="插入圖片"
+                        onClick={handleImage}
+                        className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="w-px h-3 bg-slate-200 mx-1"></div>
+
+                      {/* Color Palette Buttons */}
+                      <div className="flex items-center space-x-1.5 bg-white border border-slate-200 rounded-lg py-0.5 px-2">
+                        <span className="text-[10px] font-bold text-slate-400 flex items-center">
+                          <Palette className="w-3 h-3 mr-1 text-slate-400" />
+                          顏色:
+                        </span>
+                        {[
+                          { color: '#e11d48', label: '熱情紅' },
+                          { color: '#2563eb', label: '商務藍' },
+                          { color: '#16a34a', label: '森林綠' },
+                          { color: '#d97706', label: '琥珀黃' },
+                          { color: '#7c3aed', label: '極光紫' },
+                        ].map(item => (
+                          <button
+                            key={item.color}
+                            type="button"
+                            title={item.label}
+                            onClick={() => insertText(`<span style="color: ${item.color}">`, '</span>')}
+                            className="w-3.5 h-3.5 rounded-full border border-slate-200 transition transform hover:scale-115 active:scale-95 cursor-pointer"
+                            style={{ backgroundColor: item.color }}
+                          />
+                        ))}
+                        {/* Custom Color Input */}
+                        <div className="relative flex items-center pl-1 border-l border-slate-100">
+                          <input 
+                            type="color" 
+                            title="自訂顏色"
+                            onChange={(e) => insertText(`<span style="color: ${e.target.value}">`, '</span>')}
+                            className="w-3.5 h-3.5 p-0 border-0 rounded cursor-pointer outline-none bg-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-[9px] font-semibold text-slate-400 flex items-center hidden sm:flex">
+                      <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
+                      選取文字後點擊即可套用格式
+                    </div>
+                  </div>
+
+                  <textarea 
+                    ref={textareaRef}
+                    required
+                    value={formData.content}
+                    onChange={e => setFormData({...formData, content: e.target.value})}
+                    className="w-full px-5 py-4 border border-slate-200 border-t-0 rounded-b-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition min-h-[350px] text-xs font-mono leading-relaxed"
+                    placeholder="### 一、 第一段標題&#10;&#10;可以使用快捷工具列，或手動編寫 Markdown 格式與顏色標籤..."
+                  />
+                </div>
               </div>
 
             </div>

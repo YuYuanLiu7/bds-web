@@ -120,10 +120,30 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
 
   // Custom premium Lightweight Markdown Content Parser
   const parseInlineMarkdown = (text: string) => {
-    const parts = text.split(/\*\*([^*]+)\*\*/g);
+    if (!text) return '';
+    
+    // Regex matches **bold** or <span style="color:#xxxxxx">content</span>
+    const regex = /(\*\*[^*]+\*\*|<span style="color:\s*#[a-fA-F0-9]{3,6}">[^<]+<\/span>)/g;
+    const parts = text.split(regex);
+    
     return parts.map((part, i) => {
-      if (i % 2 === 1) {
-        return <strong key={i} className="text-slate-950 font-black">{part}</strong>;
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={i} className="text-slate-950 font-black">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      if (part.startsWith('<span style="color:') && part.endsWith('</span>')) {
+        const colorMatch = part.match(/color:\s*(#[a-fA-F0-9]{3,6})/);
+        const textMatch = part.match(/>([^<]+)</);
+        const color = colorMatch ? colorMatch[1] : 'inherit';
+        const content = textMatch ? textMatch[1] : '';
+        return (
+          <span key={i} style={{ color }} className="font-black">
+            {content}
+          </span>
+        );
       }
       return part;
     });
