@@ -30,41 +30,30 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
-  const insertText = (before: string, after: string = '') => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  const handleEditorChange = () => {
+    if (editorRef.current) {
+      setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+    }
+  };
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentVal = formData.content;
-    const selectedText = currentVal.substring(start, end);
-
-    const replacement = before + selectedText + after;
-    const newVal = currentVal.substring(0, start) + replacement + currentVal.substring(end);
-
-    setFormData(prev => ({ ...prev, content: newVal }));
-
-    // Re-focus and position cursor
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + before.length + selectedText.length + after.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
+  const execCmd = (command: string, value: string = '') => {
+    document.execCommand(command, false, value);
+    handleEditorChange();
   };
 
   const handleLink = () => {
     const url = prompt('請輸入連結網址：', 'https://');
     if (url) {
-      insertText('[', `](${url})`);
+      execCmd('createLink', url);
     }
   };
 
   const handleImage = () => {
     const url = prompt('請輸入圖片網址：', 'https://');
     if (url) {
-      insertText('![', `](${url})`);
+      execCmd('insertImage', url);
     }
   };
   const [formData, setFormData] = useState<Article>({
@@ -107,6 +96,11 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
           image_url: article.image_url || '',
           date: formatForInput(article.date)
         });
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.innerHTML = article.content || '';
+          }
+        }, 50);
       } else {
         const now = new Date();
         setFormData({
@@ -120,6 +114,11 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
           image_url: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800',
           status: 'published'
         });
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.innerHTML = '';
+          }
+        }, 50);
       }
     }
   }, [isOpen, article]);
@@ -367,11 +366,11 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                 </select>
               </div>
 
-              {/* Content Block with Word-style Toolbar */}
+              {/* Content Block with Kaik-style WYSIWYG Rich Text Toolbar */}
               <div className="md:col-span-3">
                 <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-wider flex items-center">
                   <FileText className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  文章內文 (支援 Word 風格工具列與 Markdown 語法)
+                  文章內文 (所見即所得富文本編輯器)
                 </label>
                 
                 <div className="flex flex-col w-full">
@@ -382,8 +381,8 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                       {/* Bold */}
                       <button
                         type="button"
-                        title="粗體 (選取後點選)"
-                        onClick={() => insertText('**', '**')}
+                        title="粗體"
+                        onClick={() => execCmd('bold')}
                         className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center"
                       >
                         <Bold className="w-3.5 h-3.5" />
@@ -395,7 +394,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                       <button
                         type="button"
                         title="標題二"
-                        onClick={() => insertText('## ')}
+                        onClick={() => execCmd('formatBlock', '<h2>')}
                         className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center font-bold text-xs"
                       >
                         <Heading2 className="w-3.5 h-3.5" />
@@ -405,7 +404,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                       <button
                         type="button"
                         title="標題三"
-                        onClick={() => insertText('### ')}
+                        onClick={() => execCmd('formatBlock', '<h3>')}
                         className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer flex items-center justify-center font-bold text-xs"
                       >
                         <Heading3 className="w-3.5 h-3.5" />
@@ -452,7 +451,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                             key={item.color}
                             type="button"
                             title={item.label}
-                            onClick={() => insertText(`<span style="color: ${item.color}">`, '</span>')}
+                            onClick={() => execCmd('foreColor', item.color)}
                             className="w-3.5 h-3.5 rounded-full border border-slate-200 transition transform hover:scale-115 active:scale-95 cursor-pointer"
                             style={{ backgroundColor: item.color }}
                           />
@@ -462,7 +461,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                           <input 
                             type="color" 
                             title="自訂顏色"
-                            onChange={(e) => insertText(`<span style="color: ${e.target.value}">`, '</span>')}
+                            onChange={(e) => execCmd('foreColor', e.target.value)}
                             className="w-3.5 h-3.5 p-0 border-0 rounded cursor-pointer outline-none bg-transparent"
                           />
                         </div>
@@ -471,17 +470,18 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                     
                     <div className="text-[9px] font-semibold text-slate-400 flex items-center hidden sm:flex">
                       <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
-                      選取文字後點擊即可套用格式
+                      所見即所得：選取文字後即可直接變色或加粗
                     </div>
                   </div>
 
-                  <textarea 
-                    ref={textareaRef}
-                    required
-                    value={formData.content}
-                    onChange={e => setFormData({...formData, content: e.target.value})}
-                    className="w-full px-5 py-4 border border-slate-200 border-t-0 rounded-b-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition min-h-[350px] text-xs font-mono leading-relaxed"
-                    placeholder="### 一、 第一段標題&#10;&#10;可以使用快捷工具列，或手動編寫 Markdown 格式與顏色標籤..."
+                  {/* WYSIWYG ContentEditable Area */}
+                  <div 
+                    ref={editorRef}
+                    contentEditable
+                    onInput={handleEditorChange}
+                    className="w-full px-5 py-4 border border-slate-200 border-t-0 rounded-b-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition min-h-[350px] text-xs font-semibold leading-relaxed overflow-y-auto bg-white prose max-w-none prose-headings:font-black prose-h2:text-xl prose-h3:text-lg prose-strong:font-black empty:before:content-[attr(data-placeholder)] before:text-slate-400"
+                    style={{ outline: 'none' }}
+                    data-placeholder="在此處開始撰寫您的部落格專欄文章，支援所見即所得富文本編輯（粗體、大小標、顏色）..."
                   />
                 </div>
               </div>

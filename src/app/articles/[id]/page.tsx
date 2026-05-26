@@ -191,6 +191,11 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
     });
   };
 
+  const isHTML = (str: string) => {
+    if (!str) return false;
+    return /<[a-z][\s\S]*>/i.test(str);
+  };
+
   return (
     <div className="bg-slate-50/50 min-h-screen pb-20 font-sans text-slate-700">
       
@@ -284,7 +289,14 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
 
             {/* Content Body */}
             <div className="prose prose-slate max-w-none pt-4">
-              {renderContent(article.content)}
+              {isHTML(article.content) ? (
+                <div 
+                  className="text-left text-xs md:text-sm text-slate-600 font-semibold leading-relaxed space-y-4 prose-headings:font-black prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-900 prose-strong:font-black"
+                  dangerouslySetInnerHTML={{ __html: article.content }}
+                />
+              ) : (
+                renderContent(article.content)
+              )}
             </div>
 
           </article>
