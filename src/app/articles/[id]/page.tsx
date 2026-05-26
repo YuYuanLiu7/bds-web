@@ -3,7 +3,11 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Calendar, Eye, ArrowLeft, User, Tag, Clock, Share2, Heart } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { 
+  Calendar, Eye, ArrowLeft, User, Tag, Clock, Share2, Heart,
+  Lock, ShieldAlert, LogIn, ShoppingBag
+} from 'lucide-react';
 
 interface ArticlePageProps {
   params: Promise<{ id: string }>;
@@ -11,6 +15,7 @@ interface ArticlePageProps {
 
 export default function ArticleDetailPage({ params }: ArticlePageProps) {
   const router = useRouter();
+  const { data: session } = useSession();
   const resolvedParams = use(params);
   const { id } = resolvedParams;
 
@@ -18,6 +23,10 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
+  
+  // Advanced course visibility settings
+  const [purchasedCourseIds, setPurchasedCourseIds] = useState<string[]>([]);
+  const [allCourses, setAllCourses] = useState<any[]>([]);
 
   // Failsafe Mock Articles Fallback
   const MOCK_ARTICLES = [
@@ -68,7 +77,7 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
       })
       .catch(err => console.warn("Using default settings in Article detail:", err));
 
-    // 2. Fetch specific article by ID
+    // 2. Fetch specific article by ID or custom Slug
     fetch(`/api/articles?id=${id}`)
       .then(async res => {
         if (!res.ok) throw new Error('API failed');
@@ -83,7 +92,10 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
             category: data.category || '',
             summary: data.summary || '',
             content: data.content || '',
-            imageUrl: data.image_url || data.imageUrl || 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800'
+            imageUrl: data.image_url || data.imageUrl || 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800',
+            visibility: data.visibility || 'public',
+            required_course_ids: data.required_course_ids || '',
+            is_pinned: !!data.is_pinned
           });
         } else {
           throw new Error('Invalid article payload');
@@ -103,6 +115,29 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
       .finally(() => {
         setLoading(false);
       });
+
+    // 3. Fetch current logged-in user course permissions
+    fetch('/api/user/courses')
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Not logged in or guest');
+      })
+      .then(ids => {
+        if (Array.isArray(ids)) {
+          setPurchasedCourseIds(ids);
+        }
+      })
+      .catch(() => setPurchasedCourseIds([]));
+
+    // 4. Fetch all public courses to translate ID -> Title on guide card
+    fetch('/api/courses')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAllCourses(data);
+        }
+      })
+      .catch(err => console.warn('無法載入公共課程清單：', err));
   }, [id]);
 
   const handleShare = () => {
@@ -289,14 +324,137 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
 
             {/* Content Body */}
             <div className="prose prose-slate max-w-none pt-4">
-              {isHTML(article.content) ? (
-                <div 
-                  className="text-left text-xs md:text-sm text-slate-600 font-semibold leading-relaxed space-y-4 prose-headings:font-black prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-900 prose-strong:font-black"
-                  dangerouslySetInnerHTML={{ __html: article.content }}
-                />
-              ) : (
-                renderContent(article.content)
-              )}
+              {(() => {
+                // 1. 權限檢驗
+                const isAdmin = session?.user && (session.user as any).role === 'admin';
+                const isPublic = !article.visibility || article.visibility === 'public';
+                const isMemberOnly = article.visibility === 'members';
+                const isCoursePurchaserOnly = article.visibility === 'course_purchasers';
+
+                const hasAccess = 
+                  isAdmin || 
+                  isPublic || 
+                  (isMemberOnly && !!session) || 
+                  (isCoursePurchaserOnly && (() => {
+                    if (!session) return false;
+                    const requiredIds = article.required_course_ids ? article.required_course_ids.split(',').filter(Boolean) : [];
+                    return requiredIds.some((cid: string) => purchasedCourseIds.includes(cid));
+                  })());
+
+                if (hasAccess) {
+                  // 渲染文章內容
+                  return isHTML(article.content) ? (
+                    <div 
+                      className="text-left text-xs md:text-sm text-slate-600 font-semibold leading-relaxed space-y-4 prose-headings:font-black prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-900 prose-strong:font-black"
+                      dangerouslySetInnerHTML={{ __html: article.content }}
+                    />
+                  ) : (
+                    renderContent(article.content)
+                  );
+                }
+
+                // 2. 當無權限時，判斷渲染哪種付費鎖
+                if (isMemberOnly && !session) {
+                  return (
+                    <div className="relative pt-6 select-none">
+                      <div className="space-y-3 opacity-25 pointer-events-none filter blur-xs">
+                        <p className="h-4 bg-slate-200 rounded w-full"></p>
+                        <p className="h-4 bg-slate-200 rounded w-5/6"></p>
+                        <p className="h-4 bg-slate-200 rounded w-4/6"></p>
+                        <p className="h-4 bg-slate-200 rounded w-full"></p>
+                      </div>
+                      
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <div className="bg-white/95 backdrop-blur-md border border-slate-100 p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-5 animate-in fade-in zoom-in duration-200">
+                          <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mx-auto text-indigo-600">
+                            <Lock className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="text-base font-black text-slate-800">登入會員解鎖專欄</h3>
+                            <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+                              本篇深度產業觀察報告僅限 BDS 會員專屬閱讀。只需免費註冊或登入您的帳戶，即可立即解鎖完整專欄文章！
+                            </p>
+                          </div>
+                          <button 
+                            onClick={() => router.push(`/login?callbackUrl=/articles/${id}`)}
+                            style={{ backgroundColor: primaryColor }}
+                            className="w-full text-white font-bold text-xs py-2.5 rounded-xl transition hover:opacity-90 active:scale-95 shadow-md flex items-center justify-center space-x-1.5 cursor-pointer"
+                          >
+                            <LogIn className="w-4 h-4" />
+                            <span>登入/註冊會員</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (isCoursePurchaserOnly) {
+                  const requiredIds = article.required_course_ids ? article.required_course_ids.split(',').filter(Boolean) : [];
+                  const lockedCourses = allCourses.filter(c => requiredIds.includes(c.id));
+
+                  return (
+                    <div className="relative pt-6 select-none">
+                      <div className="space-y-3 opacity-25 pointer-events-none filter blur-xs animate-pulse">
+                        <p className="h-4 bg-slate-200 rounded w-full"></p>
+                        <p className="h-4 bg-slate-200 rounded w-5/6"></p>
+                        <p className="h-4 bg-slate-200 rounded w-4/6"></p>
+                        <p className="h-4 bg-slate-200 rounded w-full"></p>
+                      </div>
+                      
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <div className="bg-white/95 backdrop-blur-md border border-slate-100 p-8 rounded-3xl shadow-xl max-w-lg w-full text-center space-y-6 animate-in fade-in zoom-in duration-200">
+                          <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-500">
+                            <ShieldAlert className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-2.5">
+                            <h3 className="text-base font-black text-slate-800">付費訂閱學員專屬內容</h3>
+                            <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+                              本篇為 BDS 付費學員限定解鎖之高階產業洞察報告。購買下方任一指定精選課程，即可即刻開通完整閱讀權限！
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-3 max-h-[220px] overflow-y-auto">
+                            {lockedCourses.length > 0 ? (
+                              lockedCourses.map(course => (
+                                <div key={course.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center justify-between gap-4 text-left">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-xs font-black text-slate-700 truncate">{course.title}</h4>
+                                    <p className="text-[9px] text-indigo-600 font-black mt-1">解鎖本專欄文章 + 終身課程複習</p>
+                                  </div>
+                                  <button 
+                                    onClick={() => router.push(`/courses/${course.id}`)}
+                                    className="flex-shrink-0 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 px-4 py-2 rounded-xl text-xs font-black text-slate-700 transition flex items-center space-x-1.5 cursor-pointer shadow-xs"
+                                  >
+                                    <ShoppingBag className="w-3.5 h-3.5 text-indigo-600" />
+                                    <span>去解鎖</span>
+                                  </button>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center justify-between gap-4 text-left">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-xs font-black text-slate-700 truncate">限定指定付費課程學員解鎖</h4>
+                                  <p className="text-[9px] text-slate-400 font-semibold mt-1">請至課程專區挑選課程以開通權限</p>
+                                </div>
+                                <button 
+                                  onClick={() => router.push(`/courses`)}
+                                  className="flex-shrink-0 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 px-4 py-2 rounded-xl text-xs font-black text-slate-700 transition flex items-center space-x-1.5 cursor-pointer shadow-xs"
+                                >
+                                  <ShoppingBag className="w-3.5 h-3.5 text-indigo-600" />
+                                  <span>瀏覽課程</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
             </div>
 
           </article>

@@ -80,6 +80,13 @@ CREATE TABLE articles (
   content TEXT,
   image_url TEXT,
   status TEXT DEFAULT 'published',
+  slug TEXT UNIQUE,
+  tags TEXT,
+  seo_title TEXT,
+  seo_description TEXT,
+  is_pinned BOOLEAN DEFAULT FALSE,
+  visibility TEXT DEFAULT 'public',
+  required_course_ids TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

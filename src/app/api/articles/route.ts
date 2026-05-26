@@ -7,12 +7,11 @@ export async function GET(req: Request) {
     const id = searchParams.get('id');
 
     if (id) {
-      // Fetch a single article by ID
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('id', id)
-        .single();
+      // Fetch a single article by ID or custom Slug
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      const query = supabase.from('articles').select('*');
+      const { data, error } = await (isUUID ? query.eq('id', id) : query.eq('slug', id)).single();
 
       if (error) throw error;
       return NextResponse.json(data);

@@ -39,7 +39,14 @@ export async function POST(req: Request) {
       content, 
       image_url, 
       status, 
-      views 
+      views,
+      slug,
+      tags,
+      seo_title,
+      seo_description,
+      is_pinned,
+      visibility,
+      required_course_ids
     } = body;
 
     const finalDate = date ? new Date(date).toISOString() : new Date().toISOString();
@@ -55,7 +62,14 @@ export async function POST(req: Request) {
         content, 
         image_url, 
         status: status || 'published', 
-        views: parseInt(views) || 0
+        views: parseInt(views) || 0,
+        slug: slug?.trim() || null,
+        tags: tags || null,
+        seo_title: seo_title || null,
+        seo_description: seo_description || null,
+        is_pinned: !!is_pinned,
+        visibility: visibility || 'public',
+        required_course_ids: required_course_ids || null
       }])
       .select()
       .single();
@@ -85,7 +99,14 @@ export async function PUT(req: Request) {
       content, 
       image_url, 
       status, 
-      views 
+      views,
+      slug,
+      tags,
+      seo_title,
+      seo_description,
+      is_pinned,
+      visibility,
+      required_course_ids
     } = body;
 
     const finalDate = date ? new Date(date).toISOString() : new Date().toISOString();
@@ -101,7 +122,14 @@ export async function PUT(req: Request) {
         content, 
         image_url, 
         status: status || 'published', 
-        views: parseInt(views) || 0
+        views: parseInt(views) || 0,
+        slug: slug?.trim() || null,
+        tags: tags || null,
+        seo_title: seo_title || null,
+        seo_description: seo_description || null,
+        is_pinned: !!is_pinned,
+        visibility: visibility || 'public',
+        required_course_ids: required_course_ids || null
       })
       .eq('id', id)
       .select()
