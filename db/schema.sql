@@ -68,3 +68,19 @@ CREATE TABLE events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Articles Table
+CREATE TABLE articles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  author TEXT NOT NULL DEFAULT 'BDS 編輯部',
+  date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  views INTEGER DEFAULT 0,
+  category TEXT NOT NULL,
+  summary TEXT,
+  content TEXT,
+  image_url TEXT,
+  status TEXT DEFAULT 'published',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+

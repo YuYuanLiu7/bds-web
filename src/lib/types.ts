@@ -39,3 +39,18 @@ export interface Event {
   created_at: string;
 }
 
+export interface Article {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  views: number;
+  category: string;
+  summary: string | null;
+  content: string | null;
+  image_url: string | null;
+  status: 'published' | 'draft';
+  created_at: string;
+}
+
+

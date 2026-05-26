@@ -1,17 +1,18 @@
-import { getSiteSettingsServer } from "@/lib/site-settings";
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, Eye, ArrowLeft, ArrowRight, User } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, ArrowRight, User, Layers, Clock } from 'lucide-react';
 
-export const revalidate = 0;
+export default function ArticlesPage() {
+  const [primaryColor, setPrimaryColor] = useState('#21448e');
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function ArticlesPage() {
-  const settings = await getSiteSettingsServer();
-  const primaryColor = settings.primaryColor || '#21448e';
-
-  // Synchronized with admin mock data
-  const articles = [
+  // Failsafe Mock Articles Fallback
+  const MOCK_ARTICLES = [
     { 
-      id: '1', 
+      id: 'd3283ca2-c0b8-421e-a120-a42236f5b801', 
       title: '如何切入高階硬體銷售？商務開發的四大核心能力指標', 
       author: 'BDS 編輯部', 
       date: '2026-05-20', 
@@ -21,7 +22,7 @@ export default async function ArticlesPage() {
       imageUrl: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800'
     },
     { 
-      id: '2', 
+      id: 'd3283ca2-c0b8-421e-a120-a42236f5b802', 
       title: '半導體供應鏈重構：業務經理必須掌握的轉型思維與契機', 
       author: 'Phyllis', 
       date: '2026-05-15', 
@@ -31,7 +32,7 @@ export default async function ArticlesPage() {
       imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800'
     },
     { 
-      id: '3', 
+      id: 'd3283ca2-c0b8-421e-a120-a42236f5b803', 
       title: '從新手到 ODM 求職王：外商業務的面試技巧與履歷優化指南', 
       author: 'Angela', 
       date: '2026-04-28', 
@@ -41,6 +42,48 @@ export default async function ArticlesPage() {
       imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800'
     }
   ];
+
+  useEffect(() => {
+    // 1. Fetch site settings
+    fetch('/api/admin/site-settings')
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Failed to fetch settings');
+      })
+      .then(data => {
+        setPrimaryColor(data.primaryColor || '#21448e');
+      })
+      .catch(err => console.warn("Using default settings in Articles page:", err));
+
+    // 2. Fetch dynamic articles
+    fetch('/api/articles')
+      .then(async res => {
+        if (!res.ok) throw new Error('API response not ok');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const mapped = data.map((e: any) => ({
+            id: e.id,
+            title: e.title,
+            author: e.author || 'BDS 編輯部',
+            date: e.date ? e.date.split('T')[0] : '',
+            views: e.views || 0,
+            category: e.category || '',
+            summary: e.summary || '',
+            imageUrl: e.image_url || e.imageUrl || 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800'
+          }));
+          setArticles(mapped);
+        } else {
+          throw new Error('Data is not an array');
+        }
+      })
+      .catch(err => {
+        console.warn("Using fallback mock data for articles (database table not yet created):", err);
+        setArticles(MOCK_ARTICLES);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="bg-gray-50/50 min-h-screen pb-16 font-sans">
@@ -60,7 +103,7 @@ export default async function ArticlesPage() {
           </Link>
           <div className="space-y-2">
             <span className="text-[10px] uppercase font-black tracking-widest text-white/50 block">產業洞察與實戰專欄</span>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight">文章列表</h1>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight">專欄文章</h1>
             <p className="text-white/70 text-xs md:text-sm font-semibold max-w-xl leading-relaxed">
               匯聚半導體、硬體與醫療器材產業的第一手商業觀察，提供商務開發、談判銷售與職涯成長策略。
             </p>
@@ -79,67 +122,89 @@ export default async function ArticlesPage() {
         </div>
 
         {/* Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles.map((article) => (
-            <article 
-              key={article.id}
-              className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-200/50 transition duration-300"
-            >
-              {/* Image Preview */}
-              <div className="aspect-[16/10] w-full overflow-hidden bg-slate-50 relative select-none">
-                <img 
-                  src={article.imageUrl} 
-                  alt={article.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
-                />
-                <span 
-                  style={{ backgroundColor: primaryColor }}
-                  className="absolute top-4 left-4 text-white text-[9px] font-black tracking-wider uppercase px-2.5 py-1 rounded-lg"
-                >
-                  {article.category}
-                </span>
-              </div>
+        {loading ? (
+          <div className="py-24 text-center text-slate-400 font-semibold text-xs select-none">
+            專欄文章載入中...
+          </div>
+        ) : articles.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {articles.map((article) => (
+              <article 
+                key={article.id}
+                className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-200/50 transition duration-300"
+              >
+                {/* Image Preview */}
+                <Link href={`/articles/${article.id}`} className="aspect-[16/10] w-full overflow-hidden bg-slate-50 relative select-none block">
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
+                  />
+                  <span 
+                    style={{ backgroundColor: primaryColor }}
+                    className="absolute top-4 left-4 text-white text-[9px] font-black tracking-wider uppercase px-2.5 py-1 rounded-lg"
+                  >
+                    {article.category}
+                  </span>
+                </Link>
 
-              {/* Body */}
-              <div className="p-6 flex-1 flex flex-col justify-between text-left space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[#21448e] transition duration-200 line-clamp-2" style={{ groupHover: { color: primaryColor } } as any}>
-                    {article.title}
-                  </h3>
-                  <p className="text-xs text-slate-400 font-medium leading-relaxed line-clamp-3">
-                    {article.summary}
-                  </p>
-                </div>
-
-                {/* Footer Info */}
-                <div className="space-y-4 border-t border-slate-50 pt-4">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-semibold select-none">
-                    <div className="flex items-center">
-                      <User className="w-3.5 h-3.5 mr-1 text-slate-300" />
-                      <span>由 {article.author} 發布</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="flex items-center">
-                        <Calendar className="w-3.5 h-3.5 mr-1 text-slate-300" />
-                        {article.date}
-                      </span>
-                      <span className="flex items-center">
-                        <Eye className="w-3.5 h-3.5 mr-1 text-slate-300" />
-                        瀏覽 {article.views} 次
-                      </span>
-                    </div>
+                {/* Body */}
+                <div className="p-6 flex-1 flex flex-col justify-between text-left space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[#21448e] transition duration-200 line-clamp-2" style={{ groupHover: { color: primaryColor } } as any}>
+                      <Link href={`/articles/${article.id}`} className="hover:underline">
+                        {article.title}
+                      </Link>
+                    </h3>
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed line-clamp-3">
+                      {article.summary}
+                    </p>
                   </div>
 
-                  {/* Read More */}
-                  <div className="text-xs font-black text-[#21448e] flex items-center justify-end select-none group-hover:underline cursor-pointer" style={{ color: primaryColor }}>
-                    閱讀全文 <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+                  {/* Footer Info */}
+                  <div className="space-y-4 border-t border-slate-50 pt-4">
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-semibold select-none">
+                      <div className="flex items-center">
+                        <User className="w-3.5 h-3.5 mr-1 text-slate-300" />
+                        <span>由 {article.author} 發布</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="flex items-center">
+                          <Calendar className="w-3.5 h-3.5 mr-1 text-slate-300" />
+                          {article.date}
+                        </span>
+                        <span className="flex items-center">
+                          <Eye className="w-3.5 h-3.5 mr-1 text-slate-300" />
+                          瀏覽 {article.views} 次
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Read More */}
+                    <Link 
+                      href={`/articles/${article.id}`}
+                      className="text-xs font-black text-[#21448e] flex items-center justify-end select-none group-hover:underline cursor-pointer" 
+                      style={{ color: primaryColor }}
+                    >
+                      閱讀全文 <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
                   </div>
                 </div>
-              </div>
 
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center bg-white border border-slate-100 rounded-3xl p-16 select-none shadow-xs space-y-4">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
+              <Clock className="w-8 h-8" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-extrabold text-slate-800 text-base">目前尚無專欄文章</h3>
+              <p className="text-slate-400 text-xs font-semibold">我們正在準備精彩的產業分析與專欄報導，敬請期待！</p>
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
