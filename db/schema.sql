@@ -49,3 +49,22 @@ CREATE TABLE user_courses (
   purchased_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   PRIMARY KEY (user_id, course_id)
 );
+
+-- Events Table
+CREATE TABLE events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT,
+  price INTEGER NOT NULL DEFAULT 0,
+  price_display TEXT,
+  date TIMESTAMP WITH TIME ZONE NOT NULL,
+  location TEXT,
+  attendees INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'upcoming',
+  type TEXT NOT NULL,
+  category TEXT NOT NULL,
+  registration_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+

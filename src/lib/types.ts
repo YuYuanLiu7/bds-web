@@ -21,3 +21,21 @@ export interface Chapter {
 export interface CourseWithChapters extends Course {
   chapters: Chapter[];
 }
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  price: number;
+  price_display: string | null;
+  date: string;
+  location: string | null;
+  attendees: number;
+  status: 'upcoming' | 'completed';
+  type: string;
+  category: string;
+  registration_url: string | null;
+  created_at: string;
+}
+
