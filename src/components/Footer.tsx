@@ -2,8 +2,16 @@
 
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // If in admin dashboard, do not render the frontend Footer
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="bg-slate-50 border-t border-slate-100 py-10 md:py-14 select-none flex-shrink-0">
       <div className="max-w-[1140px] mx-auto px-6 text-center space-y-6">

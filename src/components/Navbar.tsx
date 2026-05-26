@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import { 
   ChevronDown, 
   User, 
@@ -14,9 +15,15 @@ import {
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
   const [showCourseDropdown, setShowCourseDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMobileCourseDropdown, setShowMobileCourseDropdown] = useState(false);
+
+  // If in admin dashboard, do not render the frontend Navbar
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   // Dynamic visual settings
   const [logoUrl, setLogoUrl] = useState('');
@@ -99,19 +106,19 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link href="/admin/events" className="text-slate-500 hover:text-slate-900 transition">
+          <Link href="/events" className="text-slate-500 hover:text-slate-900 transition">
             活動
           </Link>
-          <Link href="/admin/articles" className="text-slate-500 hover:text-slate-900 transition">
+          <Link href="/articles" className="text-slate-500 hover:text-slate-900 transition">
             文章
           </Link>
-          <Link href="/admin/downloads" className="text-slate-500 hover:text-slate-900 transition">
+          <Link href="/downloads" className="text-slate-500 hover:text-slate-900 transition">
             資源
           </Link>
-          <Link href="/admin/membership" className="text-slate-500 hover:text-slate-900 transition">
+          <Link href="/membership" className="text-slate-500 hover:text-slate-900 transition">
             會員方案
           </Link>
-          <Link href="/admin/help" className="text-slate-500 hover:text-slate-900 transition">
+          <Link href="/help" className="text-slate-500 hover:text-slate-900 transition">
             常見問答
           </Link>
         </nav>
@@ -193,11 +200,11 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link href="/admin/events" className="block text-slate-600 hover:text-slate-900 font-bold">活動</Link>
-          <Link href="/admin/articles" className="block text-slate-600 hover:text-slate-900 font-bold">文章</Link>
-          <Link href="/admin/downloads" className="block text-slate-600 hover:text-slate-900 font-bold">資源</Link>
-          <Link href="/admin/membership" className="block text-slate-600 hover:text-slate-900 font-bold">會員方案</Link>
-          <Link href="/admin/help" className="block text-slate-600 hover:text-slate-900 font-bold">常見問答</Link>
+          <Link href="/events" className="block text-slate-600 hover:text-slate-900 font-bold">活動</Link>
+          <Link href="/articles" className="block text-slate-600 hover:text-slate-900 font-bold">文章</Link>
+          <Link href="/downloads" className="block text-slate-600 hover:text-slate-900 font-bold">資源</Link>
+          <Link href="/membership" className="block text-slate-600 hover:text-slate-900 font-bold">會員方案</Link>
+          <Link href="/help" className="block text-slate-600 hover:text-slate-900 font-bold">常見問答</Link>
 
           <div className="pt-4 border-t border-slate-100">
             {session ? (
