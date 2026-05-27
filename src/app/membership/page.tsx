@@ -104,7 +104,11 @@ export default async function MembershipPage() {
   }
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-16 font-sans">
+    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-amber-100/25 rounded-full blur-[130px] pointer-events-none -z-10"></div>
       
       {/* Header */}
       <div 
@@ -130,12 +134,12 @@ export default async function MembershipPage() {
       </div>
 
       {/* Main Container */}
-      <div className="max-w-[1200px] mx-auto px-6 py-16 text-center">
+      <div className="max-w-[1200px] mx-auto px-6 py-16 text-center relative z-10">
         
         {/* Title */}
         <div className="max-w-2xl mx-auto space-y-3 mb-16 select-none">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-800">開啟您的產業黃金職涯</h2>
-          <p className="text-xs md:text-sm text-slate-400 font-semibold leading-relaxed">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900">開啟您的產業黃金職涯</h2>
+          <p className="text-xs md:text-sm text-slate-600 font-bold leading-relaxed">
             我們提供彈性的付費訂閱與單次買斷方案。無論您是業務新手，還是資深商務開發專家，都能在這裡找到為您量身打造的專屬解法。
           </p>
         </div>

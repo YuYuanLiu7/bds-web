@@ -149,10 +149,10 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
         return (
           <div 
             key={plan.id}
-            className={`bg-white rounded-3xl p-8 border flex flex-col justify-between relative transition duration-300 text-left ${
+            className={`rounded-3xl p-8 border flex flex-col justify-between relative transition-all duration-300 text-left hover:-translate-y-1.5 ${
               plan.is_popular 
-                ? 'border-indigo-500 shadow-md ring-1 ring-indigo-500/20 scale-100 lg:scale-[1.03] z-10' 
-                : 'border-slate-100 hover:border-slate-200 shadow-xs'
+                ? 'border-indigo-500/80 bg-white/95 backdrop-blur-md shadow-lg hover:shadow-2xl ring-1 ring-indigo-500/20 scale-100 lg:scale-[1.03] z-10' 
+                : 'border-slate-200/70 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-xl hover:border-slate-300'
             }`}
           >
             {plan.is_popular && (
@@ -166,9 +166,9 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
 
             <div className="space-y-6">
               {/* Plan Header */}
-              <div className="space-y-1 select-none">
-                <h3 className="text-lg font-black text-slate-955">{plan.title}</h3>
-                <p className="text-xs text-slate-500 font-semibold leading-relaxed">{plan.description}</p>
+              <div className="space-y-1.5 select-none">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">{plan.title}</h3>
+                <p className="text-xs text-slate-700 font-bold leading-relaxed">{plan.description}</p>
               </div>
 
               {/* Price Display */}
@@ -182,7 +182,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
 
               {/* Features List */}
               <div className="space-y-3 pt-2">
-                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider select-none">方案包含權益：</h4>
+                <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest select-none">方案包含權益：</h4>
                 <ul className="space-y-2.5 text-xs text-slate-700 font-bold leading-relaxed">
                   {plan.features && plan.features.map((feat, fIdx) => (
                     <li key={fIdx} className="flex items-start">
