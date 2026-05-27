@@ -103,4 +103,28 @@ CREATE TABLE downloads (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Membership Plans Table (會員方案)
+CREATE TABLE IF NOT EXISTS membership_plans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  price INTEGER NOT NULL DEFAULT 0,
+  period TEXT NOT NULL, -- '月繳', '年繳', '一次性'
+  description TEXT,
+  features TEXT[] DEFAULT '{}', -- Array of strings for features
+  is_popular BOOLEAN DEFAULT FALSE,
+  status TEXT DEFAULT 'active', -- 'active' or 'draft'
+  subscribers_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Add membership_plan_id column to orders for tracking transactions
+ALTER TABLE orders 
+ADD COLUMN IF NOT EXISTS membership_plan_id UUID REFERENCES membership_plans(id) ON DELETE SET NULL;
+
+-- Add membership column and expiry tracking to users table
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS membership_plan_id UUID REFERENCES membership_plans(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS membership_expires_at TIMESTAMP WITH TIME ZONE;
+
+
 

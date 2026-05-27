@@ -2,17 +2,21 @@ import { NextResponse } from 'next/server';
 import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
-    const { courseId, courseName, amount } = await req.json();
+    const session = await getServerSession(authOptions);
+    const body = await req.json();
+    const { courseId, courseName, planId, planName, amount, type = 'course' } = body;
 
     const PAYUNI_CONFIG = {
       MerID: process.env.PAYUNI_MERID || 'MS12345678',
       HashKey: process.env.PAYUNI_HASH_KEY || 'YOUR_PAYUNI_HASH_KEY',
       HashIV: process.env.PAYUNI_HASH_IV || 'YOUR_PAYUNI_HASH_IV',
-      ReturnURL: `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
+      ReturnURL: type === 'membership' 
+        ? `${process.env.NEXTAUTH_URL}/membership`
+        : `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
       NotifyURL: `${process.env.NEXTAUTH_URL}/api/checkout/callback`,
     };
 
@@ -31,13 +35,34 @@ export async function POST(req: Request) {
         .single();
 
       if (userData) {
-        await supabase.from('orders').insert({
-          id: merTradeNo,
-          user_id: userData.id,
-          course_id: courseId,
-          amount: amount,
-          status: 'pending'
-        });
+        if (type === 'membership') {
+          try {
+            await supabase.from('orders').insert({
+              id: merTradeNo,
+              user_id: userData.id,
+              membership_plan_id: planId,
+              amount: amount,
+              status: 'pending'
+            });
+          } catch (dbErr) {
+            console.warn("DB insert membership order failed (table migration might not be executed yet):", dbErr);
+            // Fallback insert without membership_plan_id
+            await supabase.from('orders').insert({
+              id: merTradeNo,
+              user_id: userData.id,
+              amount: amount,
+              status: 'pending'
+            });
+          }
+        } else {
+          await supabase.from('orders').insert({
+            id: merTradeNo,
+            user_id: userData.id,
+            course_id: courseId,
+            amount: amount,
+            status: 'pending'
+          });
+        }
       }
     }
 
@@ -46,7 +71,7 @@ export async function POST(req: Request) {
       MerTradeNo: merTradeNo,
       TradeAmt: amount,
       Timestamp: timestamp,
-      ProdDesc: `Purchase ${courseName}`,
+      ProdDesc: type === 'membership' ? `Subscribe to ${planName}` : `Purchase ${courseName}`,
       ReturnURL: PAYUNI_CONFIG.ReturnURL,
       NotifyURL: PAYUNI_CONFIG.NotifyURL,
       Version: '2.0',
@@ -61,8 +86,8 @@ export async function POST(req: Request) {
       EncryptInfo: encryptInfo,
       HashInfo: hashInfo,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Checkout error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

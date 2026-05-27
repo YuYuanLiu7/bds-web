@@ -44,12 +44,52 @@ export async function POST(req: Request) {
         .single();
 
       if (order && !orderError) {
-        // 開通課程權限
-        await supabase.from('user_courses').upsert({
-          user_id: order.user_id,
-          course_id: order.course_id,
-          purchased_at: new Date().toISOString()
-        });
+        if (order.course_id) {
+          // 開通課程權限
+          await supabase.from('user_courses').upsert({
+            user_id: order.user_id,
+            course_id: order.course_id,
+            purchased_at: new Date().toISOString()
+          });
+        } else if (order.membership_plan_id) {
+          // 開通會員方案訂閱權限
+          try {
+            // 查詢該會員方案的付款週期，用以計算到期日
+            const { data: plan } = await supabase
+              .from('membership_plans')
+              .select('period')
+              .eq('id', order.membership_plan_id)
+              .single();
+            
+            let expiresAt = null;
+            if (plan) {
+              const now = new Date();
+              if (plan.period === '月繳') {
+                now.setMonth(now.getMonth() + 1);
+                expiresAt = now.toISOString();
+              } else if (plan.period === '年繳') {
+                now.setFullYear(now.getFullYear() + 1);
+                expiresAt = now.toISOString();
+              } // '一次性' expiresAt 為 null 代表無期限
+            } else {
+              // 備援：若查不到方案，依交易慣例預設月繳 30 天
+              const now = new Date();
+              now.setMonth(now.getMonth() + 1);
+              expiresAt = now.toISOString();
+            }
+
+            // 更新使用者的訂閱方案與過期日
+            await supabase
+              .from('users')
+              .update({
+                membership_plan_id: order.membership_plan_id,
+                membership_expires_at: expiresAt
+              })
+              .eq('id', order.user_id);
+          } catch (mErr) {
+            console.error("Failed to process membership order callback (table might not exist yet):", mErr);
+          }
+        }
       }
       
       console.log('Payment success and access granted:', merTradeNo);
