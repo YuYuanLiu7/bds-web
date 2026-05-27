@@ -88,7 +88,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
             <div 
               key={item.id}
               onClick={() => handleCardClick(item)}
-              className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs flex flex-col justify-between hover:shadow-md hover:border-slate-200/50 transition duration-300 group text-left cursor-pointer transform hover:-translate-y-0.5"
+              className="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-slate-200/70 shadow-sm flex flex-col justify-between hover:shadow-xl hover:border-slate-350 transition-all duration-300 group text-left cursor-pointer transform hover:-translate-y-1.5"
             >
               <div className="space-y-4">
                 {/* Visual Icon Header */}

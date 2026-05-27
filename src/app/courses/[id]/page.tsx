@@ -33,9 +33,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20">
+    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-20 font-sans relative overflow-hidden">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[220px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+      <div className="absolute top-[480px] right-[5%] w-[550px] h-[550px] bg-sky-200/20 rounded-full blur-[130px] pointer-events-none -z-10"></div>
+
       {/* Hero Section */}
-      <div className="bg-white border-b border-gray-200 py-12">
+      <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 py-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold mb-4">
@@ -80,7 +85,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
           {/* What you'll learn */}
-          <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+          <section className="bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-slate-200/70 shadow-sm">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">課程內容亮點</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {features.map((feature, i) => (
@@ -111,7 +116,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     <Link 
                       key={chapter.id} 
                       href={`/courses/${id}/learn/${chapter.id}`}
-                      className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:border-blue-200 transition"
+                      className="bg-white/90 backdrop-blur-sm p-4 rounded-xl border border-slate-200/70 shadow-xs flex items-center justify-between hover:border-blue-200 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-200"
                     >
                       {content}
                       <PlayCircle className="w-4 h-4 text-blue-500" />
@@ -119,7 +124,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   ) : (
                     <div 
                       key={chapter.id} 
-                      className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between opacity-75"
+                      className="bg-white/70 backdrop-blur-sm p-4 rounded-xl border border-slate-200/60 shadow-xs flex items-center justify-between opacity-75"
                     >
                       {content}
                       <Clock className="w-4 h-4 text-gray-300" />
@@ -134,7 +139,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div>
         {/* Sidebar (Buy Box) */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg sticky top-24">
+          <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-slate-200/70 shadow-lg sticky top-24">
             <div className="mb-6">
               <div className="text-gray-500 text-sm mb-1 uppercase font-bold tracking-wider">課程售價</div>
               <div className="text-4xl font-extrabold text-blue-600">NT$ {course.price.toLocaleString()}</div>

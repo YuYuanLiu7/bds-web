@@ -35,9 +35,13 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-900 text-white overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-950 via-[#0B0F19] to-indigo-950/40 text-white overflow-hidden relative font-sans">
+      
+      {/* Premium Ambient Background Glows (Dark Mode version) */}
+      <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+      <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none -z-10"></div>
       {/* Sidebar - Course Content */}
-      <div className="w-full lg:w-80 border-r border-gray-800 flex flex-col h-1/3 lg:h-full bg-gray-900">
+      <div className="w-full lg:w-80 border-r border-slate-800/80 flex flex-col h-1/3 lg:h-full bg-slate-950/70 backdrop-blur-md relative z-10">
         <div className="p-4 border-b border-gray-800">
           <Link href={`/courses/${id}`} className="flex items-center text-gray-400 hover:text-white transition mb-4 text-sm">
             <ChevronLeft className="w-4 h-4 mr-1" /> 返回課程介紹

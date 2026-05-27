@@ -46,7 +46,11 @@ export default function HelpFAQPage() {
   ];
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-16 font-sans">
+    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-sky-200/20 rounded-full blur-[130px] pointer-events-none -z-10"></div>
       
       {/* Header */}
       <div 
@@ -87,7 +91,7 @@ export default function HelpFAQPage() {
           {faqs.map((faq, idx) => (
             <div 
               key={idx}
-              className="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden transition-all duration-300"
+              className="bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden transition-all duration-300"
             >
               {/* Question Trigger */}
               <button
@@ -120,7 +124,7 @@ export default function HelpFAQPage() {
         </div>
 
         {/* Support Card */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center select-none shadow-xs mt-12 space-y-4 max-w-lg mx-auto">
+        <div className="bg-white/90 backdrop-blur-md border border-slate-200/70 rounded-3xl p-8 text-center select-none shadow-sm mt-12 space-y-4 max-w-lg mx-auto">
           <div className="text-xs font-black text-slate-800">仍未找到您的解答？</div>
           <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
             我們非常樂意為您解答！如果您有任何特殊的合作洽談、企業包班需求或金流疑問，請隨時來信至我們的客服信箱，我們將於 24 小時內儘速回覆。

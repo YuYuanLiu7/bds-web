@@ -69,7 +69,11 @@ export default async function DownloadsPage() {
   }
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-16 font-sans">
+    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-sky-200/20 rounded-full blur-[130px] pointer-events-none -z-10"></div>
       
       {/* Header */}
       <div 

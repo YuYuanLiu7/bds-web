@@ -60,7 +60,11 @@ export default async function CategoryPage({ params }: PageProps) {
   );
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-16 font-sans">
+    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-sky-200/20 rounded-full blur-[130px] pointer-events-none -z-10"></div>
       
       {/* Category Hero Header */}
       <div 
@@ -100,7 +104,7 @@ export default async function CategoryPage({ params }: PageProps) {
             {filteredCourses.map((course) => (
               <div 
                 key={course.id}
-                className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-200/50 transition duration-300"
+                className="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/70 overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-350 transition-all duration-300"
               >
                 {/* Thumbnail Cover */}
                 <Link href={`/courses/${course.id}`} className="block relative aspect-[16/9] w-full overflow-hidden bg-slate-50">
@@ -159,7 +163,7 @@ export default async function CategoryPage({ params }: PageProps) {
             ))}
           </div>
         ) : (
-          <div className="text-center bg-white border border-slate-100 rounded-3xl p-16 select-none shadow-xs max-w-xl mx-auto space-y-4">
+          <div className="text-center bg-white/90 backdrop-blur-md border border-slate-200/70 rounded-3xl p-16 select-none shadow-sm max-w-xl mx-auto space-y-4">
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
               <BookOpen className="w-8 h-8" />
             </div>

@@ -160,7 +160,11 @@ export default function EventsPage() {
 
 
   return (
-    <div className="bg-gray-50/50 min-h-screen pb-20 font-sans text-slate-700">
+    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-20 font-sans text-slate-700 relative overflow-hidden">
+      
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-sky-200/20 rounded-full blur-[130px] pointer-events-none -z-10"></div>
       
       {/* Dynamic Teachify-style Hero Banner */}
       <div 
@@ -236,7 +240,7 @@ export default function EventsPage() {
           
           {/* Left Column: Sidebar Category Selector */}
           <div className="lg:col-span-1 space-y-4 select-none">
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs space-y-4">
+            <div className="bg-white/90 backdrop-blur-md p-5 rounded-2xl border border-slate-200/70 shadow-sm space-y-4">
               <h3 className="font-black text-slate-800 text-xs pb-3 border-b border-slate-50 uppercase tracking-wider flex items-center">
                 <span className="w-1.5 h-4 bg-[#21448e] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
                 活動分類
@@ -324,7 +328,7 @@ export default function EventsPage() {
                 {filteredEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-200/50 transition duration-300 text-left"
+                    className="bg-white/90 backdrop-blur-md rounded-3xl border border-slate-200/70 shadow-sm overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-350 transition-all duration-300 text-left"
                   >
                     {/* Event Cover Image */}
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-50 select-none">
@@ -408,7 +412,7 @@ export default function EventsPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center bg-white border border-slate-100 rounded-3xl p-16 select-none shadow-xs space-y-4">
+              <div className="text-center bg-white/90 backdrop-blur-md border border-slate-200/70 rounded-3xl p-16 select-none shadow-sm space-y-4">
                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
                   <Clock className="w-8 h-8" />
                 </div>
