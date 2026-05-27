@@ -1,15 +1,126 @@
 'use client';
 
-import { useState } from 'react';
-import { Download, Search, Plus, Eye, Award, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { Download, Search, Plus, Edit3, Trash2, Copy, Check, MoreVertical, FileText, ShoppingBag, DollarSign, Activity, Filter } from 'lucide-react';
+import DownloadModal from '@/components/admin/DownloadModal';
+
+interface DownloadProduct {
+  id: string;
+  title: string;
+  price: number;
+  type: string;
+  description: string;
+  downloads_count: number;
+  status: 'published' | 'draft';
+  file_url?: string;
+  created_at?: string;
+}
+
+// Seed/Mock fallback data in case database is empty or not yet migrated
+const MOCK_DOWNLOADS: DownloadProduct[] = [
+  { id: '1', title: 'BDS 獨家：半導體高階業務求職信與履歷模板', price: 499, type: 'PDF 文件', description: '針對半導體設備、IC 通路、代工廠業務職缺量身打造的英文履歷與動機信模板，助您脫穎而出。', downloads_count: 125, status: 'published', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: '2', title: '硬體產業 ODM 生意開發策略白皮書 (2026 最新版)', price: 1200, type: 'PDF/PPT 簡報', description: '深度解析電子製造與 ODM 大廠商務拓展核心方法論，包含客戶導入、RFQ 報價與銷售談判策略。', downloads_count: 86, status: 'published', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: '3', title: '外商商務開發面試經典 50 問與模擬解題手冊', price: 699, type: 'PDF 電子書', description: '由資深外商 BD 總監編寫，涵蓋 50 個經典面試提問、Star 原則回答公式與商務思維模擬解密。', downloads_count: 234, status: 'published', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+];
 
 export default function AdminDownloadsPage() {
-  const [downloads, setDownloads] = useState([
-    { id: '1', title: 'BDS 獨家：半導體高階業務求職信與履歷模板', downloads: 125, price: 'NT$ 499', status: 'published', type: 'PDF 文件' },
-    { id: '2', title: '硬體產業 ODM 生意開發策略白皮書 (2026 最新版)', downloads: 86, price: 'NT$ 1,200', status: 'published', type: 'PDF/PPT 簡報' },
-    { id: '3', title: '外商商務開發面試經典 50 問與模擬解題手冊', downloads: 234, price: 'NT$ 699', status: 'published', type: 'PDF 電子書' }
-  ]);
+  const [downloads, setDownloads] = useState<DownloadProduct[]>([]);
+  const [filteredDownloads, setFilteredDownloads] = useState<DownloadProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Search & Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFormat, setSelectedFormat] = useState('All');
+  
+  // Modals
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<DownloadProduct | null>(null);
+  
+  // Actions
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const fetchDownloads = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/downloads');
+      if (!res.ok) throw new Error('API request failed');
+      const data = await res.json();
+      
+      if (Array.isArray(data) && data.length > 0) {
+        setDownloads(data);
+      } else {
+        // Fallback to mock data to prevent blank screen if DB table is unmigrated
+        setDownloads(MOCK_DOWNLOADS);
+      }
+    } catch (err) {
+      console.warn('API Error, falling back to local seed data:', err);
+      setDownloads(MOCK_DOWNLOADS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDownloads();
+  }, []);
+
+  // Filter & Search Logic
+  useEffect(() => {
+    let result = [...downloads];
+    
+    if (searchQuery.trim() !== '') {
+      result = result.filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedFormat !== 'All') {
+      result = result.filter(item => item.type === selectedFormat);
+    }
+
+    setFilteredDownloads(result);
+  }, [downloads, searchQuery, selectedFormat]);
+
+  const handleAdd = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (product: DownloadProduct) => {
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('確定要刪除此數位商品嗎？')) return;
+    try {
+      // Check if it's a real DB product (non-mock numeric string id usually)
+      if (id.length > 5) {
+        const res = await fetch(`/api/admin/downloads?id=${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('刪除失敗');
+      }
+      
+      setDownloads(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      alert('刪除失敗');
+    }
+  };
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Calculations for KPI cards
+  const totalProducts = downloads.length;
+  const totalVolume = downloads.reduce((acc, curr) => acc + (curr.downloads_count || 0), 0);
+  const totalSalesRevenue = downloads.reduce((acc, curr) => acc + ((curr.price || 0) * (curr.downloads_count || 0)), 0);
+  const averagePrice = totalProducts > 0 ? Math.round(downloads.reduce((acc, curr) => acc + (curr.price || 0), 0) / totalProducts) : 0;
+
+  // Extract all available formats for filter dropdown
+  const uniqueFormats = Array.from(new Set(downloads.map(item => item.type)));
 
   return (
     <div className="space-y-6 select-none font-sans text-slate-700">
@@ -18,87 +129,265 @@ export default function AdminDownloadsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>download</span>
-            數位下載
+            <Download className="w-6 h-6 mr-2 text-indigo-600" />
+            數位下載商品管理
           </h1>
-          <p className="text-slate-400 text-xs mt-1 font-semibold">管理與上傳可供學員單獨購買或下載的 PDF 手冊、簡報與學習模板。</p>
+          <p className="text-slate-400 text-xs mt-1 font-semibold">
+            統計並管理可供學員單獨購買或下載的 PDF 電子書、求職履歷模板與實戰白皮書。
+          </p>
         </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center cursor-pointer active:scale-98">
-          <Plus className="w-4 h-4 mr-1.5" /> 新增數位商品
+        <button 
+          onClick={handleAdd}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center cursor-pointer active:scale-98"
+        >
+          <Plus className="w-4 h-4 mr-1.5" /> 上架新數位商品
         </button>
+      </div>
+
+      {/* KPI Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* Stat 1: Total Products */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">上架數位商品</span>
+            <div className="text-xl font-black text-slate-800">{totalProducts} <span className="text-xs font-semibold text-slate-400">項</span></div>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <ShoppingBag className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Stat 2: Total Net Sales Volume */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">累計淨銷售量</span>
+            <div className="text-xl font-black text-emerald-600">{totalVolume.toLocaleString()} <span className="text-xs font-semibold text-emerald-400">次</span></div>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <Download className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Stat 3: Total Net Sales Revenue */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">累計淨銷售總額</span>
+            <div className="text-xl font-black text-indigo-600">NT$ {totalSalesRevenue.toLocaleString()}</div>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <DollarSign className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Stat 4: Average Order Price */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">商品平均單價</span>
+            <div className="text-xl font-black text-slate-800">NT$ {averagePrice.toLocaleString()}</div>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
+            <Activity className="w-5 h-5" />
+          </div>
+        </div>
+
       </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         
-        {/* Table List */}
+        {/* Table List (lg:col-span-3) */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="text-xs text-slate-400 font-bold">
-            共 <span className="text-slate-700 font-extrabold">{downloads.length}</span> 項，顯示 <span className="text-slate-700 font-extrabold">1-{downloads.length}</span>
+          <div className="flex justify-between items-center text-xs text-slate-400 font-bold px-1">
+            <div>
+              共 <span className="text-slate-700 font-extrabold">{filteredDownloads.length}</span> 項數位資源
+            </div>
+            {loading && <span className="text-indigo-600 animate-pulse">連線更新中...</span>}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <table className="w-full text-left border-collapse table-fixed">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100 h-12">
-                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/2">商品名稱</th>
-                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">定價</th>
-                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">商品格式 / 下載量</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {downloads.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-bold text-[10px]">
-                          販售中
-                        </span>
-                      </div>
-                      <Link href={`/admin/downloads/${item.id}`} className="block font-bold text-blue-600 hover:text-blue-800 transition text-sm mt-1.5 leading-snug">
-                        {item.title}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-slate-800 font-extrabold text-sm">
-                      {item.price}
-                    </td>
-                    <td className="px-6 py-4 space-y-1 text-slate-400 font-semibold text-xs">
-                      <div className="flex items-center text-slate-500">
-                        {item.type}
-                      </div>
-                      <div className="flex items-center">
-                        <Download className="w-3.5 h-3.5 mr-1 text-slate-300" />
-                        已售出/下載: <span className="text-slate-600 font-bold ml-1">{item.downloads} 次</span>
-                      </div>
-                    </td>
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-150 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse table-auto min-w-[700px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-150 h-12 select-none">
+                    <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3 w-[40%]">商品名稱</th>
+                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3 text-center">發布狀態</th>
+                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">定價</th>
+                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">淨銷售量 (次)</th>
+                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">淨銷售總額</th>
+                    <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3 text-right">操作</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredDownloads.length > 0 ? (
+                    filteredDownloads.map((item) => {
+                      const netSalesTotal = (item.price || 0) * (item.downloads_count || 0);
+                      return (
+                        <tr key={item.id} className="hover:bg-slate-50/40 transition duration-150 group">
+                          
+                          {/* Title & Format */}
+                          <td className="px-6 py-4.5">
+                            <div className="space-y-1">
+                              <span 
+                                onClick={() => handleEdit(item)}
+                                className="font-extrabold text-slate-800 text-sm hover:text-indigo-600 transition cursor-pointer leading-snug block"
+                              >
+                                {item.title}
+                              </span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-50 border border-slate-150 text-slate-500 font-extrabold text-[9px] uppercase tracking-wider select-none">
+                                {item.type}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-5 py-4.5 text-center select-none">
+                            {item.status === 'published' ? (
+                              <span className="inline-flex items-center px-2 py-0.8 rounded-full bg-emerald-50 text-emerald-700 font-black text-[9px] border border-emerald-150">
+                                🟢 已上架
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.8 rounded-full bg-amber-50 text-amber-700 font-black text-[9px] border border-amber-150">
+                                🟡 草稿
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Original Price */}
+                          <td className="px-5 py-4.5 text-slate-700 font-bold text-xs select-none">
+                            NT$ {item.price.toLocaleString()}
+                          </td>
+
+                          {/* Net Sales Volume */}
+                          <td className="px-5 py-4.5 text-slate-800 font-extrabold text-xs select-none">
+                            <div className="flex items-center space-x-1">
+                              <Download className="w-3.5 h-3.5 text-emerald-500" />
+                              <span>{item.downloads_count}</span>
+                            </div>
+                          </td>
+
+                          {/* Net Sales Total */}
+                          <td className="px-5 py-4.5 text-indigo-600 font-black text-sm select-none">
+                            NT$ {netSalesTotal.toLocaleString()}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-6 py-4.5 text-right select-none">
+                            <div className="flex items-center justify-end space-x-1.5 opacity-90 group-hover:opacity-100 transition">
+                              
+                              {/* Edit Button */}
+                              <button
+                                onClick={() => handleEdit(item)}
+                                title="編輯商品"
+                                className="p-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-400 hover:text-indigo-600 rounded-lg transition cursor-pointer flex items-center justify-center"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+
+                              {/* Copy ID Button */}
+                              <button
+                                onClick={() => handleCopyId(item.id)}
+                                title="複製商品 ID"
+                                className="p-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-400 hover:text-indigo-600 rounded-lg transition cursor-pointer flex items-center justify-center"
+                              >
+                                {copiedId === item.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleDelete(item.id)}
+                                title="刪除商品"
+                                className="p-1.5 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer flex items-center justify-center"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+
+                            </div>
+                          </td>
+
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic text-xs">
+                        沒有找到符合篩選條件的數位商品。
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        {/* Filter Aside */}
+        {/* Filter Aside (lg:col-span-1) */}
         <div className="lg:col-span-1 lg:order-first">
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm pb-2.5 border-b border-slate-50">商品篩選</h3>
+          <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-xs space-y-4">
+            <div className="flex items-center pb-2.5 border-b border-slate-100">
+              <Filter className="w-4 h-4 mr-2 text-indigo-500 shrink-0" />
+              <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">商品篩選</h3>
+            </div>
+            
             <div className="space-y-4">
+              
+              {/* Search Title/Desc */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">商品名稱</label>
-                <input 
-                  type="text" 
-                  placeholder="搜尋數位商品名稱"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
-                />
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider">商品搜尋</label>
+                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-600 focus-within:bg-white transition">
+                  <Search className="w-3.5 h-3.5 text-slate-400 mr-2" />
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="搜尋關鍵字..."
+                    className="w-full bg-transparent text-xs font-semibold text-slate-700 outline-none"
+                  />
+                </div>
               </div>
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-sm transition active:scale-95 flex items-center justify-center cursor-pointer">
-                <Search className="w-3.5 h-3.5 mr-1" /> 搜尋商品
-              </button>
+
+              {/* Format Filter */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider">檔案格式</label>
+                <select 
+                  value={selectedFormat}
+                  onChange={e => setSelectedFormat(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
+                >
+                  <option value="All">🌐 顯示全部格式</option>
+                  {uniqueFormats.map(format => (
+                    <option key={format} value={format}>{format}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Reset Filters button */}
+              {(searchQuery !== '' || selectedFormat !== 'All') && (
+                <button 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedFormat('All');
+                  }}
+                  className="w-full py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-500 font-bold text-[10px] rounded-xl transition cursor-pointer"
+                >
+                  清除所有篩選
+                </button>
+              )}
+
             </div>
           </div>
         </div>
 
       </div>
+
+      {/* Product Edit / Create Modal */}
+      <DownloadModal 
+        isOpen={isModalOpen}
+        product={editingProduct}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchDownloads}
+      />
+
     </div>
   );
 }

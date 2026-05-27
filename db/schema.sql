@@ -90,4 +90,17 @@ CREATE TABLE articles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Downloads Table (Digital Products)
+CREATE TABLE downloads (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  price INTEGER NOT NULL DEFAULT 0,
+  type TEXT NOT NULL,
+  description TEXT,
+  downloads_count INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'published',
+  file_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 
