@@ -20,7 +20,7 @@ export default function AdminGlobalSettingsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>sliders</span>
+            <Sliders className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             全站設定
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">自訂您的網站網域、Email 寄件服務、頁尾聲明及全站基礎防護機制。</p>
@@ -47,7 +47,7 @@ export default function AdminGlobalSettingsPage() {
             <div className="border-t border-slate-50 my-1"></div>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500">主自訂網域 (Custom Domain)</label>
+                <label className="text-xs font-bold text-slate-500">自訂網域</label>
                 <input 
                   type="text" 
                   defaultValue="bds.fu-notes.com" 
@@ -55,7 +55,7 @@ export default function AdminGlobalSettingsPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500">預設二級子網域 (Default Kaik Subdomain)</label>
+                <label className="text-xs font-bold text-slate-500">預設二級子網域</label>
                 <input 
                   type="text" 
                   defaultValue="outliersadmin38.kaik.io" 
@@ -70,7 +70,7 @@ export default function AdminGlobalSettingsPage() {
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5">
             <h2 className="text-sm font-extrabold text-slate-800 flex items-center">
               <Mail className="w-4.5 h-4.5 mr-2 text-slate-400" />
-              Email 寄件者與服務設定 (SMTP)
+              Email 寄件者與服務設定
             </h2>
             <div className="border-t border-slate-50 my-1"></div>
             <div className="space-y-4">

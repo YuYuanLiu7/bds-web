@@ -167,7 +167,7 @@ export default function AdminFinancePage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>payments</span>
+            <Receipt className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             交易紀錄
           </h1>
         </div>
@@ -178,14 +178,14 @@ export default function AdminFinancePage() {
             onClick={handleExportCSV}
             className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
           >
-            <span className="material-symbols-outlined mr-1.5" style={{ fontSize: '16px' }}>download</span>
+            <Download className="w-4 h-4 mr-1.5" />
             匯出所有訂單
           </button>
           <button 
             onClick={handleExportCSV}
             className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
           >
-            <span className="material-symbols-outlined mr-1.5" style={{ fontSize: '16px' }}>download</span>
+            <Download className="w-4 h-4 mr-1.5" />
             匯出 Excel
           </button>
         </div>

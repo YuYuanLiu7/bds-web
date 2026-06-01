@@ -26,7 +26,7 @@ export default function AdminIntegrationsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>grid_view</span>
+            <Grid className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             第三方整合
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">快速連結與管理 GA4 數據追蹤、Meta 像素、LINE 登入與聯盟行銷工具。</p>

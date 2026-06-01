@@ -20,7 +20,7 @@ export default function AdminDeveloperPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>code</span>
+            <Code className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             開發者專區
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">自訂與串接 Webhook 通知、管理 API 密鑰授權，進行進階系統設定與系統日誌監控。</p>

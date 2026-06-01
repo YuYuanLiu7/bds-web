@@ -7,7 +7,7 @@ import {
   Bold, Heading2, Heading3, Palette, Link as LinkIcon, Sparkles,
   Globe, Lock, BookOpen, Pin, ChevronDown, ChevronUp,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Outdent, Indent, Quote, Code, Table, Video,
-  Type, Italic, Underline, Strikethrough
+  Type, Italic, Underline, Strikethrough, Send, FilePlus, Edit3
 } from 'lucide-react';
 
 interface Article {
@@ -460,10 +460,12 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
         <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 select-none">
           <div>
             <h2 className="text-base font-black text-slate-800 flex items-center">
-              <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '20px' }}>
-                {formData.id ? 'edit_note' : 'note_add'}
-              </span>
-              {formData.id ? '編輯文章 (對標 Kaik.io)' : '撰寫新文章 (對標 Kaik.io)'}
+              {formData.id ? (
+                <Edit3 className="w-5 h-5 mr-2 text-indigo-600" />
+              ) : (
+                <FilePlus className="w-5 h-5 mr-2 text-indigo-600" />
+              )}
+              {formData.id ? '編輯文章' : '撰寫新文章'}
             </h2>
             <p className="text-[10px] text-slate-400 font-semibold mt-0.5">發布產業洞察、專業觀點報告與學員限定文章。</p>
           </div>
@@ -497,7 +499,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-wider flex items-center">
                     <FileText className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                    文章內文 (Kaik 所見即所得富文本編輯器)
+                    文章內文 (所見即所得富文本編輯器)
                   </label>
                   
                   <div className="flex flex-col w-full rounded-2xl overflow-hidden border border-slate-200 shadow-xs bg-white">
@@ -979,7 +981,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                     className="w-full px-5 py-3.5 bg-slate-100/50 flex justify-between items-center border-b border-slate-200/80 font-black text-xs text-slate-700 select-none cursor-pointer"
                   >
                     <span className="flex items-center">
-                      <span className="material-symbols-outlined mr-2 text-indigo-500" style={{ fontSize: '18px' }}>send</span>
+                      <Send className="w-4 h-4 mr-2 text-indigo-500" />
                       發布與置頂設定
                     </span>
                     {activePanel === 'publish' ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -1078,7 +1080,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                     className="w-full px-5 py-3.5 bg-slate-100/50 flex justify-between items-center border-b border-slate-200/80 font-black text-xs text-slate-700 select-none cursor-pointer"
                   >
                     <span className="flex items-center">
-                      <span className="material-symbols-outlined mr-2 text-indigo-500" style={{ fontSize: '18px' }}>tag</span>
+                      <Tag className="w-4 h-4 mr-2 text-indigo-500" />
                       分類與標籤設定
                     </span>
                     {activePanel === 'meta' ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -1129,7 +1131,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                     className="w-full px-5 py-3.5 bg-slate-100/50 flex justify-between items-center border-b border-slate-200/80 font-black text-xs text-slate-700 select-none cursor-pointer"
                   >
                     <span className="flex items-center">
-                      <span className="material-symbols-outlined mr-2 text-indigo-500" style={{ fontSize: '18px' }}>lock</span>
+                      <Lock className="w-4 h-4 mr-2 text-indigo-500" />
                       閱讀權限與付費鎖定
                     </span>
                     {activePanel === 'visibility' ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -1200,7 +1202,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                     className="w-full px-5 py-3.5 bg-slate-100/50 flex justify-between items-center border-b border-slate-200/80 font-black text-xs text-slate-700 select-none cursor-pointer"
                   >
                     <span className="flex items-center">
-                      <span className="material-symbols-outlined mr-2 text-indigo-500" style={{ fontSize: '18px' }}>language</span>
+                      <Globe className="w-4 h-4 mr-2 text-indigo-500" />
                       自訂網址與 SEO 設定
                     </span>
                     {activePanel === 'seo' ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}

@@ -134,7 +134,7 @@ export default function AdminArticlesPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>description</span>
+            <FileText className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             文章管理
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">撰寫與管理您的部落格專欄、產業洞察報告與活動公告。</p>

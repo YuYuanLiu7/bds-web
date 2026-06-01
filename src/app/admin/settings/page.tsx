@@ -18,7 +18,8 @@ import {
   Check,
   Image as ImageIcon,
   Sliders,
-  Link2
+  Link2,
+  Settings
 } from 'lucide-react';
 
 export default function AdminSettingsPage() {
@@ -237,7 +238,7 @@ export default function AdminSettingsPage() {
       {/* Header */}
       <div className="border-b border-slate-100 pb-4">
         <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-          <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>settings</span>
+          <Settings className="w-6.5 h-6.5 mr-2 text-indigo-600" />
           設定
         </h1>
         <p className="text-slate-400 text-xs mt-1 font-semibold">自訂與配置您的 BDS 平台屬性、金流閘道器及系統通知參數。</p>

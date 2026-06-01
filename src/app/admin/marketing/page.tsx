@@ -18,7 +18,7 @@ export default function AdminMarketingPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>sell</span>
+            <Tag className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             行銷
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">建立促銷折扣代碼、行銷優惠券以提高學員的轉單與購買意願。</p>
