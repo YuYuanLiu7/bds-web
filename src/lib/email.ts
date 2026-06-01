@@ -186,7 +186,7 @@ export async function sendPurchaseSuccessEmail({
               
               <!-- Receipt Detail Card -->
               <div class="receipt-box">
-                <div class="receipt-title">訂單明細 (Receipt)</div>
+                <div class="receipt-title">訂單明細</div>
                 <div class="receipt-row">
                   <span class="label">購買項目</span>
                   <span class="value">${itemName}</span>

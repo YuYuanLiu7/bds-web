@@ -561,7 +561,7 @@ export default function CourseStudentsPage() {
             <DollarSign className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[10px] font-extrabold text-slate-400 tracking-wider">淨銷售總額 (NTD)</div>
+            <div className="text-[10px] font-extrabold text-slate-400 tracking-wider">淨銷售總額</div>
             <div className="text-base font-black text-emerald-600 mt-0.5">
               {loading ? '...' : `NT$ ${netSales.toLocaleString()}`}
             </div>

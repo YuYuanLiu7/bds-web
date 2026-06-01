@@ -146,7 +146,7 @@ export default function OrderDetailPage() {
               <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center border-b border-slate-50 pb-3">
                   <Receipt className="w-4 h-4 mr-1.5 text-slate-400" />
-                  訂購項目 (Item Details)
+                  訂購項目
                 </h3>
 
                 {order.courses ? (
@@ -192,16 +192,16 @@ export default function OrderDetailPage() {
                 {/* Billing Summary rows */}
                 <div className="space-y-3 pt-2 text-xs font-semibold text-slate-500">
                   <div className="flex justify-between">
-                    <span>商品小計 (Subtotal)</span>
+                    <span>商品小計</span>
                     <span className="text-slate-800 font-bold">NT$ {order.amount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>優惠代碼折扣 (Discount)</span>
+                    <span>優惠折扣</span>
                     <span className="text-slate-400">- NT$ 0</span>
                   </div>
                   <div className="flex justify-between border-t border-slate-100 pt-3 text-sm font-extrabold text-slate-800">
                     <span className="flex items-center text-slate-600">
-                      實收實付金額 (Total Paid)
+                      實收實付金額
                     </span>
                     <span className="text-emerald-600 text-base font-black">
                       NT$ {order.amount.toLocaleString()}
@@ -214,7 +214,7 @@ export default function OrderDetailPage() {
               <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center border-b border-slate-50 pb-3">
                   <CreditCard className="w-4 h-4 mr-1.5 text-slate-400" />
-                  金流交易明細 (PayUni Gateway)
+                  金流交易明細
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold text-slate-500">
@@ -227,21 +227,21 @@ export default function OrderDetailPage() {
                   </div>
                   
                   <div className="space-y-1">
-                    <div className="text-[10px] text-slate-400">付款管道 (Payment Type)</div>
+                    <div className="text-[10px] text-slate-400">付款管道</div>
                     <div className="text-slate-800 font-black uppercase">
-                      {order.payment_type === 'SIMULATED_TEST' ? '模拟支付 (SIMULATED TEST)' : (order.payment_type || '—')}
+                      {order.payment_type === 'SIMULATED_TEST' ? '模擬支付' : (order.payment_type || '—')}
                     </div>
                   </div>
 
                   <div className="space-y-1 border-t border-slate-50 pt-2 sm:border-0 sm:pt-0">
-                    <div className="text-[10px] text-slate-400">交易流水號 (PayUni Trade No)</div>
+                    <div className="text-[10px] text-slate-400">交易流水號</div>
                     <div className="text-slate-800 font-mono font-bold truncate">
                       {order.id}
                     </div>
                   </div>
 
                   <div className="space-y-1 border-t border-slate-50 pt-2 sm:border-0 sm:pt-0">
-                    <div className="text-[10px] text-slate-400">最後狀態更新時間 (Updated At)</div>
+                    <div className="text-[10px] text-slate-400">最後狀態更新時間</div>
                     <div className="text-slate-800 font-semibold">
                       {formatTaiwanDate(order.updated_at)}
                     </div>
@@ -258,7 +258,7 @@ export default function OrderDetailPage() {
               <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center border-b border-slate-50 pb-3">
                   <User className="w-4 h-4 mr-1.5 text-slate-400" />
-                  訂購學員資訊 (Customer)
+                  訂購學員資訊
                 </h3>
 
                 {order.users ? (

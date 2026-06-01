@@ -179,14 +179,14 @@ export default function AdminFinancePage() {
             className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
           >
             <span className="material-symbols-outlined mr-1.5" style={{ fontSize: '16px' }}>download</span>
-            匯出所有訂單 (CSV)
+            匯出所有訂單
           </button>
           <button 
             onClick={handleExportCSV}
             className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
           >
             <span className="material-symbols-outlined mr-1.5" style={{ fontSize: '16px' }}>download</span>
-            Excel 匯出
+            匯出 Excel
           </button>
         </div>
       </div>
