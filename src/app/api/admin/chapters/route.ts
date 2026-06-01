@@ -3,6 +3,35 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
+// 1. GET：取得特定課程的所有章節單元 (依順序排序)
+export async function GET(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const courseId = searchParams.get('courseId');
+
+    if (!courseId) {
+      return NextResponse.json({ error: "缺少課程 ID" }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from('chapters')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('order_index', { ascending: true });
+
+    if (error) throw error;
+
+    return NextResponse.json(data || []);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

@@ -74,6 +74,11 @@ export default function AdminCoursesPage() {
     setActiveMenuId(null);
   };
 
+  // Global stats calculations
+  const totalCoursesCount = courses.length;
+  const grandNetSales = courses.reduce((sum, c) => sum + (c.netSales || 0), 0);
+  const grandStudentAccesses = courses.reduce((sum, c) => sum + (c.studentCount || 0), 0);
+
   return (
     <div className="space-y-6 select-none font-sans text-slate-700">
       
@@ -100,13 +105,51 @@ export default function AdminCoursesPage() {
         </div>
       )}
 
+      {/* Course Summary Analytics Dashboard */}
+      {!loading && courses.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in duration-300">
+          {/* Card 1: Total Courses */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3 hover:shadow-md transition">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>school</span>
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">上架課程總數</div>
+              <div className="text-base font-black text-slate-800 mt-0.5">{totalCoursesCount} <span className="text-[10px] font-extrabold text-slate-400">門</span></div>
+            </div>
+          </div>
+
+          {/* Card 2: Cumulative Student Accesses */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3 hover:shadow-md transition">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600 flex-shrink-0">
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>group</span>
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">累計看課學員</div>
+              <div className="text-base font-black text-slate-800 mt-0.5">{grandStudentAccesses} <span className="text-[10px] font-extrabold text-slate-400">人次</span></div>
+            </div>
+          </div>
+
+          {/* Card 3: Grand Net Sales Total */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3 hover:shadow-md transition">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>payments</span>
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">全站課程淨銷售總額</div>
+              <div className="text-base font-black text-emerald-600 mt-0.5">NT$ {grandNetSales.toLocaleString()}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Courses Cards Grid */}
       {loading ? (
         <div className="py-32 text-center text-slate-400 font-semibold text-sm">
           課程資料載入中...
         </div>
       ) : courses.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-300">
           {courses.map((course) => {
             const hasChapters = course.chapters && course.chapters.length > 0;
             const mockLecturer = {
@@ -190,10 +233,22 @@ export default function AdminCoursesPage() {
 
                     {/* Title */}
                     <h3 className="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition leading-snug line-clamp-2">
-                      <Link href={`/admin/courses/${course.id}`} className="hover:underline">
+                      <Link href={`/admin/courses/${course.id}/students`} className="hover:underline">
                         {course.title}
                       </Link>
                     </h3>
+                  </div>
+
+                  {/* Course stats block (Students count and Net Sales) */}
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl text-[10px] font-bold">
+                    <div className="flex items-center text-slate-500">
+                      <span className="material-symbols-outlined mr-1 text-slate-400" style={{ fontSize: '13px' }}>group</span>
+                      <span>學員: <span className="text-slate-800 font-extrabold">{course.studentCount || 0}</span> 人</span>
+                    </div>
+                    <div className="flex items-center text-slate-500 justify-end">
+                      <span className="material-symbols-outlined mr-1 text-slate-400" style={{ fontSize: '13px' }}>payments</span>
+                      <span>銷售: <span className="text-emerald-600 font-extrabold">NT$ {(course.netSales || 0).toLocaleString()}</span></span>
+                    </div>
                   </div>
 
                   {/* Footer Stats & Lecturer avatar row */}

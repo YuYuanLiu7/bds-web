@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
+import { sendPurchaseSuccessEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -62,6 +63,19 @@ export async function POST(req: Request) {
         .eq('id', user.id);
     } catch (e) {
       console.warn("DB update user membership skipped (table/columns might not be migrated yet):", e);
+    }
+
+    // 5. 寄送模擬購買成功通知信
+    try {
+      await sendPurchaseSuccessEmail({
+        email: session.user.email,
+        name: session.user.name || '學員',
+        itemName: `訂閱會員 - ${planName}`,
+        amount: parseInt(price) || 0,
+        tradeNo: merTradeNo
+      });
+    } catch (emailErr) {
+      console.error("Failed to send simulation success email:", emailErr);
     }
 
     return NextResponse.json({ 

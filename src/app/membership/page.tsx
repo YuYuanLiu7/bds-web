@@ -11,7 +11,7 @@ export const revalidate = 0;
 // Seed/Mock fallback data in case database is empty or not yet migrated
 const SEED_PLANS = [
   { 
-    id: '1', 
+    id: '182000da-6fcd-4748-86df-e1f3b122a8c1', 
     title: 'BDS 產業升級訂閱制 - 月費方案', 
     price: 990, 
     period: '月繳',
@@ -26,7 +26,7 @@ const SEED_PLANS = [
     ]
   },
   { 
-    id: '2', 
+    id: '182000da-6fcd-4748-86df-e1f3b122a8c2', 
     title: 'BDS 產業升級訂閱制 - 年費極致方案', 
     price: 9500, 
     period: '年繳',
@@ -42,7 +42,7 @@ const SEED_PLANS = [
     ]
   },
   { 
-    id: '3', 
+    id: '182000da-6fcd-4748-86df-e1f3b122a8c3', 
     title: 'BDS VIP 創始永久會員專案', 
     price: 25000, 
     period: '一次性',

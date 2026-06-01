@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
+import { sendPurchaseSuccessEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -89,6 +90,44 @@ export async function POST(req: Request) {
           } catch (mErr) {
             console.error("Failed to process membership order callback (table might not exist yet):", mErr);
           }
+        }
+
+        // 寄送購買成功通知信
+        try {
+          const { data: user } = await supabase
+            .from('users')
+            .select('name, email')
+            .eq('id', order.user_id)
+            .single();
+
+          let purchasedItemName = '線上項目';
+          if (order.course_id) {
+            const { data: course } = await supabase
+              .from('courses')
+              .select('title')
+              .eq('id', order.course_id)
+              .single();
+            if (course) purchasedItemName = course.title;
+          } else if (order.membership_plan_id) {
+            const { data: plan } = await supabase
+              .from('membership_plans')
+              .select('title')
+              .eq('id', order.membership_plan_id)
+              .single();
+            if (plan) purchasedItemName = `訂閱會員 - ${plan.title}`;
+          }
+
+          if (user && user.email) {
+            await sendPurchaseSuccessEmail({
+              email: user.email,
+              name: user.name || '學員',
+              itemName: purchasedItemName,
+              amount: order.amount,
+              tradeNo: order.id
+            });
+          }
+        } catch (emailErr) {
+          console.error("Failed to process email dispatch in callback:", emailErr);
         }
       }
       
