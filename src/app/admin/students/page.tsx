@@ -390,9 +390,11 @@ export default function AdminStudentsPage() {
             ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
             : 'bg-rose-50 border-rose-100 text-rose-700'
         }`}>
-          <span className="material-symbols-outlined mr-2" style={{ fontSize: '20px' }}>
-            {toast.type === 'success' ? 'check_circle' : 'warning'}
-          </span>
+          {toast.type === 'success' ? (
+            <Check className="w-4 h-4 mr-2 text-emerald-600" />
+          ) : (
+            <X className="w-4 h-4 mr-2 text-rose-600" />
+          )}
           {toast.message}
         </div>
       )}
@@ -401,7 +403,7 @@ export default function AdminStudentsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>people</span>
+            <Users className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             成員管理
           </h1>
           <p className="text-[11px] text-slate-400 font-bold mt-1">管理您平台上的學員、講師、助教與後台管理帳號</p>

@@ -444,9 +444,11 @@ export default function CourseStudentsPage() {
             ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
             : 'bg-rose-50 border-rose-100 text-rose-700'
         }`}>
-          <span className="material-symbols-outlined mr-2" style={{ fontSize: '20px' }}>
-            {toast.type === 'success' ? 'check_circle' : 'warning'}
-          </span>
+          {toast.type === 'success' ? (
+            <Check className="w-4 h-4 mr-2 text-emerald-600" />
+          ) : (
+            <X className="w-4 h-4 mr-2 text-rose-600" />
+          )}
           {toast.message}
         </div>
       )}

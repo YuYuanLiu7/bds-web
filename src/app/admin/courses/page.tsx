@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, Star, User as UserIcon, BookOpen, GraduationCap, ChevronDown } from "lucide-react";
+import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, Star, User as UserIcon, BookOpen, GraduationCap, ChevronDown, Users, DollarSign } from "lucide-react";
 import Image from "next/image";
 import CourseModal from "@/components/admin/CourseModal";
 
@@ -86,7 +86,7 @@ export default function AdminCoursesPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <span className="material-symbols-outlined mr-2 text-indigo-600" style={{ fontSize: '26px' }}>school</span>
+            <GraduationCap className="w-7 h-7 mr-2 text-indigo-600" />
             課程
           </h1>
         </div>
@@ -111,7 +111,7 @@ export default function AdminCoursesPage() {
           {/* Card 1: Total Courses */}
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3 hover:shadow-md transition">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>school</span>
+              <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">上架課程總數</div>
@@ -122,7 +122,7 @@ export default function AdminCoursesPage() {
           {/* Card 2: Cumulative Student Accesses */}
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3 hover:shadow-md transition">
             <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600 flex-shrink-0">
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>group</span>
+              <Users className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">累計看課學員</div>
@@ -133,7 +133,7 @@ export default function AdminCoursesPage() {
           {/* Card 3: Grand Net Sales Total */}
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3 hover:shadow-md transition">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>payments</span>
+              <DollarSign className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">全站課程淨銷售總額</div>
@@ -242,11 +242,11 @@ export default function AdminCoursesPage() {
                   {/* Course stats block (Students count and Net Sales) */}
                   <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl text-[10px] font-bold">
                     <div className="flex items-center text-slate-500">
-                      <span className="material-symbols-outlined mr-1 text-slate-400" style={{ fontSize: '13px' }}>group</span>
+                      <Users className="w-3.5 h-3.5 mr-1 text-slate-400" />
                       <span>學員: <span className="text-slate-800 font-extrabold">{course.studentCount || 0}</span> 人</span>
                     </div>
                     <div className="flex items-center text-slate-500 justify-end">
-                      <span className="material-symbols-outlined mr-1 text-slate-400" style={{ fontSize: '13px' }}>payments</span>
+                      <DollarSign className="w-3.5 h-3.5 mr-0.5 text-slate-400" />
                       <span>銷售: <span className="text-emerald-600 font-extrabold">NT$ {(course.netSales || 0).toLocaleString()}</span></span>
                     </div>
                   </div>
