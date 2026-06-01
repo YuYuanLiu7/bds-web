@@ -44,6 +44,63 @@ export default function AdminFinancePage() {
     fetchOrders();
   }, []);
 
+  // Client-side dynamic CSV and Excel exporter (fully compatible with Microsoft Excel Chinese encoding via UTF-8 BOM)
+  const handleExportCSV = () => {
+    if (filteredOrders.length === 0) {
+      alert("目前沒有可匯出的訂單資料！");
+      return;
+    }
+
+    // CSV Headers
+    const headers = ["訂單編號", "付款時間", "顧客姓名", "顧客信箱", "聯絡電話", "交易金額 (NTD)", "金流管道", "付款狀態"];
+    
+    // Convert orders dataset
+    const rows = filteredOrders.map(order => {
+      const formatTime = (dateStr: string) => {
+        const d = new Date(dateStr);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const dy = String(d.getDate()).padStart(2, '0');
+        const h = String(d.getHours()).padStart(2, '0');
+        const mn = String(d.getMinutes()).padStart(2, '0');
+        return `${y}/${m}/${dy} ${h}:${mn}`;
+      };
+
+      return [
+        order.id || '',
+        order.created_at ? formatTime(order.created_at) : '',
+        order.users?.name || '未知學員',
+        order.users?.email || '',
+        order.users?.phone || '',
+        order.amount || 0,
+        order.payment_type === 'SIMULATED_TEST' ? '模擬支付' : (order.payment_type || 'PayUni'),
+        order.status === 'paid' ? '已付款' : '未付款'
+      ];
+    });
+
+    // Merge columns and safe escape commas and double quotes
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    // Add UTF-8 BOM prefix (\uFEFF) so Excel opens Traditional Chinese characters correctly without garbling!
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    
+    // Create temporary link element and click to trigger download
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    link.setAttribute("download", `BDS_訂單匯出_${dateStr}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     let result = [...orders];
@@ -117,13 +174,19 @@ export default function AdminFinancePage() {
         
         {/* Export buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <button className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm">
+          <button 
+            onClick={handleExportCSV}
+            className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
+          >
             <span className="material-symbols-outlined mr-1.5" style={{ fontSize: '16px' }}>download</span>
             匯出所有訂單 (CSV)
           </button>
-          <button className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm">
+          <button 
+            onClick={handleExportCSV}
+            className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
+          >
             <span className="material-symbols-outlined mr-1.5" style={{ fontSize: '16px' }}>download</span>
-            Excel
+            Excel 匯出
           </button>
         </div>
       </div>
