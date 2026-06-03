@@ -33,6 +33,7 @@ interface CourseModalProps {
 export default function CourseModal({ course, isOpen, onClose }: CourseModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [deletedChapters, setDeletedChapters] = useState<string[]>([]);
   const [formData, setFormData] = useState<Course>({
     title: '',
@@ -95,6 +96,34 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     }
     const newChapters = formData.chapters.filter((_, i) => i !== index);
     setFormData({ ...formData, chapters: newChapters });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '上傳失敗');
+
+      if (data.url) {
+        setFormData(prev => ({ ...prev, thumbnail_url: data.url }));
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('圖片上傳失敗：' + err.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -234,20 +263,48 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center">
-                  <ImageIcon className="w-4 h-4 mr-2" /> 封面圖片網址
+                  <ImageIcon className="w-4 h-4 mr-2" /> 課程封面圖片
                 </label>
-                <input 
-                  type="text" 
-                  value={formData.thumbnail_url}
-                  onChange={e => setFormData({...formData, thumbnail_url: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
-                  placeholder="https://..."
-                />
-                {formData.thumbnail_url && (
-                  <div className="mt-4 relative aspect-video rounded-xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50">
-                    <Image src={formData.thumbnail_url} alt="Preview" fill className="object-cover" />
-                  </div>
-                )}
+                
+                <div className="mt-2 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-2xl p-6 bg-gray-50 hover:bg-gray-100/50 transition relative group cursor-pointer">
+                  {uploading ? (
+                    <div className="flex flex-col items-center justify-center py-4 space-y-2">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                      <span className="text-xs font-bold text-gray-500">正在上傳圖片中...</span>
+                    </div>
+                  ) : formData.thumbnail_url ? (
+                    <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+                      <Image 
+                        src={formData.thumbnail_url} 
+                        alt="Preview" 
+                        fill 
+                        className="object-cover"
+                        unoptimized={true}
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <span className="text-white text-xs font-bold bg-black/60 px-3.5 py-2 rounded-xl">重新選取圖片</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
+                      <div className="p-3 bg-white rounded-full shadow-xs text-gray-400 group-hover:text-blue-500 transition">
+                        <ImageIcon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-700">點擊上傳課程封面圖片</p>
+                        <p className="text-[10px] text-gray-400 mt-1 font-semibold">支援 PNG, JPG, WEBP，建議尺寸 1280x800 px</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
