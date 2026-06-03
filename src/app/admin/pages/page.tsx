@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileCode, Search, Plus, ExternalLink, RefreshCw, Trash2, X } from 'lucide-react';
+import { FileCode, Search, Plus, ExternalLink, RefreshCw, Trash2, X, Pencil } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminPagesPage() {
@@ -14,11 +14,82 @@ export default function AdminPagesPage() {
   ]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPage, setEditingPage] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    path: '',
+    status: 'draft' as 'published' | 'draft'
+  });
 
   const filteredPages = pages.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     p.path.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleOpenCreateModal = () => {
+    setEditingPage(null);
+    setFormData({
+      name: '',
+      path: '/',
+      status: 'draft'
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (page: any) => {
+    setEditingPage(page);
+    setFormData({
+      name: page.name,
+      path: page.path,
+      status: page.status
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDeletePage = (id: string) => {
+    if (confirm('確定要刪除此自訂頁面嗎？這將會從頁面清單中移除此紀錄。')) {
+      setPages(prev => prev.filter(p => p.id !== id));
+    }
+  };
+
+  const handleSavePage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.path) return;
+
+    let formattedPath = formData.path.trim();
+    if (!formattedPath.startsWith('/')) {
+      formattedPath = '/' + formattedPath;
+    }
+
+    const now = new Date();
+    const lastUpdated = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    if (editingPage) {
+      // Edit
+      setPages(prev => prev.map(p => p.id === editingPage.id ? {
+        ...p,
+        name: formData.name,
+        path: formattedPath,
+        status: formData.status,
+        lastUpdated
+      } : p));
+    } else {
+      // Create
+      const newPage = {
+        id: String(Date.now()),
+        name: formData.name,
+        path: formattedPath,
+        type: 'custom',
+        status: formData.status,
+        lastUpdated
+      };
+      setPages(prev => [...prev, newPage]);
+    }
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="space-y-6 select-none font-sans text-slate-700">
@@ -32,7 +103,10 @@ export default function AdminPagesPage() {
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">自訂與配置您的官網首頁、課程總覽頁與其他靜態說明頁面。</p>
         </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center cursor-pointer active:scale-98">
+        <button 
+          onClick={handleOpenCreateModal}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center cursor-pointer active:scale-98"
+        >
           <Plus className="w-4 h-4 mr-1.5" /> 建立自訂頁面
         </button>
       </div>
@@ -65,10 +139,11 @@ export default function AdminPagesPage() {
             <table className="w-full text-left border-collapse table-fixed">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 h-12">
-                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-5/12">頁面名稱</th>
+                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-4/12">頁面名稱</th>
                   <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-3/12">路徑</th>
                   <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-2/12">類型 / 狀態</th>
                   <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-2/12">最後更新</th>
+                  <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/12 text-center">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -117,11 +192,33 @@ export default function AdminPagesPage() {
                       <td className="px-6 py-4 text-slate-400 font-medium text-xs">
                         {p.lastUpdated}
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center space-x-2.5">
+                          <button 
+                            onClick={() => handleOpenEditModal(p)}
+                            className="text-slate-400 hover:text-indigo-600 transition cursor-pointer p-1 rounded hover:bg-slate-50"
+                            title="編輯頁面"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          {p.type === 'custom' ? (
+                            <button 
+                              onClick={() => handleDeletePage(p.id)}
+                              className="text-slate-400 hover:text-red-500 transition cursor-pointer p-1 rounded hover:bg-slate-50"
+                              title="刪除頁面"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          ) : (
+                            <div className="w-5.5 h-5.5"></div>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="text-center py-12 text-slate-400 font-semibold text-xs italic">
+                    <td colSpan={5} className="text-center py-12 text-slate-400 font-semibold text-xs italic">
                       找不到相符的頁面...
                     </td>
                   </tr>
@@ -147,7 +244,7 @@ export default function AdminPagesPage() {
                 />
               </div>
               <button 
-                onClick={() => {}} // Dynamic search is instant on typing, this button is just click decoration
+                onClick={() => {}} // Dynamic search is instant on typing
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-sm transition active:scale-95 flex items-center justify-center cursor-pointer"
               >
                 <Search className="w-3.5 h-3.5 mr-1" /> 搜尋頁面
@@ -157,6 +254,101 @@ export default function AdminPagesPage() {
         </div>
 
       </div>
+
+      {/* Page Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-[2000] p-4">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h2 className="font-extrabold text-slate-800 text-xs flex items-center">
+                <FileCode className="w-4.5 h-4.5 mr-1.5 text-indigo-600" />
+                {editingPage ? '編輯頁面資訊' : '建立全新自訂頁面'}
+              </h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition cursor-pointer"
+              >
+                <X className="w-4.5 h-4.5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSavePage} className="p-5 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">頁面名稱</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="例如: 關於我們 / BDS 理念介紹"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">頁面路徑</label>
+                <input 
+                  type="text" 
+                  required
+                  disabled={editingPage?.type === 'system'}
+                  value={formData.path}
+                  onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                  placeholder="例如: /about"
+                  className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition ${editingPage?.type === 'system' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                />
+                {editingPage?.type === 'system' && (
+                  <p className="text-[9px] text-slate-400 font-semibold mt-0.5">系統內建頁面的路徑無法修改。</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">發布狀態</label>
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <label className={`flex items-center justify-center p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer select-none ${formData.status === 'published' ? 'border-indigo-600 bg-indigo-50/30 text-indigo-700' : 'border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100/70'}`}>
+                    <input 
+                      type="radio" 
+                      name="status"
+                      value="published"
+                      checked={formData.status === 'published'}
+                      onChange={() => setFormData({ ...formData, status: 'published' })}
+                      className="sr-only"
+                    />
+                    已發佈
+                  </label>
+                  <label className={`flex items-center justify-center p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer select-none ${formData.status === 'draft' ? 'border-indigo-600 bg-indigo-50/30 text-indigo-700' : 'border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100/70'}`}>
+                    <input 
+                      type="radio" 
+                      name="status"
+                      value="draft"
+                      checked={formData.status === 'draft'}
+                      onChange={() => setFormData({ ...formData, status: 'draft' })}
+                      className="sr-only"
+                    />
+                    草稿
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex space-x-3 pt-4 border-t border-slate-100">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-500 py-2.5 rounded-xl font-bold text-xs border border-slate-200 transition active:scale-98 cursor-pointer text-center"
+                >
+                  取消
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-md transition active:scale-98 cursor-pointer text-center"
+                >
+                  儲存設定
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
