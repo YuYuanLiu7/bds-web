@@ -72,7 +72,43 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
     ? displayedCourses
     : displayedCourses.filter(c => c.category === selectedCategory);
 
+  const [maintenance, setMaintenance] = useState(false);
+  const [mMsg, setMMsg] = useState('系統升級維護中，請稍後再試。');
+
+  useEffect(() => {
+    const status = localStorage.getItem('bds_site_status');
+    const msg = localStorage.getItem('bds_maintenance_message');
+    if (status === 'maintenance') {
+      setMaintenance(true);
+      if (msg) setMMsg(msg);
+    }
+  }, []);
+
   const primaryColor = settings.primaryColor || '#21448e';
+
+  if (maintenance) {
+    return (
+      <div className="min-h-[70vh] w-full flex items-center justify-center p-6 bg-slate-50 relative overflow-hidden select-none">
+        <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-indigo-200/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="relative bg-white/80 backdrop-blur-md border border-slate-200/80 p-8 md:p-12 rounded-3xl max-w-md w-full shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-black text-slate-800">平台升級維護中</h1>
+            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+              {mMsg}
+            </p>
+          </div>
+          <div className="text-[10px] text-slate-400 font-bold border-t border-slate-100 pt-4">
+            BDS By Doing So 營運團隊 敬上
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col bg-white">

@@ -30,6 +30,10 @@ export default function Navbar() {
   const [primaryColor, setPrimaryColor] = useState('#21448e');
   const [slogan, setSlogan] = useState('業務不是超人，卻有超能力！');
 
+  // Announcement state
+  const [announcement, setAnnouncement] = useState<any>(null);
+  const [dismissed, setDismissed] = useState(false);
+
   useEffect(() => {
     fetch('/api/admin/site-settings')
       .then(res => {
@@ -42,14 +46,51 @@ export default function Navbar() {
         setSlogan(data.slogan || '');
       })
       .catch(err => console.warn("Using default settings in Navbar:", err));
+
+    // Load active announcement
+    const saved = localStorage.getItem('bds_announcements');
+    if (saved) {
+      try {
+        const list = JSON.parse(saved);
+        const active = list.find((a: any) => a.status === 'published');
+        if (active) {
+          setAnnouncement(active);
+        }
+      } catch (e) {}
+    }
   }, []);
 
   const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'BDS 會員';
   const isAdmin = (session?.user as any)?.role === 'admin';
 
   return (
-    <nav className="sticky top-0 bg-white border-b border-slate-100 z-[1000] shadow-xs select-none">
-      <div className="max-w-[1200px] mx-auto h-16 md:h-20 px-6 flex items-center justify-between">
+    <>
+      {announcement && !dismissed && (
+        <div 
+          style={{ backgroundColor: primaryColor }}
+          className="text-white text-[11px] md:text-xs font-bold py-2 px-6 flex items-center justify-between select-none relative z-[1001] animate-in slide-in-from-top duration-200"
+        >
+          <div className="flex-1 text-center truncate pr-6">
+            {announcement.url ? (
+              <Link href={announcement.url} className="hover:underline flex items-center justify-center space-x-1.5">
+                <span>{announcement.content}</span>
+                <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded font-black">點此查看 ↗</span>
+              </Link>
+            ) : (
+              <span>{announcement.content}</span>
+            )}
+          </div>
+          <button 
+            onClick={() => setDismissed(true)}
+            className="absolute right-4 p-1 hover:bg-white/10 rounded transition cursor-pointer"
+            title="關閉公告"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+      <nav className="sticky top-0 bg-white border-b border-slate-100 z-[1000] shadow-xs select-none">
+        <div className="max-w-[1200px] mx-auto h-16 md:h-20 px-6 flex items-center justify-between">
         
         {/* Left: Brand Logo & Slogan */}
         <div className="flex items-center space-x-4">
@@ -250,5 +291,6 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+    </>
   );
 }

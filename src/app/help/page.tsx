@@ -9,6 +9,8 @@ export default function HelpFAQPage() {
   const [primaryColor, setPrimaryColor] = useState('#21448e');
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
+  const [faqs, setFaqs] = useState<any[]>([]);
+
   useEffect(() => {
     fetch('/api/admin/site-settings')
       .then(res => {
@@ -20,9 +22,21 @@ export default function HelpFAQPage() {
         setPrimaryColor(data.primaryColor || '#21448e');
       })
       .catch(err => console.warn("Using default settings in FAQ page:", err));
+
+    // Load FAQs
+    const saved = localStorage.getItem('bds_faqs');
+    if (saved) {
+      try {
+        setFaqs(JSON.parse(saved));
+      } catch (e) {
+        setFaqs(DEFAULT_FAQS);
+      }
+    } else {
+      setFaqs(DEFAULT_FAQS);
+    }
   }, []);
 
-  const faqs = [
+  const DEFAULT_FAQS = [
     {
       q: '如何開始選購與學習 BDS 的實戰課程？',
       a: '您只需在 BDS 首頁或課程列表頁面中，點選您感興趣的課程。點擊「立即購買」或「立即選購」後，系統會自動引導您進入 PayUni 安全金流結帳流程。付款完成後，系統會即時開通您的權限，您可以在頂端點擊「我的學習」直接開始看課觀看影片！'
@@ -33,7 +47,7 @@ export default function HelpFAQPage() {
     },
     {
       q: '購買課程後，觀看期限是多久？可以退款嗎？',
-      a: '在 BDS 購買的任何單門實戰課程皆享有「終身無限次觀看」的權益，沒有時間與次數限制。由於數位內容與影音商品在購買開通後即可完整觀看，若您有特殊的個人因素退款需求，請在購買後 7 天內（且觀看進度不超過第一章節 10%）來信至客服信箱，我們將由專人為您審核辦理。'
+      a: '在 BDS 購買的任何單門實戰課程皆享有「終身無限次觀看」的權益，沒有時間與次數限制。由於數位內容與影音商品在購買開通後即可完整觀看，若您有特殊的個人因素退款需求，請在購買後 7 天內（且觀看進度不超過第一章節 10%）與我們聯絡，我們將由專人為您審核辦理。'
     },
     {
       q: '付款完成後，我該如何確認我的課程已經開通？',
