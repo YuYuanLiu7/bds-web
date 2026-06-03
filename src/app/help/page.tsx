@@ -129,13 +129,13 @@ export default function HelpFAQPage() {
           <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
             我們非常樂意為您解答！如果您有任何特殊的合作洽談、企業包班需求或金流疑問，請隨時來信至我們的客服信箱，我們將於 24 小時內儘速回覆。
           </p>
-          <a 
-            href="mailto:bydoingso@gmail.com"
+          <Link 
+            href="/contact"
             style={{ backgroundColor: primaryColor }}
-            className="inline-block text-white text-xs font-bold px-8 py-3 rounded-2xl shadow-xs transition hover:opacity-90 active:scale-95 cursor-pointer"
+            className="inline-block text-white text-xs font-bold px-8 py-3 rounded-2xl shadow-xs transition hover:opacity-90 active:scale-95 cursor-pointer text-center"
           >
-            聯絡客服信箱
-          </a>
+            立即聯絡我們
+          </Link>
         </div>
 
       </div>
