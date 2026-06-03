@@ -1,11 +1,34 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { BookOpen, Users, Award, ShieldCheck } from 'lucide-react';
 
-export const metadata = {
-  title: '關於我們 | BDS By Doing So - 專業職涯與產業學習平台',
-  description: 'BDS By Doing So 專注於半導體、醫療器材、硬體科技產業的業務開發與銷售實務課程，致力於縮短產學落差。',
-};
-
 export default function AboutPage() {
+  const [pageData, setPageData] = useState({
+    title: '關於我們',
+    subtitle: '業務不是超人，卻有超能力！',
+    content: 'BDS By Doing So 是一個專為「硬體科技、半導體、生醫材料及跨領域商務開發」量身打造的實戰學習平台。我們深信真正的專業來自於實踐與經驗傳承，協助每一位渴望躍升的夥伴實現職場轉型與能力升級。',
+    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200'
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('bds_pages_content');
+    if (saved) {
+      try {
+        const list = JSON.parse(saved);
+        const item = list.find((p: any) => p.path === '/about');
+        if (item) {
+          setPageData({
+            title: item.title || '關於我們',
+            subtitle: item.subtitle || '業務不是超人，卻有超能力！',
+            content: item.content || '',
+            imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200'
+          });
+        }
+      } catch (e) {}
+    }
+  }, []);
+
   const coreValues = [
     {
       icon: BookOpen,
@@ -40,58 +63,47 @@ export default function AboutPage() {
         <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 font-bold text-xs mb-4">
           關於我們
         </span>
-        <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-6">
-          業務不是超人，<br className="md:hidden" />卻有超能力！
+        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-6 whitespace-pre-line">
+          {pageData.title}
         </h1>
-        <p className="text-slate-600 max-w-2.5xl mx-auto text-base md:text-lg leading-relaxed font-medium">
-          BDS By Doing So 是一個專為「硬體科技、半導體、生醫材料及跨領域商務開發」量身打造的實戰學習平台。
-          我們深信真正的專業來自於實踐與經驗傳承，協助每一位渴望躍升的夥伴實現職場轉型與能力升級。
+        <p className="text-slate-600 max-w-2.5xl mx-auto text-sm md:text-base leading-relaxed font-semibold whitespace-pre-line">
+          {pageData.subtitle}
         </p>
       </section>
 
       {/* Content Section - Story */}
       <section className="py-12 max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="space-y-6">
+        <div className="space-y-6 col-span-1">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">
             我們的起源與使命
           </h2>
-          <div className="text-slate-600 space-y-4 text-sm md:text-base leading-relaxed font-medium">
-            <p>
-              在高度競爭的 B2B 與科技產業中，一名優秀的業務（Account Manager / Business Development）往往是企業成長的最關鍵推手。然而，學校教育與坊間課程卻極少涵蓋真正的科技產業銷售實務。
-            </p>
-            <p>
-              BDS (By Doing So) 因而誕生。我們集結了科技大廠、外商及醫療器材產業的實戰經理人，以最接地氣的視角，提煉出能夠立即應用的實戰心法，幫助學員少走彎路、加速晉升。
-            </p>
-            <p>
-              我們不只賣課程，更在建立一個高黏著度、資源互通的「科技與生醫商務人才生態圈」，讓所有走在業務與開發路上的夥伴，都能在此找到方向與隊友。
-            </p>
+          <div className="text-slate-600 space-y-4 text-xs md:text-sm leading-relaxed font-medium whitespace-pre-line">
+            {pageData.content ? (
+              <p>{pageData.content}</p>
+            ) : (
+              <>
+                <p>
+                  在高度競爭的 B2B 與科技產業中，一名優秀的業務（Account Manager / Business Development）往往是企業成長的最關鍵推手。然而，學校教育與坊間課程卻極少涵蓋真正的科技產業銷售實務。
+                </p>
+                <p>
+                  BDS (By Doing So) 因而誕生。我們集結了科技大廠、外商及醫療器材產業的實戰經理人，以最接地氣的視角，提煉出能夠立即應用的實戰心法，幫助學員少走彎路、加速晉升。
+                </p>
+                <p>
+                  我們不只賣課程，更在建立一個高黏著度、資源互通的「科技與生醫商務人才生態圈」，讓所有走在業務與開發路上的夥伴，都能在此找到方向與隊友。
+                </p>
+              </>
+            )}
           </div>
         </div>
-        <div className="relative group">
+        <div className="relative group col-span-1">
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-sky-500 rounded-2xl blur-lg opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-          <div className="relative bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden p-8 space-y-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center font-extrabold text-indigo-600 text-lg">
-                B
-              </div>
-              <div>
-                <h3 className="font-extrabold text-slate-800">By Doing So</h3>
-                <p className="text-slate-400 text-xs font-semibold">專業職涯與產業學習平台</p>
-              </div>
-            </div>
-            <div className="border-t border-slate-100 pt-6 space-y-3">
-              <div className="flex justify-between text-xs font-semibold text-slate-500">
-                <span>專注產業</span>
-                <span className="text-slate-800 font-bold">半導體 / 醫療器材 / 硬體科技</span>
-              </div>
-              <div className="flex justify-between text-xs font-semibold text-slate-500">
-                <span>核心學程</span>
-                <span className="text-slate-800 font-bold">業務新手村 / 職場升級 / 讀書會</span>
-              </div>
-              <div className="flex justify-between text-xs font-semibold text-slate-500">
-                <span>創辦理念</span>
-                <span className="text-slate-800 font-bold">實踐中學習 (By Doing So)</span>
-              </div>
+          <div className="relative bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden p-3 space-y-6">
+            <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
+              <img 
+                src={pageData.imageUrl} 
+                alt="About Visual"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>

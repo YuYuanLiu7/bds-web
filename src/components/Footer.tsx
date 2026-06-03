@@ -30,6 +30,14 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 font-semibold gap-3">
           <div>© {new Date().getFullYear()} BDS All Rights Reserved.</div>
           <div className="flex items-center space-x-4">
+            <Link href="/about" className="hover:underline transition text-slate-400 hover:text-slate-600">
+              關於我們
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/contact" className="hover:underline transition text-slate-400 hover:text-slate-600">
+              聯絡我們
+            </Link>
+            <span className="text-slate-300">•</span>
             <Link href="/privacy" className="hover:underline transition text-slate-400 hover:text-slate-600">
               使用者條款
             </Link>

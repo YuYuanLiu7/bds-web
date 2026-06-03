@@ -1,9 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { Mail, MessageSquare, Send, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Mail, MessageSquare, Send, CheckCircle, ImageIcon } from 'lucide-react';
 
 export default function ContactPage() {
+  const [pageData, setPageData] = useState({
+    title: '有任何問題？我們隨時為您解答',
+    subtitle: '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
+    content: '客服與合作信箱：bydoingso@gmail.com。任何諮詢將於 1-2 個工作天內回覆。',
+    imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200'
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +20,24 @@ export default function ContactPage() {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('bds_pages_content');
+    if (saved) {
+      try {
+        const list = JSON.parse(saved);
+        const item = list.find((p: any) => p.path === '/contact');
+        if (item) {
+          setPageData({
+            title: item.title || '有任何問題？我們隨時為您解答',
+            subtitle: item.subtitle || '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
+            content: item.content || '',
+            imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200'
+          });
+        }
+      } catch (e) {}
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +68,11 @@ export default function ContactPage() {
         <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 font-bold text-xs mb-4">
           聯絡我們
         </span>
-        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-4">
-          有任何問題？我們隨時為您解答
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-4 whitespace-pre-line">
+          {pageData.title}
         </h1>
-        <p className="text-slate-500 text-xs md:text-sm font-semibold max-w-lg mx-auto leading-relaxed">
-          不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。
+        <p className="text-slate-500 text-xs md:text-sm font-semibold max-w-xl mx-auto leading-relaxed whitespace-pre-line">
+          {pageData.subtitle}
         </p>
       </section>
 
@@ -62,7 +87,7 @@ export default function ContactPage() {
             </div>
             <div>
               <h3 className="font-extrabold text-slate-800 text-sm">客服與合作信箱</h3>
-              <p className="text-slate-400 text-xs mt-1 font-semibold">任何諮詢將於 1-2 個工作天內回覆</p>
+              <p className="text-slate-400 text-xs mt-1 font-semibold whitespace-pre-line">{pageData.content || '任何諮詢將於 1-2 個工作天內回覆。'}</p>
               <a href="mailto:bydoingso@gmail.com" className="text-indigo-600 font-bold text-xs hover:underline mt-2 block">
                 bydoingso@gmail.com
               </a>
@@ -82,12 +107,18 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#21448e] to-indigo-800 p-6 rounded-2xl shadow-md text-white space-y-2">
-            <h4 className="font-black text-sm">BDS By Doing So</h4>
-            <p className="text-[11px] text-indigo-200 leading-relaxed font-semibold">
-              「業務不是超人，卻有超能力！」<br />
-              讓我們在實踐中前行，一同躍升為高產值、高影響力的商務菁英。
-            </p>
+          <div className="bg-gradient-to-br from-[#21448e] to-indigo-800 p-6 rounded-2xl shadow-md text-white space-y-2 relative overflow-hidden aspect-video max-h-[140px] flex flex-col justify-end">
+            <img 
+              src={pageData.imageUrl} 
+              alt="Contact Banner" 
+              className="absolute inset-0 w-full h-full object-cover opacity-20"
+            />
+            <div className="relative z-10">
+              <h4 className="font-black text-sm">BDS By Doing So</h4>
+              <p className="text-[10px] text-indigo-200 leading-relaxed font-semibold">
+                業務不是超人，卻有超能力！
+              </p>
+            </div>
           </div>
         </div>
 

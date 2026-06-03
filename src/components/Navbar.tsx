@@ -205,6 +205,8 @@ export default function Navbar() {
           <Link href="/downloads" className="block text-slate-600 hover:text-slate-900 font-bold">資源</Link>
           <Link href="/membership" className="block text-slate-600 hover:text-slate-900 font-bold">會員方案</Link>
           <Link href="/help" className="block text-slate-600 hover:text-slate-900 font-bold">常見問答</Link>
+          <Link href="/about" className="block text-slate-600 hover:text-slate-900 font-bold">關於我們</Link>
+          <Link href="/contact" className="block text-slate-600 hover:text-slate-900 font-bold">聯絡我們</Link>
 
           <div className="pt-4 border-t border-slate-100">
             {session ? (

@@ -1,11 +1,32 @@
-import { Shield, Lock, FileText, CheckCircle } from 'lucide-react';
+'use client';
 
-export const metadata = {
-  title: '服務條款與隱私權政策 | BDS By Doing So - 專業職涯與產業學習平台',
-  description: 'BDS By Doing So 使用者服務條款與隱私權保護政策說明。',
-};
+import { useState, useEffect } from 'react';
+import { Shield, Lock, FileText } from 'lucide-react';
 
 export default function PrivacyPage() {
+  const [pageData, setPageData] = useState({
+    title: '服務條款與隱私權政策',
+    subtitle: '法律與條約規定說明',
+    content: '歡迎您使用 BDS By Doing So（以下簡稱「本平台」）。本服務條款旨在規範本平台與註冊會員（以下簡稱「會員」）之間的權利義務關係。當您註冊成為本平台會員或開始使用本平台提供的付費/免費課程時，即表示您已閱讀、理解並同意接受本條款之所有內容。',
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('bds_pages_content');
+    if (saved) {
+      try {
+        const list = JSON.parse(saved);
+        const item = list.find((p: any) => p.path === '/privacy');
+        if (item) {
+          setPageData({
+            title: item.title || '服務條款與隱私權政策',
+            subtitle: item.subtitle || '法律與條約規定說明',
+            content: item.content || '',
+          });
+        }
+      } catch (e) {}
+    }
+  }, []);
+
   return (
     <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-20 font-sans relative overflow-hidden select-none">
       {/* Ambient background glows */}
@@ -17,11 +38,11 @@ export default function PrivacyPage() {
         <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 font-bold text-xs mb-4">
           法律與條約
         </span>
-        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-4">
-          服務條款與隱私權政策
+        <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-4 whitespace-pre-line">
+          {pageData.title}
         </h1>
-        <p className="text-slate-500 text-xs md:text-sm font-semibold">
-          最後更新日期：2026 年 6 月 1 日
+        <p className="text-slate-500 text-xs md:text-sm font-semibold whitespace-pre-line">
+          {pageData.subtitle}
         </p>
       </section>
 
@@ -49,14 +70,13 @@ export default function PrivacyPage() {
           
           {/* Section 1: Terms */}
           <div id="terms" className="space-y-4 scroll-mt-24">
-            <h2 className="text-xl font-extrabold text-slate-800 flex items-center">
-              <FileText className="w-5.5 h-5.5 mr-2 text-indigo-500" /> 1. 使用者服務條款
+            <h2 className="text-lg font-extrabold text-slate-800 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-indigo-500" /> 1. 使用者服務條款與平台說明
             </h2>
-            <div className="text-slate-600 text-xs md:text-sm leading-relaxed space-y-3 font-medium">
-              <p>
-                歡迎您使用 BDS By Doing So（以下簡稱「本平台」）。本服務條款旨在規範本平台與註冊會員（以下簡稱「會員」）之間的權利義務關係。當您註冊成為本平台會員或開始使用本平台提供的付費/免費課程時，即表示您已閱讀、理解並同意接受本條款之所有內容。
-              </p>
-              <h3 className="font-bold text-slate-700 mt-2">一、帳號安全與使用規範</h3>
+            <div className="text-slate-600 text-xs md:text-sm leading-relaxed space-y-3 font-medium whitespace-pre-line">
+              <p>{pageData.content}</p>
+              
+              <h3 className="font-bold text-slate-700 mt-4">一、帳號安全與使用規範</h3>
               <p>
                 會員註冊時應提供真實、完整之個人資料。會員帳號僅限註冊者本人使用，不得轉讓、出借或與他人共用。若因帳號外洩導致權益受損，本平台不負賠償責任。
               </p>
@@ -71,8 +91,8 @@ export default function PrivacyPage() {
 
           {/* Section 2: Privacy */}
           <div id="privacy" className="space-y-4 scroll-mt-24">
-            <h2 className="text-xl font-extrabold text-slate-800 flex items-center">
-              <Shield className="w-5.5 h-5.5 mr-2 text-sky-500" /> 2. 隱私權保護政策
+            <h2 className="text-lg font-extrabold text-slate-800 flex items-center">
+              <Shield className="w-5 h-5 mr-2 text-sky-500" /> 2. 隱私權保護政策
             </h2>
             <div className="text-slate-600 text-xs md:text-sm leading-relaxed space-y-3 font-medium">
               <p>
@@ -97,8 +117,8 @@ export default function PrivacyPage() {
 
           {/* Section 3: Refund */}
           <div id="refund" className="space-y-4 scroll-mt-24">
-            <h2 className="text-xl font-extrabold text-slate-800 flex items-center">
-              <Lock className="w-5.5 h-5.5 mr-2 text-emerald-500" /> 3. 退費與購買須知
+            <h2 className="text-lg font-extrabold text-slate-800 flex items-center">
+              <Lock className="w-5 h-5 mr-2 text-emerald-500" /> 3. 退費與購買須知
             </h2>
             <div className="text-slate-600 text-xs md:text-sm leading-relaxed space-y-3 font-medium">
               <p>
