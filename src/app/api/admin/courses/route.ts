@@ -11,13 +11,37 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, description, price, category, thumbnail_url } = body;
+    const { title, description, price, category, thumbnail_url, instructor, is_published } = body;
 
-    const { data, error } = await supabase
+    const insertData: any = { 
+      title, 
+      description, 
+      price: parseInt(price), 
+      category, 
+      thumbnail_url, 
+      is_published: is_published !== false 
+    };
+    if (instructor) {
+      insertData.instructor = instructor;
+    }
+
+    let { data, error } = await supabase
       .from('courses')
-      .insert([{ title, description, price: parseInt(price), category, thumbnail_url, is_published: true }])
+      .insert([insertData])
       .select()
       .single();
+
+    if (error && error.message.includes('column "instructor" does not exist')) {
+      // Graceful fallback if instructor column has not been migrated yet
+      delete insertData.instructor;
+      const retry = await supabase
+        .from('courses')
+        .insert([insertData])
+        .select()
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) throw error;
     return NextResponse.json(data);
@@ -34,14 +58,39 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, description, price, category, thumbnail_url } = body;
+    const { id, title, description, price, category, thumbnail_url, instructor, is_published } = body;
 
-    const { data, error } = await supabase
+    const updateData: any = { 
+      title, 
+      description, 
+      price: parseInt(price), 
+      category, 
+      thumbnail_url,
+      is_published: is_published !== false
+    };
+    if (instructor) {
+      updateData.instructor = instructor;
+    }
+
+    let { data, error } = await supabase
       .from('courses')
-      .update({ title, description, price: parseInt(price), category, thumbnail_url })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
+
+    if (error && error.message.includes('column "instructor" does not exist')) {
+      // Graceful fallback if instructor column has not been migrated yet
+      delete updateData.instructor;
+      const retry = await supabase
+        .from('courses')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) throw error;
     return NextResponse.json(data);

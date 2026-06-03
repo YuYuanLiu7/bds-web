@@ -17,6 +17,7 @@ export default function AdminCoursesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'published', 'draft'
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [instructorFilter, setInstructorFilter] = useState('all');
 
   // Tracks which card's menu is open
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -80,6 +81,7 @@ export default function AdminCoursesPage() {
   };
 
   const uniqueCategories = Array.from(new Set(courses.map(c => c.category).filter(Boolean)));
+  const uniqueInstructors = Array.from(new Set(courses.map(c => c.instructor || 'BDS 團隊').filter(Boolean)));
 
   const filteredCourses = courses.filter(course => {
     const title = course.title || '';
@@ -94,13 +96,17 @@ export default function AdminCoursesPage() {
 
     const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
 
-    return matchesSearch && matchesStatus && matchesCategory;
+    const instructorName = course.instructor || 'BDS 團隊';
+    const matchesInstructor = instructorFilter === 'all' || instructorName === instructorFilter;
+
+    return matchesSearch && matchesStatus && matchesCategory && matchesInstructor;
   });
 
   const handleResetFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
     setCategoryFilter('all');
+    setInstructorFilter('all');
   };
 
   // Global stats calculations
@@ -181,7 +187,7 @@ export default function AdminCoursesPage() {
             <span>
               篩選出 <span className="text-slate-700 font-extrabold">{filteredCourses.length}</span> 門課程
             </span>
-            {(searchQuery || statusFilter !== 'all' || categoryFilter !== 'all') && (
+            {(searchQuery || statusFilter !== 'all' || categoryFilter !== 'all' || instructorFilter !== 'all') && (
               <button 
                 onClick={handleResetFilters}
                 className="text-indigo-600 hover:text-indigo-800 font-bold hover:underline cursor-pointer"
@@ -199,7 +205,7 @@ export default function AdminCoursesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-in fade-in duration-300">
               {filteredCourses.map((course) => {
                 const mockLecturer = {
-                  name: 'BDS 團隊',
+                  name: course.instructor || 'BDS 團隊',
                   avatar: 'https://warehouse.kaik.network/lecturer/avatar/182000da-6fcd-4748-86df-e1f3b122a8c2/92222ca2-c0b8-421e-a120-a42236f5b80a.jpg'
                 };
 
@@ -395,6 +401,21 @@ export default function AdminCoursesPage() {
                   <option value="all">所有分類</option>
                   {uniqueCategories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Instructor Selector */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">授課講師</label>
+                <select
+                  value={instructorFilter}
+                  onChange={(e) => setInstructorFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition bg-white"
+                >
+                  <option value="all">所有講師</option>
+                  {uniqueInstructors.map(inst => (
+                    <option key={inst} value={inst}>{inst}</option>
                   ))}
                 </select>
               </div>

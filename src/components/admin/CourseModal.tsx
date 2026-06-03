@@ -19,6 +19,8 @@ interface Course {
   thumbnail_url: string;
   price: number;
   category: string;
+  instructor?: string;
+  is_published?: boolean;
   chapters: Chapter[];
 }
 
@@ -38,6 +40,8 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     thumbnail_url: '',
     price: 0,
     category: '業務新手村',
+    instructor: 'BDS 團隊',
+    is_published: true,
     chapters: []
   });
 
@@ -45,7 +49,11 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
   useEffect(() => {
     if (isOpen) {
       if (course) {
-        setFormData(course);
+        setFormData({
+          ...course,
+          instructor: course.instructor || 'BDS 團隊',
+          is_published: course.is_published !== false
+        });
       } else {
         setFormData({
           title: '',
@@ -53,6 +61,8 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
           thumbnail_url: '',
           price: 0,
           category: '業務新手村',
+          instructor: 'BDS 團隊',
+          is_published: true,
           chapters: []
         });
       }
@@ -198,6 +208,30 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
             </div>
 
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">授課講師</label>
+                <input 
+                  type="text" 
+                  value={formData.instructor || ''}
+                  onChange={e => setFormData({...formData, instructor: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
+                  placeholder="例如：BDS 團隊"
+                />
+              </div>
+
+              <div className="flex items-center space-x-3 pt-2">
+                <input 
+                  type="checkbox" 
+                  id="is_published"
+                  checked={!!formData.is_published}
+                  onChange={e => setFormData({...formData, is_published: e.target.checked})}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                />
+                <label htmlFor="is_published" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+                  將此課程立即公開發布
+                </label>
+              </div>
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center">
                   <ImageIcon className="w-4 h-4 mr-2" /> 封面圖片網址
