@@ -43,3 +43,6 @@ next-env.d.ts
 # agents and tooling
 .antigravitycli/
 /scraped/
+
+# uploads
+/public/uploads/

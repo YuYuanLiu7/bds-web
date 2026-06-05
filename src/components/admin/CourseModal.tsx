@@ -104,7 +104,9 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
     setUploading(true);
     const uploadData = new FormData();
-    uploadData.append('file', file);
+    const fileExt = file.name.split('.').pop() || 'png';
+    const safeName = `upload-${Date.now()}.${fileExt}`;
+    uploadData.append('file', file, safeName);
 
     try {
       const res = await fetch('/api/admin/upload', {

@@ -70,7 +70,7 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
     {
       title: '資源',
       items: [
-        { name: '媒體素材庫', href: '/admin/media', icon: FolderOpen }
+        { name: '媒體素材庫', href: '/admin/assets', icon: FolderOpen }
       ]
     }
   ];

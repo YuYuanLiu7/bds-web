@@ -149,7 +149,9 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
 
     setUploading(true);
     const uploadData = new FormData();
-    uploadData.append('file', file);
+    const fileExt = file.name.split('.').pop() || 'png';
+    const safeName = `upload-${Date.now()}.${fileExt}`;
+    uploadData.append('file', file, safeName);
 
     try {
       const res = await fetch('/api/admin/upload', {
@@ -296,7 +298,9 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
 
     setUploading(true);
     const uploadData = new FormData();
-    uploadData.append('file', file);
+    const fileExt = file.name.split('.').pop() || 'png';
+    const safeName = `upload-${Date.now()}.${fileExt}`;
+    uploadData.append('file', file, safeName);
 
     try {
       const res = await fetch('/api/admin/upload', {

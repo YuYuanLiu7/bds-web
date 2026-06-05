@@ -152,7 +152,9 @@ export default function AdminPagesPage() {
 
     setUploading(true);
     const data = new FormData();
-    data.append('file', file);
+    const fileExt = file.name.split('.').pop() || 'png';
+    const safeName = `upload-${Date.now()}.${fileExt}`;
+    data.append('file', file, safeName);
 
     try {
       const res = await fetch('/api/admin/upload', {

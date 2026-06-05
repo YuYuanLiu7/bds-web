@@ -25,6 +25,8 @@ export async function POST(req: Request) {
     }
 
     // 3. Parse file from FormData
+    console.log("Incoming content-type:", req.headers.get("content-type"));
+    console.log("Incoming content-length:", req.headers.get("content-length"));
     const formData = await req.formData();
     const file = formData.get('file') as File;
     if (!file) {
