@@ -13,7 +13,8 @@ export async function getPublishedCourses(): Promise<Course[]> {
     return [];
   }
 
-  return data || [];
+  // Filter out hidden courses if the column is present and set to true
+  return (data || []).filter(course => !course.is_hidden);
 }
 
 export async function getCourseById(id: string): Promise<CourseWithChapters | null> {

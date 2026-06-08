@@ -40,13 +40,30 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { course_id, title, video_url, order_index } = body;
+    const { course_id, title, video_url, order_index, file_url } = body;
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('chapters')
-      .insert([{ course_id, title, video_url, order_index: parseInt(order_index) }])
+      .insert([{ 
+        course_id, 
+        title, 
+        video_url, 
+        order_index: parseInt(order_index),
+        file_url: file_url || null 
+      }])
       .select()
       .single();
+
+    if (error && error.message.includes('does not exist')) {
+      // Graceful fallback if file_url does not exist yet
+      const retry = await supabase
+        .from('chapters')
+        .insert([{ course_id, title, video_url, order_index: parseInt(order_index) }])
+        .select()
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) throw error;
     return NextResponse.json(data);
@@ -63,14 +80,31 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, video_url, order_index } = body;
+    const { id, title, video_url, order_index, file_url } = body;
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('chapters')
-      .update({ title, video_url, order_index: parseInt(order_index) })
+      .update({ 
+        title, 
+        video_url, 
+        order_index: parseInt(order_index),
+        file_url: file_url || null
+      })
       .eq('id', id)
       .select()
       .single();
+
+    if (error && error.message.includes('does not exist')) {
+      // Graceful fallback if file_url does not exist yet
+      const retry = await supabase
+        .from('chapters')
+        .update({ title, video_url, order_index: parseInt(order_index) })
+        .eq('id', id)
+        .select()
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) throw error;
     return NextResponse.json(data);

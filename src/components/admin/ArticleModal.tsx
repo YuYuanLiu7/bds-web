@@ -144,8 +144,23 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
   };
 
   const handleEditorImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
+
+    // Convert HEIC image to JPEG if selected
+    const isHEIC = 
+      file.type === 'image/heic' || 
+      file.type === 'image/heif' || 
+      /\.(heic|heif)$/i.test(file.name);
+
+    if (isHEIC) {
+      try {
+        const { ensureClientImageCompatible } = await import('@/lib/image');
+        file = await ensureClientImageCompatible(file);
+      } catch (err) {
+        console.error('HEIC image conversion warning:', err);
+      }
+    }
 
     setUploading(true);
     const uploadData = new FormData();
@@ -293,8 +308,23 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
 
   // Handles image uploading to backend
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
+
+    // Convert HEIC image to JPEG if selected
+    const isHEIC = 
+      file.type === 'image/heic' || 
+      file.type === 'image/heif' || 
+      /\.(heic|heif)$/i.test(file.name);
+
+    if (isHEIC) {
+      try {
+        const { ensureClientImageCompatible } = await import('@/lib/image');
+        file = await ensureClientImageCompatible(file);
+      } catch (err) {
+        console.error('HEIC image conversion warning:', err);
+      }
+    }
 
     setUploading(true);
     const uploadData = new FormData();

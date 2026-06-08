@@ -11,7 +11,20 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, description, price, category, thumbnail_url, instructor, is_published } = body;
+    const { 
+      title, 
+      description, 
+      price, 
+      category, 
+      thumbnail_url, 
+      instructor, 
+      is_published,
+      is_hidden,
+      allow_comments,
+      allow_ratings,
+      file_url,
+      video_url
+    } = body;
 
     const insertData: any = { 
       title, 
@@ -19,7 +32,12 @@ export async function POST(req: Request) {
       price: parseInt(price), 
       category, 
       thumbnail_url, 
-      is_published: is_published !== false 
+      is_published: is_published !== false,
+      is_hidden: !!is_hidden,
+      allow_comments: allow_comments !== false,
+      allow_ratings: allow_ratings !== false,
+      file_url: file_url || null,
+      video_url: video_url || null
     };
     if (instructor) {
       insertData.instructor = instructor;
@@ -31,14 +49,41 @@ export async function POST(req: Request) {
       .select()
       .single();
 
-    if (error && error.message.includes('column "instructor" does not exist')) {
-      // Graceful fallback if instructor column has not been migrated yet
-      delete insertData.instructor;
-      const retry = await supabase
+    if (error && error.message.includes('does not exist')) {
+      // Graceful fallback if custom settings columns have not been migrated yet
+      const fallbackData: any = {
+        title, 
+        description, 
+        price: parseInt(price), 
+        category, 
+        thumbnail_url, 
+        is_published: is_published !== false 
+      };
+      if (instructor) fallbackData.instructor = instructor;
+      
+      let retry = await supabase
         .from('courses')
-        .insert([insertData])
+        .insert([fallbackData])
         .select()
         .single();
+
+      // Second fallback: If 'instructor' column also doesn't exist, retry without it
+      if (retry.error && retry.error.message.includes('does not exist')) {
+        const fallbackBareData: any = {
+          title, 
+          description, 
+          price: parseInt(price), 
+          category, 
+          thumbnail_url, 
+          is_published: is_published !== false 
+        };
+        retry = await supabase
+          .from('courses')
+          .insert([fallbackBareData])
+          .select()
+          .single();
+      }
+
       data = retry.data;
       error = retry.error;
     }
@@ -58,7 +103,21 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, description, price, category, thumbnail_url, instructor, is_published } = body;
+    const { 
+      id, 
+      title, 
+      description, 
+      price, 
+      category, 
+      thumbnail_url, 
+      instructor, 
+      is_published,
+      is_hidden,
+      allow_comments,
+      allow_ratings,
+      file_url,
+      video_url
+    } = body;
 
     const updateData: any = { 
       title, 
@@ -66,7 +125,12 @@ export async function PUT(req: Request) {
       price: parseInt(price), 
       category, 
       thumbnail_url,
-      is_published: is_published !== false
+      is_published: is_published !== false,
+      is_hidden: !!is_hidden,
+      allow_comments: allow_comments !== false,
+      allow_ratings: allow_ratings !== false,
+      file_url: file_url || null,
+      video_url: video_url || null
     };
     if (instructor) {
       updateData.instructor = instructor;
@@ -79,15 +143,43 @@ export async function PUT(req: Request) {
       .select()
       .single();
 
-    if (error && error.message.includes('column "instructor" does not exist')) {
-      // Graceful fallback if instructor column has not been migrated yet
-      delete updateData.instructor;
-      const retry = await supabase
+    if (error && error.message.includes('does not exist')) {
+      // Graceful fallback if custom settings columns have not been migrated yet
+      const fallbackData: any = {
+        title, 
+        description, 
+        price: parseInt(price), 
+        category, 
+        thumbnail_url,
+        is_published: is_published !== false
+      };
+      if (instructor) fallbackData.instructor = instructor;
+
+      let retry = await supabase
         .from('courses')
-        .update(updateData)
+        .update(fallbackData)
         .eq('id', id)
         .select()
         .single();
+
+      // Second fallback: If 'instructor' column also doesn't exist, retry without it
+      if (retry.error && retry.error.message.includes('does not exist')) {
+        const fallbackBareData: any = {
+          title, 
+          description, 
+          price: parseInt(price), 
+          category, 
+          thumbnail_url,
+          is_published: is_published !== false
+        };
+        retry = await supabase
+          .from('courses')
+          .update(fallbackBareData)
+          .eq('id', id)
+          .select()
+          .single();
+      }
+
       data = retry.data;
       error = retry.error;
     }

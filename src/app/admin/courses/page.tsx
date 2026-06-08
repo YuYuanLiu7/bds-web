@@ -242,6 +242,11 @@ export default function AdminCoursesPage() {
                             }`}>
                               {course.is_published ? '已發布' : '草稿'}
                             </span>
+                            {course.is_hidden && (
+                              <span className="inline-flex px-1.5 py-0.5 rounded border font-black text-[9px] bg-rose-50 border-rose-100 text-rose-600">
+                                已隱藏
+                              </span>
+                            )}
                           </div>
                           
                           {/* Vertical Menu Trigger */}

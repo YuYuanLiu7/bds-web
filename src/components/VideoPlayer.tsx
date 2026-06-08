@@ -5,14 +5,19 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({ url }: VideoPlayerProps) {
-  // Simple YouTube/Vimeo/Bunny.net extractor
+  // Check if the URL is a direct video file (e.g. .mp4, .mov, .webm)
+  const isDirectVideo = (url: string) => {
+    if (!url) return false;
+    // Matches video extensions, ignoring case and potential query params (e.g., Supabase storage tokens)
+    return /\.(mp4|webm|ogg|mov|m4v)(?:\?.*)?$/i.test(url) || url.startsWith('blob:');
+  };
+
   const getEmbedUrl = (url: string) => {
+    if (!url) return null;
+
     // Bunny.net Stream Support
     if (url.includes('bunny.net') || url.includes('iframe.mediadelivery.net')) {
-      // If it's already an embed URL
       if (url.includes('embed')) return url;
-      // If it's a direct link, we might need to handle specific formats, 
-      // but usually users paste the embed URL from Bunny dashboard.
       return url;
     }
     
@@ -30,6 +35,18 @@ export default function VideoPlayer({ url }: VideoPlayerProps) {
     }
     return url; // Default to return what's provided
   };
+
+  if (isDirectVideo(url)) {
+    return (
+      <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-2xl relative">
+        <video
+          src={url}
+          controls
+          className="w-full h-full object-contain"
+        />
+      </div>
+    );
+  }
 
   const embedUrl = getEmbedUrl(url);
 

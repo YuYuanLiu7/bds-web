@@ -251,8 +251,23 @@ export default function AdminSettingsPage() {
 
   // Image Upload general uploader
   const handleGeneralImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void, fieldId: string) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
+
+    // Convert HEIC image to JPEG if selected
+    const isHEIC = 
+      file.type === 'image/heic' || 
+      file.type === 'image/heif' || 
+      /\.(heic|heif)$/i.test(file.name);
+
+    if (isHEIC) {
+      try {
+        const { ensureClientImageCompatible } = await import('@/lib/image');
+        file = await ensureClientImageCompatible(file);
+      } catch (err) {
+        console.error('HEIC image conversion warning:', err);
+      }
+    }
 
     setUploadingField(fieldId);
     const data = new FormData();
@@ -279,8 +294,23 @@ export default function AdminSettingsPage() {
   };
 
   const handleSlideUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
+
+    // Convert HEIC image to JPEG if selected
+    const isHEIC = 
+      file.type === 'image/heic' || 
+      file.type === 'image/heif' || 
+      /\.(heic|heif)$/i.test(file.name);
+
+    if (isHEIC) {
+      try {
+        const { ensureClientImageCompatible } = await import('@/lib/image');
+        file = await ensureClientImageCompatible(file);
+      } catch (err) {
+        console.error('HEIC image conversion warning:', err);
+      }
+    }
 
     setUploadingField(`slide-${idx}`);
     const data = new FormData();

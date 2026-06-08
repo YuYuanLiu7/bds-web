@@ -6,6 +6,7 @@ import { getUserByEmail } from '@/lib/users';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import Link from 'next/link';
+import CourseReviews from '@/components/CourseReviews';
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -136,6 +137,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               )}
             </div>
           </section>
+
+          {course.allow_ratings !== false && (
+            <CourseReviews 
+              courseId={course.id}
+              courseTitle={course.title}
+              studentName={session?.user?.name || session?.user?.email || '學員'}
+              hasAccess={hasAccess}
+            />
+          )}
           </div>
         {/* Sidebar (Buy Box) */}
         <div className="lg:col-span-1">

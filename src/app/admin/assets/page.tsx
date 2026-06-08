@@ -103,7 +103,24 @@ export default function AdminAssetsPage() {
     try {
       // Support multi-file upload sequentially
       for (let i = 0; i < files.length; i++) {
-        await uploadFile(files[i]);
+        let file = files[i];
+
+        // Convert HEIC image to JPEG if selected
+        const isHEIC = 
+          file.type === 'image/heic' || 
+          file.type === 'image/heif' || 
+          /\.(heic|heif)$/i.test(file.name);
+
+        if (isHEIC) {
+          try {
+            const { ensureClientImageCompatible } = await import('@/lib/image');
+            file = await ensureClientImageCompatible(file);
+          } catch (err) {
+            console.error('HEIC image conversion warning:', err);
+          }
+        }
+
+        await uploadFile(file);
       }
       showToast(`已成功上傳 ${files.length} 個檔案至素材庫！`);
       fetchMedia(); // Refresh list

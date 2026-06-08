@@ -6,6 +6,11 @@ export interface Course {
   price: number;
   category: string | null;
   is_published: boolean;
+  is_hidden?: boolean;
+  allow_comments?: boolean;
+  allow_ratings?: boolean;
+  file_url?: string | null;
+  video_url?: string | null;
   created_at: string;
 }
 
@@ -14,6 +19,7 @@ export interface Chapter {
   course_id: string;
   title: string;
   video_url: string | null;
+  file_url?: string | null;
   order_index: number;
   created_at: string;
 }

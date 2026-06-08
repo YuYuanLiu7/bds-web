@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";
 import { ChevronLeft, Play } from "lucide-react";
+import LearnExtraDetails from "@/components/LearnExtraDetails";
 
 export default async function ChapterPage({ params }: { params: Promise<{ id: string, chapterId: string }> }) {
   const { id, chapterId } = await params;
@@ -68,7 +69,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
 
       {/* Main Content - Video Player */}
       <div className="flex-1 flex flex-col h-2/3 lg:h-full overflow-y-auto">
-        <div className="p-0 lg:p-8 max-w-5xl mx-auto w-full">
+        <div className="p-0 lg:p-8 max-w-5xl mx-auto w-full pb-20">
           <div className="bg-black lg:rounded-2xl overflow-hidden shadow-2xl">
             {currentChapter.video_url ? (
               <VideoPlayer url={currentChapter.video_url} />
@@ -83,11 +84,22 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             <h1 className="text-2xl font-bold mb-4">{currentChapter.title}</h1>
             <div className="h-px bg-gray-800 w-full mb-6"></div>
             <div className="prose prose-invert max-w-none">
-              <p className="text-gray-400">
-                這是課程章節的詳細描述內容。您可以在這裡放入講義、下載資源或是章節重點摘要。
-                (此部分未來可由資料庫擴充描述欄位)
+              <p className="text-gray-400 text-sm leading-relaxed">
+                這是課程章節的詳細描述內容。您可以在這裡閱讀本單元的重點大綱。
               </p>
             </div>
+
+            {/* Extra details (Attachments & Comment section) */}
+            <LearnExtraDetails 
+              courseId={course.id}
+              courseTitle={course.title}
+              chapterId={currentChapter.id}
+              chapterTitle={currentChapter.title}
+              studentName={user.name || user.email}
+              allowComments={course.allow_comments !== false}
+              chapterFileUrl={(currentChapter as any).file_url || ''}
+              courseFileUrl={(course as any).file_url || ''}
+            />
           </div>
         </div>
       </div>
