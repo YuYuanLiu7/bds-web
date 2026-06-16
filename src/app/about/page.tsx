@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BookOpen, Users, Award, ShieldCheck } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
 
 export default function AboutPage() {
   const [pageData, setPageData] = useState({
@@ -99,8 +100,8 @@ export default function AboutPage() {
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-sky-500 rounded-2xl blur-lg opacity-25 group-hover:opacity-40 transition duration-1000"></div>
           <div className="relative bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden p-3 space-y-6">
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
-              <img 
-                src={pageData.imageUrl} 
+              <SafeImage
+                src={pageData.imageUrl}
                 alt="關於我們示意圖"
                 className="w-full h-full object-cover"
               />

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, Send, CheckCircle, ImageIcon } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
 
 export default function ContactPage() {
   const [pageData, setPageData] = useState({
@@ -116,8 +117,8 @@ export default function ContactPage() {
           </div>
 
           <div className="bg-gradient-to-br from-[#21448e] to-indigo-800 p-6 rounded-2xl shadow-md text-white space-y-2 relative overflow-hidden aspect-video max-h-[140px] flex flex-col justify-end">
-            <img 
-              src={pageData.imageUrl} 
+            <SafeImage
+              src={pageData.imageUrl}
               alt="BDS 聯絡我們橫幅"
               className="absolute inset-0 w-full h-full object-cover opacity-20"
             />

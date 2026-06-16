@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import SafeImage from '@/components/SafeImage';
 import { 
   Calendar, 
   MapPin, 
@@ -332,7 +333,7 @@ export default function EventsPage() {
                   >
                     {/* Event Cover Image */}
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-50 select-none">
-                      <img
+                      <SafeImage
                         src={event.imageUrl}
                         alt={event.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

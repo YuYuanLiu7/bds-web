@@ -2,6 +2,7 @@ import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettingsServer } from "@/lib/site-settings";
 import Link from 'next/link';
 import { Star, Users, ArrowLeft, BookOpen } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
 
 export const revalidate = 0;
 
@@ -97,8 +98,8 @@ export default async function CategoryPage({ params }: PageProps) {
               >
                 {/* Thumbnail Cover */}
                 <Link href={`/courses/${course.id}`} className="block relative aspect-[16/9] w-full overflow-hidden bg-slate-50">
-                  <img 
-                    src={course.thumbnail_url} 
+                  <SafeImage
+                    src={course.thumbnail_url}
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

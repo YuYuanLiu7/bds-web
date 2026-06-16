@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 import { CheckCircle, PlayCircle, Clock, Users } from 'lucide-react';
 import BuyButton from '@/components/BuyButton';
 import { getCourseById, checkCourseAccess } from '@/lib/courses';
@@ -60,11 +60,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
           </div>
           <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-gray-100">
-            <Image 
-              src={course.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"} 
-              alt={course.title} 
-              fill 
-              className="object-cover" 
+            <SafeImage
+              src={course.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"}
+              alt={course.title}
+              className="absolute inset-0 w-full h-full object-cover"
             />
             {hasAccess ? (
               <Link href={`/courses/${id}/learn`} className="absolute inset-0 bg-black/20 flex items-center justify-center group cursor-pointer">

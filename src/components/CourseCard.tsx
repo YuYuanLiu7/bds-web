@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 
 interface CourseCardProps {
   id: string;
@@ -14,11 +14,10 @@ export default function CourseCard({ id, title, thumbnail, price, category, inst
   return (
     <Link href={`/courses/${id}`} className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition duration-300">
       <div className="relative aspect-video">
-        <Image
+        <SafeImage
           src={thumbnail}
           alt={title}
-          fill
-          className="object-cover group-hover:scale-105 transition duration-500"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
         />
         <div className="absolute top-2 left-2">
           <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">

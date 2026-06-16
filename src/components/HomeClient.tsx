@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { SiteSettings } from '@/lib/site-settings';
 import { Course } from '@/lib/types';
+import SafeImage from '@/components/SafeImage';
 
 interface HomeClientProps {
   settings: SiteSettings;
@@ -115,9 +116,9 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
                 }`}
               >
                 <Link href={slide.link} className="block w-full h-full group">
-                  <img 
-                    src={slide.imageUrl} 
-                    alt={`Slide ${idx + 1}`}
+                  <SafeImage
+                    src={slide.imageUrl}
+                    alt={`輪播圖 ${idx + 1}`}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
                   />
                 </Link>
@@ -165,9 +166,9 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
       {settings.sectionImage1?.imageUrl && (
         <section className="max-w-[1200px] mx-auto w-full px-6 pt-10 md:pt-14 select-none">
           <Link href={settings.sectionImage1.link || '/courses'} className="block overflow-hidden rounded-2xl shadow-sm border border-slate-100 group">
-            <img 
-              src={settings.sectionImage1.imageUrl} 
-              alt="Section Banner 1"
+            <SafeImage
+              src={settings.sectionImage1.imageUrl}
+              alt="活動橫幅一"
               className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.01]"
             />
           </Link>
@@ -215,8 +216,8 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
               >
                 {/* Thumbnail Cover */}
                 <Link href={`/courses/${course.id}`} className="block relative aspect-[16/9] w-full overflow-hidden bg-slate-50">
-                  <img 
-                    src={course.thumbnail_url} 
+                  <SafeImage
+                    src={course.thumbnail_url}
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -262,9 +263,9 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
       {settings.sectionImage2?.imageUrl && (
         <section className="max-w-[1200px] mx-auto w-full px-6 pb-12 md:pb-16 select-none">
           <Link href={settings.sectionImage2.link || '/courses'} className="block overflow-hidden rounded-2xl shadow-sm border border-slate-100 group">
-            <img 
-              src={settings.sectionImage2.imageUrl} 
-              alt="Section Banner 2"
+            <SafeImage
+              src={settings.sectionImage2.imageUrl}
+              alt="活動橫幅二"
               className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.01]"
             />
           </Link>

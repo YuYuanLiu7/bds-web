@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calendar, Eye, ArrowLeft, ArrowRight, User, Layers, Clock } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
 
 export default function ArticlesPage() {
   const [primaryColor, setPrimaryColor] = useState('#21448e');
@@ -105,8 +106,8 @@ export default function ArticlesPage() {
               >
                 {/* Image Preview */}
                 <Link href={`/articles/${article.id}`} className="aspect-[16/10] w-full overflow-hidden bg-slate-50 relative select-none block">
-                  <img 
-                    src={article.imageUrl} 
+                  <SafeImage
+                    src={article.imageUrl}
                     alt={article.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
                   />
