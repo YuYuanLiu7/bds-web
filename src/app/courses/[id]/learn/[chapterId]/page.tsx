@@ -1,6 +1,7 @@
 import { getCourseById, checkCourseAccess } from "@/lib/courses";
 import { getUserByEmail } from "@/lib/users";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";
@@ -9,7 +10,7 @@ import LearnExtraDetails from "@/components/LearnExtraDetails";
 
 export default async function ChapterPage({ params }: { params: Promise<{ id: string, chapterId: string }> }) {
   const { id, chapterId } = await params;
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     redirect(`/login?callbackUrl=/courses/${id}/learn/${chapterId}`);

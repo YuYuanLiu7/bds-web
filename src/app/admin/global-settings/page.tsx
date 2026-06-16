@@ -1,16 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sliders, Save, SlidersHorizontal, Globe, Mail, Settings, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminGlobalSettingsPage() {
   const [success, setSuccess] = useState(false);
+  const [customDomain, setCustomDomain] = useState('bds.fu-notes.com');
+  const [emailFromName, setEmailFromName] = useState('BDS By Doing So');
+  const [emailFromAddress, setEmailFromAddress] = useState('no-reply@bds.fu-notes.com');
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetch('/api/admin/general-settings')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        const g = data?.global;
+        if (g) {
+          setCustomDomain(g.customDomain ?? 'bds.fu-notes.com');
+          setEmailFromName(g.emailFromName ?? 'BDS By Doing So');
+          setEmailFromAddress(g.emailFromAddress ?? 'no-reply@bds.fu-notes.com');
+        }
+      })
+      .catch(err => console.warn('Failed to load global settings:', err));
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    try {
+      const res = await fetch('/api/admin/general-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'global', value: { customDomain, emailFromName, emailFromAddress } }),
+      });
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        alert('儲存失敗，請稍後再試');
+      }
+    } catch (err) {
+      console.error('Save global settings error:', err);
+      alert('連線錯誤，儲存失敗');
+    }
   };
 
   return (
@@ -48,9 +79,10 @@ export default function AdminGlobalSettingsPage() {
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500">自訂網域</label>
-                <input 
-                  type="text" 
-                  defaultValue="bds.fu-notes.com" 
+                <input
+                  type="text"
+                  value={customDomain}
+                  onChange={(e) => setCustomDomain(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
                 />
               </div>
@@ -77,17 +109,19 @@ export default function AdminGlobalSettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500">寄件人顯示名稱</label>
-                  <input 
-                    type="text" 
-                    defaultValue="BDS By Doing So" 
+                  <input
+                    type="text"
+                    value={emailFromName}
+                    onChange={(e) => setEmailFromName(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-500">系統發信電子信箱</label>
-                  <input 
-                    type="email" 
-                    defaultValue="no-reply@bds.fu-notes.com" 
+                  <input
+                    type="email"
+                    value={emailFromAddress}
+                    onChange={(e) => setEmailFromAddress(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
                   />
                 </div>

@@ -80,25 +80,32 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, video_url, order_index, file_url } = body;
+    const { id, title, video_url, order_index } = body;
+
+    const updateData: any = {
+      title,
+      video_url,
+      order_index: parseInt(order_index),
+    };
+    // 只有當請求明確帶 file_url 時才更新，避免沒有此欄位的編輯頁（如課程學員頁）
+    // 把既有的單元講義 file_url 覆蓋成 null 造成資料遺失
+    if ('file_url' in body) {
+      updateData.file_url = body.file_url || null;
+    }
 
     let { data, error } = await supabase
       .from('chapters')
-      .update({ 
-        title, 
-        video_url, 
-        order_index: parseInt(order_index),
-        file_url: file_url || null
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
 
     if (error && error.message.includes('does not exist')) {
       // Graceful fallback if file_url does not exist yet
+      const { file_url, ...safeUpdate } = updateData;
       const retry = await supabase
         .from('chapters')
-        .update({ title, video_url, order_index: parseInt(order_index) })
+        .update(safeUpdate)
         .eq('id', id)
         .select()
         .single();

@@ -47,17 +47,16 @@ export default function Navbar() {
       })
       .catch(err => console.warn("Using default settings in Navbar:", err));
 
-    // Load active announcement
-    const saved = localStorage.getItem('bds_announcements');
-    if (saved) {
-      try {
-        const list = JSON.parse(saved);
-        const active = list.find((a: any) => a.status === 'published');
-        if (active) {
-          setAnnouncement(active);
+    // Load active announcement from server (persisted in DB, visible to all visitors)
+    fetch('/api/settings?key=announcements')
+      .then(res => (res.ok ? res.json() : []))
+      .then(list => {
+        if (Array.isArray(list)) {
+          const active = list.find((a: any) => a.status === 'published');
+          if (active) setAnnouncement(active);
         }
-      } catch (e) {}
-    }
+      })
+      .catch(err => console.warn("Failed to load announcements:", err));
   }, []);
 
   const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'BDS 會員';

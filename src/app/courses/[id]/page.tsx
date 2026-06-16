@@ -5,12 +5,13 @@ import { getCourseById, checkCourseAccess } from '@/lib/courses';
 import { getUserByEmail } from '@/lib/users';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Link from 'next/link';
 import CourseReviews from '@/components/CourseReviews';
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   const course = await getCourseById(id);
 
   if (!course) {

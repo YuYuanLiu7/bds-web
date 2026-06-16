@@ -23,17 +23,13 @@ export default function HelpFAQPage() {
       })
       .catch(err => console.warn("Using default settings in FAQ page:", err));
 
-    // Load FAQs
-    const saved = localStorage.getItem('bds_faqs');
-    if (saved) {
-      try {
-        setFaqs(JSON.parse(saved));
-      } catch (e) {
-        setFaqs(DEFAULT_FAQS);
-      }
-    } else {
-      setFaqs(DEFAULT_FAQS);
-    }
+    // Load FAQs from server (persisted in DB)
+    fetch('/api/settings?key=faqs')
+      .then(res => (res.ok ? res.json() : null))
+      .then(list => {
+        setFaqs(Array.isArray(list) && list.length > 0 ? list : DEFAULT_FAQS);
+      })
+      .catch(() => setFaqs(DEFAULT_FAQS));
   }, []);
 
   const DEFAULT_FAQS = [

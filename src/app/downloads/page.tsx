@@ -68,6 +68,17 @@ export default async function DownloadsPage() {
     downloads = MOCK_DOWNLOADS;
   }
 
+  // 🔒 非管理員不可取得付費商品的 file_url（避免在 HTML/DOM 中外洩付費下載連結）
+  if (!isAdmin) {
+    downloads = downloads.map((d: any) => {
+      if ((d.price || 0) > 0) {
+        const { file_url, ...rest } = d;
+        return rest;
+      }
+      return d;
+    });
+  }
+
   return (
     <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
       

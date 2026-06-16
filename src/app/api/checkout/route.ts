@@ -8,7 +8,34 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await req.json();
-    const { courseId, courseName, planId, planName, amount, type = 'course' } = body;
+    const { courseId, planId, type = 'course' } = body;
+
+    // 🔒 金額一律以資料庫為準，不信任前端傳入的 amount，避免竄改價格低買
+    let amount: number;
+    let prodDesc: string;
+    if (type === 'membership') {
+      const { data: plan, error: planErr } = await supabase
+        .from('membership_plans')
+        .select('price, title')
+        .eq('id', planId)
+        .single();
+      if (planErr || !plan) {
+        return NextResponse.json({ error: '找不到指定的會員方案' }, { status: 400 });
+      }
+      amount = plan.price;
+      prodDesc = `Subscribe to ${plan.title}`;
+    } else {
+      const { data: course, error: courseErr } = await supabase
+        .from('courses')
+        .select('price, title')
+        .eq('id', courseId)
+        .single();
+      if (courseErr || !course) {
+        return NextResponse.json({ error: '找不到指定的課程' }, { status: 400 });
+      }
+      amount = course.price;
+      prodDesc = `Purchase ${course.title}`;
+    }
 
     const PAYUNI_CONFIG = {
       MerID: process.env.PAYUNI_MERID || 'MS12345678',
@@ -71,7 +98,7 @@ export async function POST(req: Request) {
       MerTradeNo: merTradeNo,
       TradeAmt: amount,
       Timestamp: timestamp,
-      ProdDesc: type === 'membership' ? `Subscribe to ${planName}` : `Purchase ${courseName}`,
+      ProdDesc: prodDesc,
       ReturnURL: PAYUNI_CONFIG.ReturnURL,
       NotifyURL: PAYUNI_CONFIG.NotifyURL,
       Version: '2.0',

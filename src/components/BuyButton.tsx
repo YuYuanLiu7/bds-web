@@ -25,7 +25,8 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
       // Create a hidden form and submit it to PayUni (UPP)
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = 'https://sandbox-api.payuni.com.tw/api/upp'; // Sandbox URL
+      // UPP 端點由環境變數決定，正式上線設定 NEXT_PUBLIC_PAYUNI_UPP_URL 即可，無需改程式碼
+      form.action = process.env.NEXT_PUBLIC_PAYUNI_UPP_URL || 'https://sandbox-api.payuni.com.tw/api/upp';
 
       Object.keys(params).forEach((key) => {
         const input = document.createElement('input');

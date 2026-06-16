@@ -76,12 +76,16 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
   const [mMsg, setMMsg] = useState('系統升級維護中，請稍後再試。');
 
   useEffect(() => {
-    const status = localStorage.getItem('bds_site_status');
-    const msg = localStorage.getItem('bds_maintenance_message');
-    if (status === 'maintenance') {
-      setMaintenance(true);
-      if (msg) setMMsg(msg);
-    }
+    // 維護狀態改由伺服器讀取（DB 持久化），讓所有訪客都看得到，而非僅當前瀏覽器
+    fetch('/api/settings?key=general')
+      .then(res => (res.ok ? res.json() : null))
+      .then(g => {
+        if (g && g.siteStatus === 'maintenance') {
+          setMaintenance(true);
+          if (g.maintenanceMessage) setMMsg(g.maintenanceMessage);
+        }
+      })
+      .catch(err => console.warn("Failed to load site status:", err));
   }, []);
 
   const primaryColor = settings.primaryColor || '#21448e';

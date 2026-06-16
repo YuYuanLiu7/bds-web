@@ -39,6 +39,12 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
       return;
     }
 
+    // 正式環境不提供模擬付款，直接走真實金流；僅開發/測試環境顯示沙盒選擇視窗
+    if (process.env.NODE_ENV === 'production') {
+      executeRealPayUni(plan);
+      return;
+    }
+
     // 啟動測試沙盒選擇視窗，提供模擬一鍵支付或真實 Sandbox 跳轉
     setSimulatingPlan(plan);
     setShowSimulateModal(true);
@@ -70,7 +76,8 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
       // Create a hidden form and submit it to PayUni (UPP)
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = 'https://sandbox-api.payuni.com.tw/api/upp'; // Sandbox URL
+      // UPP 端點由環境變數決定，正式上線設定 NEXT_PUBLIC_PAYUNI_UPP_URL 即可，無需改程式碼
+      form.action = process.env.NEXT_PUBLIC_PAYUNI_UPP_URL || 'https://sandbox-api.payuni.com.tw/api/upp';
 
       Object.keys(params).forEach((key) => {
         const input = document.createElement('input');

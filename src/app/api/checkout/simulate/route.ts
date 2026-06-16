@@ -6,6 +6,11 @@ import { sendPurchaseSuccessEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
+    // 🔒 模擬付款端點僅供開發/測試環境，正式環境必須關閉，否則任何登入者可免費開通會員
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_PAYMENT_SIMULATION !== 'true') {
+      return NextResponse.json({ error: "此端點僅供開發測試環境使用" }, { status: 403 });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

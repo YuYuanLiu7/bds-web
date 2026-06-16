@@ -64,60 +64,58 @@ export default function AdminSettingsPage() {
   const [hashIv, setHashIv] = useState('');
   const [payuniMode, setPayuniMode] = useState('sandbox');
 
-  // Load settings from localStorage and API
+  // Load settings from DB (general/faqs/announcements/notifications) + API (visual)
   useEffect(() => {
-    // 1. General
-    setSiteName(localStorage.getItem('bds_site_name') || 'BDS By Doing So');
-    setSiteDesc(localStorage.getItem('bds_site_desc') || '橋接理論與實踐，深耕硬體、半導體與醫材產業。');
-    setContactEmail(localStorage.getItem('bds_contact_email') || 'bydoingso@gmail.com');
-    setCommunityUrl(localStorage.getItem('bds_community_url') || 'https://discord.gg/bds');
+    const loadSettings = async () => {
+      try {
+        const res = await fetch('/api/admin/general-settings');
+        if (res.ok) {
+          const data = await res.json();
+          const g = data.general || {};
+          setSiteName(g.siteName ?? 'BDS By Doing So');
+          setSiteDesc(g.siteDesc ?? '橋接理論與實踐，深耕硬體、半導體與醫材產業。');
+          setContactEmail(g.contactEmail ?? 'bydoingso@gmail.com');
+          setCommunityUrl(g.communityUrl ?? 'https://discord.gg/bds');
+          setSiteStatus(g.siteStatus ?? 'online');
+          setMaintenanceMessage(g.maintenanceMessage ?? '為了提供更高品質的學習體驗，我們目前正在進行系統升級維護，預計將於明早 06:00 完成。');
 
-    // 2. Status
-    setSiteStatus(localStorage.getItem('bds_site_status') || 'online');
-    setMaintenanceMessage(localStorage.getItem('bds_maintenance_message') || '為了提供更高品質的學習體驗，我們目前正在進行系統升級維護，預計將於明早 06:00 完成。');
+          if (Array.isArray(data.faqs)) setFaqs(data.faqs);
+          if (Array.isArray(data.announcements)) setAnnouncements(data.announcements);
 
-    // 3. FAQs
-    const savedFaqs = localStorage.getItem('bds_faqs');
-    if (savedFaqs) {
-      try { setFaqs(JSON.parse(savedFaqs)); } catch (e) {}
-    } else {
-      const defaultFaqs = [
-        { q: '如何開始選購與學習 BDS 的實戰課程？', a: '您只需在 BDS 首頁或課程列表頁面中，點選您感興趣的課程。點擊「立即購買」或「立即選購」後，系統會自動引導您進入 PayUni 安全金流結帳流程。付款完成後，系統會即時開通您的權限，您可以在頂端點擊「我的學習」直接開始看課觀看影片！' },
-        { q: 'BDS 平台支援哪些付款方式？', a: 'BDS 目前唯一指定與台灣領先金流平台 PayUni（統一金流）合作。我們支援「信用卡線上一次付清」與「ATM 虛擬帳號轉帳匯款」。所有交易皆通過 256-bit SSL 資訊安全加密，保證您的付款資訊百分之百安全無虞。' },
-        { q: '購買課程後，觀看期限是多久？可以退款嗎？', a: '在 BDS 購買的任何單門實戰課程皆享有「終身無限次觀看」的權益，沒有時間與次數限制。由於數位內容與影音商品在購買開通後即可完整觀看，若您有特殊的個人因素退款需求，請在購買後 7 天內（且觀看進度不超過第一章節 10%）與我們聯絡，我們將由專人為您審核辦理。' },
-        { q: '付款完成後，我該如何確認我的課程已經開通？', a: '當您完成信用卡付款或 ATM 轉帳匯款成功後，PayUni 金流系統會發送通知給我們，系統會在 1 秒鐘內自動為您的註冊帳號開通對應課程權限。您可以登入後至頂端點選「我的學習」確認；同時您也會在您的信箱中收到一封訂單成立與權限開通的通知信件。' },
-        { q: '我們有學員專屬的交流社群或 Discord 群組嗎？', a: '有的！BDS 非常重視學員的實戰交流。凡是購買過 BDS 任一課程或訂閱方案的學員，皆可在課程學習播放器的公告區或您的電子郵件信箱中，獲得專屬「Discord 業務表達與 BD 核心沙龍交流群」的邀請連結。在這裡您可以隨時向講師提問，並與數百位同行精英交流合作！' }
-      ];
-      setFaqs(defaultFaqs);
-      localStorage.setItem('bds_faqs', JSON.stringify(defaultFaqs));
-    }
+          const n = data.notifications || {};
+          setAdminEmail(n.adminEmail ?? 'admin@bydoingso.com');
+          setEmailSubject(n.emailSubject ?? '【BDS By Doing So】您的課程已開通成功！');
+          setEmailTemplate(n.emailTemplate ?? '親愛的學員您好，感謝您購買 BDS 課程！系統已成功開通您的看課權限。');
+        }
+      } catch (err) {
+        console.error("Failed to load general settings:", err);
+      }
+    };
+    loadSettings();
 
-    // 4. Announcements
-    const savedAnn = localStorage.getItem('bds_announcements');
-    if (savedAnn) {
-      try { setAnnouncements(JSON.parse(savedAnn)); } catch (e) {}
-    } else {
-      const defaultAnn = [
-        { content: '🎉 賀！硬體業務新手村課程突破 200 人選修！專屬學習群組加碼開放。', url: '/courses', status: 'published' }
-      ];
-      setAnnouncements(defaultAnn);
-      localStorage.setItem('bds_announcements', JSON.stringify(defaultAnn));
-    }
-
-    // 5. Email notifications
-    setAdminEmail(localStorage.getItem('bds_admin_email') || 'admin@bydoingso.com');
-    setEmailSubject(localStorage.getItem('bds_email_subject') || '【BDS By Doing So】您的課程已開通成功！');
-    setEmailTemplate(localStorage.getItem('bds_email_template') || '親愛的學員您好，感謝您購買 BDS 課程！系統已成功開通您的看課權限。');
-
-    // 6. PayUni Gateways
-    setMerId(localStorage.getItem('bds_mer_id') || 'MS12345678');
-    setHashKey(localStorage.getItem('bds_hash_key') || 'YOUR_PAYUNI_HASH_KEY');
-    setHashIv(localStorage.getItem('bds_hash_iv') || 'YOUR_PAYUNI_HASH_IV');
-    setPayuniMode(localStorage.getItem('bds_payuni_mode') || 'sandbox');
+    // PayUni 金鑰一律以伺服器環境變數為準（不存資料庫，避免公開金鑰外洩）；
+    // 此處僅供顯示參考，正式金鑰請設定於 .env / 部署平台環境變數。
+    setMerId(process.env.NEXT_PUBLIC_PAYUNI_MERID || 'MS12345678');
+    setPayuniMode((process.env.NEXT_PUBLIC_PAYUNI_UPP_URL || '').includes('sandbox') === false && process.env.NEXT_PUBLIC_PAYUNI_UPP_URL ? 'production' : 'sandbox');
 
     // Fetch Front visual settings
     fetchVisualSettings();
   }, []);
+
+  // 共用：將某個設定區塊寫入資料庫
+  const saveSetting = async (key: string, value: any): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/admin/general-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      });
+      return res.ok;
+    } catch (err) {
+      console.error(`Failed to save setting '${key}':`, err);
+      return false;
+    }
+  };
 
   const fetchVisualSettings = async () => {
     setIsVisualLoading(true);
@@ -145,13 +143,13 @@ export default function AdminSettingsPage() {
     setTimeout(() => setSuccessMsg(null), 3000);
   };
 
-  const handleSaveGeneral = (e: React.FormEvent) => {
+  const handleSaveGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('bds_site_name', siteName);
-    localStorage.setItem('bds_site_desc', siteDesc);
-    localStorage.setItem('bds_contact_email', contactEmail);
-    localStorage.setItem('bds_community_url', communityUrl);
-    handleShowToast('基本資訊與聯絡方式設定已儲存成功！');
+    // 一般資訊與運作狀態同屬 general 區塊，一起寫入避免互相覆蓋
+    const ok = await saveSetting('general', {
+      siteName, siteDesc, contactEmail, communityUrl, siteStatus, maintenanceMessage,
+    });
+    handleShowToast(ok ? '基本資訊與聯絡方式設定已儲存成功！' : '儲存失敗，請稍後再試');
   };
 
   const handleSaveVisual = async (e: React.FormEvent) => {
@@ -179,35 +177,31 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleSaveStatus = (e: React.FormEvent) => {
+  const handleSaveStatus = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('bds_site_status', siteStatus);
-    localStorage.setItem('bds_maintenance_message', maintenanceMessage);
-    handleShowToast('網站上線與運作狀態設定已儲存！');
+    const ok = await saveSetting('general', {
+      siteName, siteDesc, contactEmail, communityUrl, siteStatus, maintenanceMessage,
+    });
+    handleShowToast(ok ? '網站上線與運作狀態設定已儲存！' : '儲存失敗，請稍後再試');
   };
 
-  const handleSaveNotifications = (e: React.FormEvent) => {
+  const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('bds_admin_email', adminEmail);
-    localStorage.setItem('bds_email_subject', emailSubject);
-    localStorage.setItem('bds_email_template', emailTemplate);
-    handleShowToast('郵件與通知設定已儲存！');
+    const ok = await saveSetting('notifications', { adminEmail, emailSubject, emailTemplate });
+    handleShowToast(ok ? '郵件與通知設定已儲存！' : '儲存失敗，請稍後再試');
   };
 
   const handleSavePayUni = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('bds_mer_id', merId);
-    localStorage.setItem('bds_hash_key', hashKey);
-    localStorage.setItem('bds_hash_iv', hashIv);
-    localStorage.setItem('bds_payuni_mode', payuniMode);
-    handleShowToast('PayUni 金流金鑰設定已儲存成功！');
+    // PayUni 金鑰以伺服器環境變數為準，不在此持久化（避免公開金鑰外洩）。
+    handleShowToast('提示：PayUni 金鑰請於 .env / 部署平台環境變數設定，此頁僅供參考。');
   };
 
   // FAQ Manager helpers
-  const handleAddFaq = (e: React.FormEvent) => {
+  const handleAddFaq = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!faqForm.q || !faqForm.a) return;
-    
+
     let newFaqs;
     if (editingFaqIndex !== null) {
       newFaqs = faqs.map((f, idx) => idx === editingFaqIndex ? faqForm : f);
@@ -216,18 +210,18 @@ export default function AdminSettingsPage() {
       newFaqs = [...faqs, faqForm];
     }
     setFaqs(newFaqs);
-    localStorage.setItem('bds_faqs', JSON.stringify(newFaqs));
+    await saveSetting('faqs', newFaqs);
     setFaqForm({ q: '', a: '' });
   };
 
-  const handleDeleteFaq = (index: number) => {
+  const handleDeleteFaq = async (index: number) => {
     const newFaqs = faqs.filter((_, idx) => idx !== index);
     setFaqs(newFaqs);
-    localStorage.setItem('bds_faqs', JSON.stringify(newFaqs));
+    await saveSetting('faqs', newFaqs);
   };
 
   // Announcement Manager helpers
-  const handleAddAnnouncement = (e: React.FormEvent) => {
+  const handleAddAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!announcementForm.content) return;
 
@@ -239,14 +233,14 @@ export default function AdminSettingsPage() {
       newAnn = [...announcements, announcementForm];
     }
     setAnnouncements(newAnn);
-    localStorage.setItem('bds_announcements', JSON.stringify(newAnn));
+    await saveSetting('announcements', newAnn);
     setAnnouncementForm({ content: '', url: '', status: 'published' });
   };
 
-  const handleDeleteAnnouncement = (index: number) => {
+  const handleDeleteAnnouncement = async (index: number) => {
     const newAnn = announcements.filter((_, idx) => idx !== index);
     setAnnouncements(newAnn);
-    localStorage.setItem('bds_announcements', JSON.stringify(newAnn));
+    await saveSetting('announcements', newAnn);
   };
 
   // Image Upload general uploader

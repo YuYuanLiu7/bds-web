@@ -95,7 +95,9 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
             imageUrl: data.image_url || data.imageUrl || 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800',
             visibility: data.visibility || 'public',
             required_course_ids: data.required_course_ids || '',
-            is_pinned: !!data.is_pinned
+            is_pinned: !!data.is_pinned,
+            locked: !!data.locked,
+            lockType: data.lockType || 'public'
           });
         } else {
           throw new Error('Invalid article payload');
@@ -325,21 +327,11 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
             {/* Content Body */}
             <div className="prose prose-slate max-w-none pt-4">
               {(() => {
-                // 1. 權限檢驗
-                const isAdmin = session?.user && (session.user as any).role === 'admin';
-                const isPublic = !article.visibility || article.visibility === 'public';
-                const isMemberOnly = article.visibility === 'members';
-                const isCoursePurchaserOnly = article.visibility === 'course_purchasers';
-
-                const hasAccess = 
-                  isAdmin || 
-                  isPublic || 
-                  (isMemberOnly && !!session) || 
-                  (isCoursePurchaserOnly && (() => {
-                    if (!session) return false;
-                    const requiredIds = article.required_course_ids ? article.required_course_ids.split(',').filter(Boolean) : [];
-                    return requiredIds.some((cid: string) => purchasedCourseIds.includes(cid));
-                  })());
+                // 1. 權限檢驗：以後端回傳的 locked / lockType 為準（後端已驗證），
+                //    前端不再自行判斷，避免雙重邏輯不一致或被繞過
+                const hasAccess = !article.locked;
+                const isMemberOnly = article.lockType === 'members';
+                const isCoursePurchaserOnly = article.lockType === 'course_purchasers';
 
                 if (hasAccess) {
                   // 渲染文章內容
@@ -354,7 +346,7 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
                 }
 
                 // 2. 當無權限時，判斷渲染哪種付費鎖
-                if (isMemberOnly && !session) {
+                if (isMemberOnly) {
                   return (
                     <div className="relative pt-6 select-none">
                       <div className="space-y-3 opacity-25 pointer-events-none filter blur-xs">
@@ -363,25 +355,27 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
                         <p className="h-4 bg-slate-200 rounded w-4/6"></p>
                         <p className="h-4 bg-slate-200 rounded w-full"></p>
                       </div>
-                      
+
                       <div className="absolute inset-0 flex items-center justify-center p-4">
                         <div className="bg-white/95 backdrop-blur-md border border-slate-100 p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-5 animate-in fade-in zoom-in duration-200">
                           <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mx-auto text-indigo-600">
                             <Lock className="w-5 h-5" />
                           </div>
                           <div className="space-y-2">
-                            <h3 className="text-base font-black text-slate-800">登入會員解鎖專欄</h3>
+                            <h3 className="text-base font-black text-slate-800">付費會員專屬專欄</h3>
                             <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-                              本篇深度產業觀察報告僅限 BDS 會員專屬閱讀。只需免費註冊或登入您的帳戶，即可立即解鎖完整專欄文章！
+                              {session
+                                ? '本篇深度產業觀察報告僅限 BDS 付費會員閱讀。訂閱任一會員方案，即可立即解鎖全站會員專屬文章！'
+                                : '本篇深度產業觀察報告僅限 BDS 付費會員閱讀。請先登入，並訂閱會員方案以解鎖完整內容。'}
                             </p>
                           </div>
-                          <button 
-                            onClick={() => router.push(`/login?callbackUrl=/articles/${id}`)}
+                          <button
+                            onClick={() => router.push(session ? '/membership' : `/login?callbackUrl=/articles/${id}`)}
                             style={{ backgroundColor: primaryColor }}
                             className="w-full text-white font-bold text-xs py-2.5 rounded-xl transition hover:opacity-90 active:scale-95 shadow-md flex items-center justify-center space-x-1.5 cursor-pointer"
                           >
-                            <LogIn className="w-4 h-4" />
-                            <span>登入/註冊會員</span>
+                            {session ? <ShoppingBag className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+                            <span>{session ? '前往訂閱會員方案' : '登入以解鎖'}</span>
                           </button>
                         </div>
                       </div>
