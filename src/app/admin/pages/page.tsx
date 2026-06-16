@@ -86,24 +86,31 @@ export default function AdminPagesPage() {
     imageUrl: ''
   });
 
-  // Load from localStorage on mount
+  // 從伺服器載入頁面內容（持久化於 site_settings，跨裝置/對訪客皆生效）
   useEffect(() => {
-    const saved = localStorage.getItem('bds_pages_content');
-    if (saved) {
-      try {
-        setPages(JSON.parse(saved));
-      } catch (e) {
-        setPages(DEFAULT_PAGES);
-      }
-    } else {
-      localStorage.setItem('bds_pages_content', JSON.stringify(DEFAULT_PAGES));
-      setPages(DEFAULT_PAGES);
-    }
+    fetch('/api/settings?key=pages')
+      .then(res => (res.ok ? res.json() : null))
+      .then(list => setPages(Array.isArray(list) && list.length > 0 ? list : DEFAULT_PAGES))
+      .catch(() => setPages(DEFAULT_PAGES));
   }, []);
 
-  const updatePagesState = (newPages: any[]) => {
+  // 更新並寫入資料庫（透過管理員設定 API）
+  const updatePagesState = async (newPages: any[]) => {
     setPages(newPages);
-    localStorage.setItem('bds_pages_content', JSON.stringify(newPages));
+    try {
+      const res = await fetch('/api/admin/general-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'pages', value: newPages }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || '頁面內容儲存失敗，請稍後再試。');
+      }
+    } catch (err) {
+      console.error('Save pages error:', err);
+      alert('連線錯誤，頁面內容儲存失敗。');
+    }
   };
 
   const filteredPages = pages.filter(p => 

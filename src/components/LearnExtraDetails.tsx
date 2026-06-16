@@ -50,101 +50,42 @@ export default function LearnExtraDetails({
   const [newComment, setNewComment] = useState('');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Load comments from localStorage
-  const loadComments = () => {
-    try {
-      const stored = localStorage.getItem('bds_course_comments');
-      if (stored) {
-        setComments(JSON.parse(stored));
-      } else {
-        // Initialize default mock data if not set
-        const defaultMock: Comment[] = [
-          { 
-            id: 'mock-1', 
-            student: '陳玟妤', 
-            course: 'BDS爐邊對談 Vol.3｜商務開發心法', 
-            chapter: '第一章：初探商務開發開發的核心指標', 
-            text: '請問講師，對於在ODM硬體廠做業務的新手，會建議怎麼切入這個指標的練習？謝謝！', 
-            date: '2026-05-25 09:15', 
-            status: 'pending',
-            reply: null,
-            replyDate: null
-          },
-          { 
-            id: 'mock-2', 
-            student: '楊力樺', 
-            course: 'BDS爐邊對談 Vol.2｜一站式破解業務求職難題', 
-            chapter: '第二章：外商業務履歷的黃金撰寫公式', 
-            text: '這章寫的黃金公式真的很受用！我試著修改了履歷，投遞後真的接到兩家外商的面試通知！', 
-            date: '2026-05-24 15:30', 
-            status: 'approved',
-            reply: '太棒了！恭喜力樺，外商面試的核心在於對過去專案成果的「量化數據」呈現，祝你面試順利！',
-            replyDate: '2026-05-24 18:00'
-          },
-          { 
-            id: 'mock-3', 
-            student: '林恩', 
-            course: 'BDS爐邊對談 Vol.1｜業務表達及提案關鍵', 
-            chapter: '第三章：高階提案的開場破冰思維', 
-            text: '請問如果是在實體客戶拜訪時，有什麼比較好用的拜訪開頭話術推薦嗎？', 
-            date: '2026-05-23 20:45', 
-            status: 'approved',
-            reply: null,
-            replyDate: null
-          }
-        ];
-        localStorage.setItem('bds_course_comments', JSON.stringify(defaultMock));
-        setComments(defaultMock);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
+  // 從伺服器載入本章節留言（已核准的 + 自己待審的，由後端依登入者判斷）
   useEffect(() => {
-    loadComments();
-    
-    // Listen for storage changes (e.g. from admin panel approving/replying)
-    const handleStorageChange = () => {
-      loadComments();
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+    const params = new URLSearchParams({ courseId });
+    if (chapterId) params.set('chapterId', chapterId);
+    fetch(`/api/comments?${params.toString()}`)
+      .then(res => (res.ok ? res.json() : []))
+      .then(list => setComments(Array.isArray(list) ? list : []))
+      .catch(err => console.warn('Failed to load comments:', err));
+  }, [courseId, chapterId]);
 
-  // Filter comments for current chapter
-  // Show approved comments, and pending comments created by the current student
-  const filteredComments = comments.filter(c => 
-    c.course === courseTitle && 
-    c.chapter === chapterTitle && 
-    (c.status === 'approved' || (c.student === studentName && c.status === 'pending'))
-  );
+  // 後端已依章節與權限過濾，前端直接顯示
+  const filteredComments = comments;
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    const newCommentObj: Comment = {
-      id: `comment-${Date.now()}`,
-      student: studentName,
-      course: courseTitle,
-      chapter: chapterTitle,
-      text: newComment,
-      date: formattedDate,
-      status: 'pending', // Pending admin approval
-      reply: null,
-      replyDate: null
-    };
-
-    const updated = [newCommentObj, ...comments];
-    localStorage.setItem('bds_course_comments', JSON.stringify(updated));
-    setComments(updated);
-    setNewComment('');
-    setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 4000);
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId, chapterId, courseTitle, chapterTitle, text: newComment }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || '留言送出失敗，請稍後再試。');
+        return;
+      }
+      setComments([data, ...comments]);
+      setNewComment('');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 4000);
+    } catch (err) {
+      console.error('Submit comment error:', err);
+      alert('連線錯誤，留言送出失敗。');
+    }
   };
 
   return (

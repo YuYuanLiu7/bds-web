@@ -11,11 +11,11 @@ export default function PrivacyPage() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('bds_pages_content');
-    if (saved) {
-      try {
-        const list = JSON.parse(saved);
-        const item = list.find((p: any) => p.path === '/privacy');
+    // 從伺服器讀取頁面內容（後台 CMS 編輯後對所有訪客生效）
+    fetch('/api/settings?key=pages')
+      .then(res => (res.ok ? res.json() : null))
+      .then(list => {
+        const item = Array.isArray(list) ? list.find((p: any) => p.path === '/privacy') : null;
         if (item) {
           setPageData({
             title: item.title || '服務條款與隱私權政策',
@@ -23,8 +23,8 @@ export default function PrivacyPage() {
             content: item.content || '',
           });
         }
-      } catch (e) {}
-    }
+      })
+      .catch(err => console.warn('Failed to load page content:', err));
   }, []);
 
   return (

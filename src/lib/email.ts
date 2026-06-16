@@ -13,6 +13,94 @@ interface SendEmailParams {
   tradeNo: string;
 }
 
+interface ContactEmailParams {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+/**
+ * 寄送「聯絡我們」表單訊息至客服信箱。
+ * 收件者預設為 CONTACT_TO_EMAIL，未設定時退回 RESEND_TEST_RECIPIENT 或客服信箱。
+ * 使用 Resend onboarding 網域時，只能寄到已驗證信箱，故沿用沙盒導向邏輯。
+ */
+export async function sendContactEmail({
+  name,
+  email,
+  subject,
+  message,
+}: ContactEmailParams): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const contactTo =
+    process.env.CONTACT_TO_EMAIL ||
+    process.env.RESEND_TEST_RECIPIENT ||
+    'bydoingso@gmail.com';
+
+  // 沙盒模式：使用 onboarding 網域時只能寄到已驗證信箱
+  let targetEmail = contactTo;
+  const testRecipient = process.env.RESEND_TEST_RECIPIENT;
+  if (fromEmail === 'onboarding@resend.dev' && testRecipient) {
+    targetEmail = testRecipient;
+  }
+
+  const safe = (s: string) =>
+    s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const htmlContent = `
+    <div style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color:#334155; max-width:600px; margin:0 auto;">
+      <h2 style="color:#4f46e5;">📨 來自 BDS 網站的聯絡表單</h2>
+      <table style="width:100%; border-collapse:collapse; font-size:14px;">
+        <tr><td style="padding:8px; color:#64748b; font-weight:600; width:100px;">姓名</td><td style="padding:8px; font-weight:700;">${safe(name)}</td></tr>
+        <tr><td style="padding:8px; color:#64748b; font-weight:600;">信箱</td><td style="padding:8px; font-weight:700;">${safe(email)}</td></tr>
+        <tr><td style="padding:8px; color:#64748b; font-weight:600;">主題</td><td style="padding:8px; font-weight:700;">${safe(subject)}</td></tr>
+      </table>
+      <div style="margin-top:16px; padding:16px; background:#f8fafc; border:1px solid #f1f5f9; border-radius:12px; white-space:pre-line; font-size:14px; line-height:1.6;">
+        ${safe(message)}
+      </div>
+      <p style="margin-top:16px; font-size:12px; color:#94a3b8;">可直接回覆此信件聯繫來信者（Reply-To 已設為對方信箱）。</p>
+    </div>
+  `;
+
+  if (!apiKey) {
+    console.warn(`
+[Email System WARNING] RESEND_API_KEY 未設定，聯絡表單訊息僅模擬未實際寄出。
+CONTACT TO: ${contactTo}
+FROM: ${safe(name)} <${safe(email)}>
+SUBJECT: ${safe(subject)}
+MESSAGE: ${safe(message)}
+    `);
+    return false;
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        from: `BDS 聯絡表單 <${fromEmail}>`,
+        to: [targetEmail],
+        reply_to: email,
+        subject: `【BDS 聯絡表單｜${subject}】來自 ${name}`,
+        html: htmlContent,
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      console.log(`[Email System] 聯絡表單已寄出。ID: ${data.id}`);
+      return true;
+    }
+    console.error('[Email System ERROR] Resend 回傳錯誤:', data);
+    return false;
+  } catch (error) {
+    console.error('[Email System ERROR] 寄送聯絡表單失敗:', error);
+    return false;
+  }
+}
+
 export async function sendPurchaseSuccessEmail({
   email,
   name,

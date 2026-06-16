@@ -2,67 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { MessageSquare, Search, Trash2, Check, BookOpen, Clock, Filter, CornerDownRight, User } from 'lucide-react';
-import Link from 'next/link';
 
 export default function AdminCommentsPage() {
   const [comments, setComments] = useState<any[]>([]);
 
-  // Helper to save comments to localStorage and dispatch update event
-  const saveComments = (updated: any[]) => {
-    setComments(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('bds_course_comments', JSON.stringify(updated));
-      // Dispatch storage event to update other components in the same window
-      window.dispatchEvent(new Event('storage'));
-    }
+  // 從伺服器載入所有留言（持久化於資料庫）
+  const loadComments = () => {
+    fetch('/api/admin/comments')
+      .then(res => (res.ok ? res.json() : []))
+      .then(list => setComments(Array.isArray(list) ? list : []))
+      .catch(err => console.warn('Failed to load comments:', err));
   };
 
-  // Load comments on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('bds_course_comments');
-      if (stored) {
-        setComments(JSON.parse(stored));
-      } else {
-        const defaultMock = [
-          { 
-            id: 'mock-1', 
-            student: '陳玟妤', 
-            course: 'BDS爐邊對談 Vol.3｜商務開發心法', 
-            chapter: '第一章：初探商務開發開發的核心指標', 
-            text: '請問講師，對於在ODM硬體廠做業務的新手，會建議怎麼切入這個指標的練習？謝謝！', 
-            date: '2026-05-25 09:15', 
-            status: 'pending',
-            reply: null,
-            replyDate: null
-          },
-          { 
-            id: 'mock-2', 
-            student: '楊力樺', 
-            course: 'BDS爐邊對談 Vol.2｜一站式破解業務求職難題', 
-            chapter: '第二章：外商業務履歷的黃金撰寫公式', 
-            text: '這章寫的黃金公式真的很受用！我試著修改了履歷，投遞後真的接到兩家外商的面試通知！', 
-            date: '2026-05-24 15:30', 
-            status: 'approved',
-            reply: '太棒了！恭喜力樺，外商面試的核心在於對過去專案成果的「量化數據」呈現，祝你面試順利！',
-            replyDate: '2026-05-24 18:00'
-          },
-          { 
-            id: 'mock-3', 
-            student: '林恩', 
-            course: 'BDS爐邊對談 Vol.1｜業務表達及提案關鍵', 
-            chapter: '第三章：高階提案的開場破冰思維', 
-            text: '請問如果是在實體客戶拜訪時，有什麼比較好用的拜訪開頭話術推薦嗎？', 
-            date: '2026-05-23 20:45', 
-            status: 'approved',
-            reply: null,
-            replyDate: null
-          }
-        ];
-        localStorage.setItem('bds_course_comments', JSON.stringify(defaultMock));
-        setComments(defaultMock);
-      }
-    }
+    loadComments();
   }, []);
 
   // Search & Filter State
@@ -74,30 +27,54 @@ export default function AdminCommentsPage() {
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [replyTextMap, setReplyTextMap] = useState<{[key: string]: string}>({});
 
-  const handleApprove = (id: string) => {
-    saveComments(comments.map(c => c.id === id ? { ...c, status: 'approved' } : c));
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('確定要刪除此留言嗎？')) {
-      saveComments(comments.filter(c => c.id !== id));
+  const handleApprove = async (id: string) => {
+    try {
+      const res = await fetch('/api/admin/comments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'approve' }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || '操作失敗'); return; }
+      setComments(comments.map(c => (c.id === id ? data : c)));
+    } catch (err) {
+      console.error('Approve error:', err);
+      alert('連線錯誤，操作失敗。');
     }
   };
 
-  const handleSendReply = (id: string) => {
+  const handleDelete = async (id: string) => {
+    if (!confirm('確定要刪除此留言嗎？')) return;
+    try {
+      const res = await fetch(`/api/admin/comments?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || '刪除失敗'); return; }
+      setComments(comments.filter(c => c.id !== id));
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('連線錯誤，刪除失敗。');
+    }
+  };
+
+  const handleSendReply = async (id: string) => {
     const text = replyTextMap[id];
     if (!text || !text.trim()) return;
 
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    saveComments(comments.map(c => 
-      c.id === id 
-        ? { ...c, reply: text, replyDate: formattedDate, status: 'approved' } 
-        : c
-    ));
-    setReplyTextMap({ ...replyTextMap, [id]: '' });
-    setActiveReplyId(null);
+    try {
+      const res = await fetch('/api/admin/comments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'reply', reply: text }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || '回覆失敗'); return; }
+      setComments(comments.map(c => (c.id === id ? data : c)));
+      setReplyTextMap({ ...replyTextMap, [id]: '' });
+      setActiveReplyId(null);
+    } catch (err) {
+      console.error('Reply error:', err);
+      alert('連線錯誤，回覆失敗。');
+    }
   };
 
   const handleResetFilters = () => {

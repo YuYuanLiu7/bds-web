@@ -156,6 +156,36 @@ CREATE TABLE IF NOT EXISTS course_announcements (
 );
 CREATE INDEX IF NOT EXISTS idx_course_announcements_course_id ON course_announcements(course_id);
 
+-- Course Reviews（課程評價，購買/有權學員可發佈，公開顯示）
+CREATE TABLE IF NOT EXISTS course_reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  student_name TEXT NOT NULL,
+  rating INTEGER NOT NULL DEFAULT 5,
+  comment TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_course_reviews_course_id ON course_reviews(course_id);
+
+-- Course Comments（章節問題與討論留言，需管理員審核後公開，可附管理員回覆）
+CREATE TABLE IF NOT EXISTS course_comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  chapter_id UUID REFERENCES chapters(id) ON DELETE SET NULL,
+  course_title TEXT,
+  chapter_title TEXT,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  student_name TEXT NOT NULL,
+  text TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending' or 'approved'
+  reply TEXT,
+  reply_date TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_course_comments_course_id ON course_comments(course_id);
+CREATE INDEX IF NOT EXISTS idx_course_comments_chapter_id ON course_comments(chapter_id);
+
 -- ============================================================
 -- 2. 後續新增欄位（migrations）
 -- ============================================================
@@ -203,6 +233,8 @@ ALTER TABLE downloads           DISABLE ROW LEVEL SECURITY;
 ALTER TABLE membership_plans    DISABLE ROW LEVEL SECURITY;
 ALTER TABLE site_settings       DISABLE ROW LEVEL SECURITY;
 ALTER TABLE course_announcements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE course_reviews      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE course_comments     DISABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 3. 初始資料 (Seed Data) — 皆使用 ON CONFLICT DO NOTHING

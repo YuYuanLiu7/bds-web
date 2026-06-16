@@ -26,83 +26,43 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
 
-  // Load reviews from localStorage
-  const loadReviews = () => {
-    try {
-      const stored = localStorage.getItem('bds_course_reviews');
-      if (stored) {
-        setReviews(JSON.parse(stored));
-      } else {
-        // Initialize default mock data
-        const defaultMock: Review[] = [
-          {
-            id: 'rev-1',
-            courseId: 'mock-course', 
-            studentName: '陳冠宇',
-            rating: 5,
-            comment: '課程內容非常扎實！特別是針對實戰開發與業務指標，提供了很多在別的書本上學不到的實戰經驗。精準切入核心概念，強力推薦！',
-            date: '2026-05-18 10:20'
-          },
-          {
-            id: 'rev-2',
-            courseId: 'mock-course',
-            studentName: '林曉梅',
-            rating: 5,
-            comment: '講師講得很有條理，章節大綱規劃得很好，可以隨時跳到想要複習的部分。講義教材下載也十分流暢精美！',
-            date: '2026-05-20 14:15'
-          },
-          {
-            id: 'rev-3',
-            courseId: 'mock-course',
-            studentName: '黃俊傑',
-            rating: 4,
-            comment: '很棒的分享，內容非常具有啟發性與實用價值。如果後續能提供更多章節延伸討論，那就太完美了！',
-            date: '2026-05-22 19:40'
-          }
-        ];
-        localStorage.setItem('bds_course_reviews', JSON.stringify(defaultMock));
-        setReviews(defaultMock);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
+  // 從伺服器載入本課程的評價（持久化於資料庫，跨裝置/使用者皆可見）
   useEffect(() => {
-    loadReviews();
-  }, []);
+    fetch(`/api/reviews?courseId=${encodeURIComponent(courseId)}`)
+      .then(res => (res.ok ? res.json() : []))
+      .then(list => setReviews(Array.isArray(list) ? list : []))
+      .catch(err => console.warn('Failed to load reviews:', err));
+  }, [courseId]);
 
-  // Filter reviews for this course
-  // Show reviews targeting this specific courseId. If none are found, we show the mock ones.
-  const matchedReviews = reviews.filter(r => r.courseId === courseId);
-  const courseReviews = matchedReviews.length > 0 ? matchedReviews : reviews;
+  const courseReviews = reviews;
 
   const averageRating = courseReviews.length > 0
     ? (courseReviews.reduce((sum, r) => sum + r.rating, 0) / courseReviews.length).toFixed(1)
     : '5.0';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userComment.trim()) return;
 
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    const newReview: Review = {
-      id: `rev-${Date.now()}`,
-      courseId,
-      studentName: studentName || '匿名學員',
-      rating: userRating,
-      comment: userComment,
-      date: formattedDate
-    };
-
-    const updated = [newReview, ...reviews];
-    localStorage.setItem('bds_course_reviews', JSON.stringify(updated));
-    setReviews(updated);
-    setUserComment('');
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId, rating: userRating, comment: userComment }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || '評價發佈失敗，請稍後再試。');
+        return;
+      }
+      setReviews([data, ...reviews]);
+      setUserComment('');
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err) {
+      console.error('Submit review error:', err);
+      alert('連線錯誤，評價發佈失敗。');
+    }
   };
 
   return (

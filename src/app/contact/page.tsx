@@ -22,11 +22,11 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('bds_pages_content');
-    if (saved) {
-      try {
-        const list = JSON.parse(saved);
-        const item = list.find((p: any) => p.path === '/contact');
+    // 從伺服器讀取頁面內容（後台 CMS 編輯後對所有訪客生效）
+    fetch('/api/settings?key=pages')
+      .then(res => (res.ok ? res.json() : null))
+      .then(list => {
+        const item = Array.isArray(list) ? list.find((p: any) => p.path === '/contact') : null;
         if (item) {
           setPageData({
             title: item.title || '有任何問題？我們隨時為您解答',
@@ -35,26 +35,34 @@ export default function ContactPage() {
             imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200'
           });
         }
-      } catch (e) {}
-    }
+      })
+      .catch(err => console.warn('Failed to load page content:', err));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
-    
+
     setLoading(true);
-    // Simulate API request
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        subject: '課程諮詢',
-        message: ''
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-    }, 1000);
+      const data = await res.json();
+      if (res.ok) {
+        setSubmitted(true);
+        setFormData({ name: '', email: '', subject: '課程諮詢', message: '' });
+      } else {
+        alert(data.error || '送出失敗，請稍後再試。');
+      }
+    } catch (err) {
+      console.error('Contact submit error:', err);
+      alert('連線錯誤，請稍後再試或直接來信 bydoingso@gmail.com');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

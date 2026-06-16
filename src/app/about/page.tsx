@@ -12,11 +12,11 @@ export default function AboutPage() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('bds_pages_content');
-    if (saved) {
-      try {
-        const list = JSON.parse(saved);
-        const item = list.find((p: any) => p.path === '/about');
+    // 從伺服器讀取頁面內容（後台 CMS 編輯後對所有訪客生效）
+    fetch('/api/settings?key=pages')
+      .then(res => (res.ok ? res.json() : null))
+      .then(list => {
+        const item = Array.isArray(list) ? list.find((p: any) => p.path === '/about') : null;
         if (item) {
           setPageData({
             title: item.title || '關於我們',
@@ -25,8 +25,8 @@ export default function AboutPage() {
             imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200'
           });
         }
-      } catch (e) {}
-    }
+      })
+      .catch(err => console.warn('Failed to load page content:', err));
   }, []);
 
   const coreValues = [

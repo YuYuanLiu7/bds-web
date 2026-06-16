@@ -166,10 +166,48 @@ export const SETTINGS_DEFAULTS: Record<string, any> = {
     emailFromName: 'BDS By Doing So',
     emailFromAddress: 'no-reply@bds.fu-notes.com',
   },
+  // 頁面內容 CMS（about/contact/privacy 等靜態頁的標題、副標、內文、封面）
+  pages: [
+    {
+      id: '1', name: '首頁 (首頁核心展示)', path: '/', type: 'system', status: 'published', lastUpdated: '2026-05-20 18:30',
+      title: '業務不是超人，卻有超能力！',
+      subtitle: '專注於硬體、半導體、醫材產業的業務開發與銷售課程，助您提升職場競爭力。',
+      content: 'BDS By Doing So 是一個專為「硬體科技、半導體、生醫材料及跨領域商務開發」量身打造的實戰學習平台。',
+      imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200',
+    },
+    {
+      id: '2', name: '所有課程列表', path: '/courses', type: 'system', status: 'published', lastUpdated: '2026-05-18 12:45',
+      title: '所有課程',
+      subtitle: '精選實戰學程，快速提升您的專業銷售與商務拓展能力。',
+      content: '我們拒絕純理論，所有課程均由具備多年產業銷售與商務開發經驗的資深經理人親自授課。',
+      imageUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=1200',
+    },
+    {
+      id: '3', name: '關於我們 / BDS 理念介紹', path: '/about', type: 'custom', status: 'published', lastUpdated: '2026-05-12 14:00',
+      title: '關於我們',
+      subtitle: '業務不是超人，卻有超能力！',
+      content: 'BDS By Doing So 是一個專為「硬體科技、半導體、生醫材料及跨領域商務開發」量身打造的實戰學習平台。我們深信真正的專業來自於實踐與經驗傳承，協助每一位渴望躍升的夥伴實現職場轉型與能力升級。',
+      imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200',
+    },
+    {
+      id: '4', name: '隱私權與服務條款條約', path: '/privacy', type: 'custom', status: 'published', lastUpdated: '2026-04-30 09:15',
+      title: '服務條款與隱私權政策',
+      subtitle: '法律與條約規定說明',
+      content: '歡迎您使用 BDS By Doing So（以下簡稱「本平台」）。本服務條款旨在規範本平台與註冊會員之間的權利義務關係。',
+      imageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80&w=1200',
+    },
+    {
+      id: '5', name: '聯絡我們 / 商務諮詢', path: '/contact', type: 'custom', status: 'published', lastUpdated: '2026-03-22 17:00',
+      title: '有任何問題？我們隨時為您解答',
+      subtitle: '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
+      content: '客服與合作信箱：bydoingso@gmail.com。任何諮詢將於 1-2 個工作天內回覆。',
+      imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200',
+    },
+  ],
 };
 
 // 可被前台公開讀取的 key（不含通知範本、寄件設定等管理用資訊）
-export const PUBLIC_SETTING_KEYS = ['general', 'faqs', 'announcements'];
+export const PUBLIC_SETTING_KEYS = ['general', 'faqs', 'announcements', 'pages'];
 // 後台可寫入的所有 key
 export const WRITABLE_SETTING_KEYS = Object.keys(SETTINGS_DEFAULTS);
 
