@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await req.json();
-    const { courseId, planId, type = 'course' } = body;
+    const { courseId, planId, downloadId, type = 'course' } = body;
 
     // 🔒 金額一律以資料庫為準，不信任前端傳入的 amount，避免竄改價格低買
     let amount: number;
@@ -24,6 +24,17 @@ export async function POST(req: Request) {
       }
       amount = plan.price;
       prodDesc = `Subscribe to ${plan.title}`;
+    } else if (type === 'download') {
+      const { data: download, error: downloadErr } = await supabase
+        .from('downloads')
+        .select('price, title')
+        .eq('id', downloadId)
+        .single();
+      if (downloadErr || !download) {
+        return NextResponse.json({ error: '找不到指定的數位下載商品' }, { status: 400 });
+      }
+      amount = download.price;
+      prodDesc = `Purchase ${download.title}`;
     } else {
       const { data: course, error: courseErr } = await supabase
         .from('courses')
@@ -41,9 +52,11 @@ export async function POST(req: Request) {
       MerID: process.env.PAYUNI_MERID || 'MS12345678',
       HashKey: process.env.PAYUNI_HASH_KEY || 'YOUR_PAYUNI_HASH_KEY',
       HashIV: process.env.PAYUNI_HASH_IV || 'YOUR_PAYUNI_HASH_IV',
-      ReturnURL: type === 'membership' 
+      ReturnURL: type === 'membership'
         ? `${process.env.NEXTAUTH_URL}/membership`
-        : `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
+        : type === 'download'
+          ? `${process.env.NEXTAUTH_URL}/downloads`
+          : `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
       NotifyURL: `${process.env.NEXTAUTH_URL}/api/checkout/callback`,
     };
 
@@ -81,6 +94,14 @@ export async function POST(req: Request) {
               status: 'pending'
             });
           }
+        } else if (type === 'download') {
+          await supabase.from('orders').insert({
+            id: merTradeNo,
+            user_id: userData.id,
+            download_id: downloadId,
+            amount: amount,
+            status: 'pending'
+          });
         } else {
           await supabase.from('orders').insert({
             id: merTradeNo,

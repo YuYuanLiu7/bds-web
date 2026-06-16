@@ -82,6 +82,13 @@ export async function POST(req: Request) {
             course_id: order.course_id,
             purchased_at: new Date().toISOString()
           });
+        } else if (order.download_id) {
+          // 開通數位下載擁有權
+          await supabase.from('user_downloads').upsert({
+            user_id: order.user_id,
+            download_id: order.download_id,
+            purchased_at: new Date().toISOString()
+          });
         } else if (order.membership_plan_id) {
           // 開通會員方案訂閱權限
           try {
@@ -137,6 +144,13 @@ export async function POST(req: Request) {
               .eq('id', order.course_id)
               .single();
             if (course) purchasedItemName = course.title;
+          } else if (order.download_id) {
+            const { data: download } = await supabase
+              .from('downloads')
+              .select('title')
+              .eq('id', order.download_id)
+              .single();
+            if (download) purchasedItemName = `數位下載 - ${download.title}`;
           } else if (order.membership_plan_id) {
             const { data: plan } = await supabase
               .from('membership_plans')

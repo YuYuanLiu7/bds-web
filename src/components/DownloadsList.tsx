@@ -18,11 +18,20 @@ interface DownloadsListProps {
   downloads: DownloadProduct[];
   primaryColor: string;
   isAdmin?: boolean;
+  ownedIds?: string[];
+  isLoggedIn?: boolean;
 }
 
-export default function DownloadsList({ downloads, primaryColor, isAdmin = false }: DownloadsListProps) {
+export default function DownloadsList({ downloads, primaryColor, isAdmin = false, ownedIds = [], isLoggedIn = false }: DownloadsListProps) {
   const [selectedProduct, setSelectedProduct] = useState<DownloadProduct | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [processing, setProcessing] = useState(false);
+
+  // 判斷某商品目前使用者是否可直接下載：管理員、免費商品、或已購買者
+  const canDownload = (product: DownloadProduct) => {
+    const isPaid = (product.price || 0) > 0;
+    return isAdmin || !isPaid || ownedIds.includes(product.id);
+  };
 
   // Helper to map icons based on type
   const getIconForType = (type: string) => {
@@ -47,34 +56,74 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
     setDownloadSuccess(false);
   };
 
-  const handleDownload = (product: DownloadProduct) => {
-    // 1. 檢查付費狀態與管理員特權
-    const isPaid = (product.price || 0) > 0;
-    
-    if (isPaid && !isAdmin) {
-      alert('🛒 此資源為付費專屬項目。請先完成購買或聯絡客服開通權限後，即可下載使用！');
+  // 下載：付費商品的 file_url 不在列表中外洩，改向安全端點逐筆驗證權限後取得連結
+  const handleDownload = async (product: DownloadProduct) => {
+    if (!canDownload(product)) {
+      handlePurchase(product);
       return;
     }
 
-    // 2. 如果是免費項目或具備管理員權限 (最高特權)
-    if (product.file_url) {
+    setProcessing(true);
+    try {
+      const res = await fetch(`/api/downloads/${product.id}/file`);
+      const data = await res.json();
+
+      if (!res.ok || !data.file_url) {
+        alert(data.error || '此資源尚未配置下載檔案連結，請稍後再試或聯絡客服。');
+        return;
+      }
+
       setDownloadSuccess(true);
       setTimeout(() => {
-        window.open(product.file_url, '_blank');
+        window.open(data.file_url, '_blank');
         setDownloadSuccess(false);
-      }, 1500);
-    } else {
-      if (isAdmin) {
-        // 管理員尊榮特權：即使無連結也可下載樣品測試，提供極致體驗
-        setDownloadSuccess(true);
-        setTimeout(() => {
-          window.open('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', '_blank');
-          setDownloadSuccess(false);
-          alert('👑 管理員最高權限提示：本資源尚未在後台配置檔案連結，已自動為您下載測試樣品 PDF，確保功能完全正常。');
-        }, 1500);
-      } else {
-        alert('此資源目前為付費專屬，正式上架後即可下載！');
+      }, 1200);
+    } catch (err) {
+      console.error('Download error:', err);
+      alert('下載連結取得失敗，請稍後再試。');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // 購買：未登入先導向登入；已登入則建立訂單並導向 PayUni 金流
+  const handlePurchase = async (product: DownloadProduct) => {
+    if (!isLoggedIn) {
+      window.location.href = `/login?callbackUrl=/downloads`;
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ downloadId: product.id, type: 'download' }),
+      });
+      const params = await response.json();
+
+      if (!response.ok) {
+        alert(params.error || '結帳失敗，請稍後再試。');
+        return;
       }
+
+      // 建立隱藏表單並 POST 至 PayUni（UPP）；端點由環境變數決定
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = process.env.NEXT_PUBLIC_PAYUNI_UPP_URL || 'https://sandbox-api.payuni.com.tw/api/upp';
+      Object.keys(params).forEach((key) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = params[key];
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      console.error('Checkout failed:', err);
+      alert('結帳失敗，請稍後再試。');
+      setProcessing(false);
     }
   };
 
@@ -121,13 +170,17 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
                   <span className="text-lg font-black text-slate-900">
                     NT$ {item.price.toLocaleString()}
                   </span>
-                  {isAdmin && (
+                  {isAdmin ? (
                     <span className="text-[9px] font-bold text-indigo-600 flex items-center mt-0.5">
                       <Crown className="w-3 h-3 mr-0.5" /> 管理員可直接下載
                     </span>
-                  )}
+                  ) : ownedIds.includes(item.id) && (item.price || 0) > 0 ? (
+                    <span className="text-[9px] font-bold text-emerald-600 flex items-center mt-0.5">
+                      <CheckCircle2 className="w-3 h-3 mr-0.5" /> 已購買
+                    </span>
+                  ) : null}
                 </div>
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent card click trigger
                     handleCardClick(item);
@@ -135,7 +188,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
                   style={{ backgroundColor: primaryColor }}
                   className="text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs hover:opacity-90 active:scale-95 transition flex items-center cursor-pointer"
                 >
-                  {isAdmin ? '管理員查看' : ((item.price || 0) > 0 ? '立即選購' : '免費下載')} <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  {isAdmin ? '管理員查看' : canDownload(item) ? '立即下載' : ((item.price || 0) > 0 ? '立即選購' : '免費下載')} <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </button>
               </div>
 
@@ -229,16 +282,21 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
                 </div>
               ) : (
                 <button
-                  onClick={() => handleDownload(selectedProduct)}
+                  onClick={() => (canDownload(selectedProduct) ? handleDownload(selectedProduct) : handlePurchase(selectedProduct))}
+                  disabled={processing}
                   style={{ backgroundColor: primaryColor }}
-                  className="w-full py-3 text-white rounded-xl font-black text-xs shadow-md hover:opacity-90 active:scale-98 transition flex items-center justify-center cursor-pointer"
+                  className="w-full py-3 text-white rounded-xl font-black text-xs shadow-md hover:opacity-90 active:scale-98 transition flex items-center justify-center cursor-pointer disabled:opacity-60"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  {isAdmin ? (
-                    selectedProduct.file_url ? '👑 管理員直接下載' : '👑 管理員直接下載 (無連結，下載測試檔)'
-                  ) : (
-                    (selectedProduct.price || 0) > 0 ? '立即購買解鎖資源' : '免費下載資源'
-                  )}
+                  {processing
+                    ? '處理中...'
+                    : isAdmin
+                      ? '👑 管理員直接下載'
+                      : (selectedProduct.price || 0) <= 0
+                        ? '免費下載資源'
+                        : ownedIds.includes(selectedProduct.id)
+                          ? '立即下載（已購買）'
+                          : '立即購買解鎖資源'}
                 </button>
               )}
               

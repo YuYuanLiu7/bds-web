@@ -117,6 +117,14 @@ CREATE TABLE IF NOT EXISTS downloads (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- User Downloads（使用者數位下載擁有權 / 已購買）
+CREATE TABLE IF NOT EXISTS user_downloads (
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  download_id UUID REFERENCES downloads(id) ON DELETE CASCADE,
+  purchased_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (user_id, download_id)
+);
+
 -- Membership Plans（會員方案）
 CREATE TABLE IF NOT EXISTS membership_plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -160,6 +168,9 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_expires_at TIMESTAMP WITH 
 -- orders：會員方案關聯
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS membership_plan_id UUID REFERENCES membership_plans(id) ON DELETE SET NULL;
 
+-- orders：數位下載商品關聯
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS download_id UUID REFERENCES downloads(id) ON DELETE SET NULL;
+
 -- courses：講師與自訂設定
 ALTER TABLE courses ADD COLUMN IF NOT EXISTS instructor TEXT DEFAULT 'BDS 團隊';
 ALTER TABLE courses ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN DEFAULT FALSE;
@@ -185,6 +196,7 @@ ALTER TABLE courses             DISABLE ROW LEVEL SECURITY;
 ALTER TABLE chapters            DISABLE ROW LEVEL SECURITY;
 ALTER TABLE orders              DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_courses        DISABLE ROW LEVEL SECURITY;
+ALTER TABLE user_downloads      DISABLE ROW LEVEL SECURITY;
 ALTER TABLE events              DISABLE ROW LEVEL SECURITY;
 ALTER TABLE articles            DISABLE ROW LEVEL SECURITY;
 ALTER TABLE downloads           DISABLE ROW LEVEL SECURITY;

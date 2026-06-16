@@ -49,6 +49,21 @@ export default async function DownloadsPage() {
   // Get current user session to check admin status
   const session = await getServerSession(authOptions);
   const isAdmin = session?.user && (session.user as any).role === 'admin';
+  const userId = (session?.user as any)?.id;
+
+  // 查詢目前使用者已購買的數位下載商品（供前台判斷顯示「立即下載」或「立即購買」）
+  let ownedIds: string[] = [];
+  if (userId) {
+    try {
+      const { data: owned } = await supabase
+        .from('user_downloads')
+        .select('download_id')
+        .eq('user_id', userId);
+      ownedIds = (owned || []).map((o: any) => o.download_id);
+    } catch (err) {
+      console.warn('Failed to query user downloads ownership:', err);
+    }
+  }
 
   let downloads = [];
   try {
@@ -120,7 +135,7 @@ export default async function DownloadsPage() {
         </div>
 
         {/* Dynamic Interactive Downloads List */}
-        <DownloadsList downloads={downloads} primaryColor={primaryColor} isAdmin={!!isAdmin} />
+        <DownloadsList downloads={downloads} primaryColor={primaryColor} isAdmin={!!isAdmin} ownedIds={ownedIds} isLoggedIn={!!session} />
         
       </div>
 
