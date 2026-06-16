@@ -29,28 +29,17 @@ export default async function CategoryPage({ params }: PageProps) {
   const readableCategory = categoryMap[id.toLowerCase()] || decodeURIComponent(id);
   const primaryColor = settings.primaryColor || '#21448e';
 
-  // 3. Fallback mock courses if DB is empty
-  const fallbackCourses = [
-    { id: 'fs001', title: '硬體業務新手村', price: 3200, category: '業務新手村', thumbnail_url: 'https://warehouse.kaik.network/school/images/800c43d7-815d-4b73-8347-0f76477826f0.jpg', instructor: 'BDS 團隊', rating: 5.0, students: 142 },
-    { id: 'fs002', title: '醫材產業新手村', price: 3500, category: '業務新手村', thumbnail_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800', instructor: 'BDS 團隊', rating: 5.0, students: 86 },
-    { id: 'fs003', title: '外商遠距求職攻略', price: 2800, category: '職場升級', thumbnail_url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800', instructor: 'BDS 團隊', rating: 4.9, students: 95 },
-    { id: 'fs004', title: '文組跨領域高薪轉職', price: 2900, category: '職場升級', thumbnail_url: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800', instructor: 'BDS 團隊', rating: 5.0, students: 110 },
-    { id: 'fs005', title: '秒錄取的面試提問策略', price: 1800, category: '職場升級', thumbnail_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800', instructor: 'BDS 團隊', rating: 4.8, students: 78 },
-    { id: 'fs006', title: 'BDS爐邊對談 Vol.1｜業務表達及提案關鍵', price: 0, category: '爐邊對談', thumbnail_url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=800', instructor: 'BDS 團隊', rating: 5.0, students: 230 }
-  ];
-
-  const displayedCourses = courses.length > 0
-    ? courses.map(c => ({
-        id: c.id,
-        title: c.title,
-        price: c.price,
-        category: c.category || '精選',
-        thumbnail_url: c.thumbnail_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
-        instructor: 'BDS 團隊',
-        rating: undefined as number | undefined,
-        students: undefined as number | undefined
-      }))
-    : fallbackCourses;
+  // 僅顯示資料庫中的真實課程；無資料時呈現空狀態，不再以示範課程魚目混珠
+  const displayedCourses = courses.map(c => ({
+    id: c.id,
+    title: c.title,
+    price: c.price,
+    category: c.category || '精選',
+    thumbnail_url: c.thumbnail_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
+    instructor: 'BDS 團隊',
+    rating: undefined as number | undefined,
+    students: undefined as number | undefined
+  }));
 
   // Filter courses by readableCategory
   // Supports fuzzy or exact match for robust rendering
