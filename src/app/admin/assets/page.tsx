@@ -304,6 +304,20 @@ export default function AdminAssetsPage() {
   // Check if all items on the current page are selected
   const isAllPageItemsSelected = paginatedMedia.length > 0 && paginatedMedia.every(m => selectedIds.includes(m.id));
 
+  // 將檔案類型轉為中文顯示
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'image':
+        return '圖片';
+      case 'video':
+        return '影片';
+      case 'document':
+        return '文件';
+      default:
+        return '其他';
+    }
+  };
+
   // File type helper
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -325,8 +339,8 @@ export default function AdminAssetsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <FolderOpen className="w-6.5 h-6.5 mr-2 text-indigo-600" />
-            素材庫 (Assets)
+            <FolderOpen className="w-6 h-6 mr-2 text-indigo-600" />
+            素材庫
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">
             集中上傳與管理您的課程封面圖、簡報講義檔案、Banner 及輔助媒體素材。
@@ -572,12 +586,13 @@ export default function AdminAssetsPage() {
 
                         {/* Type Tag */}
                         <td className="py-3 px-4 text-center">
-                          <span className={`inline-block px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase ${
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[9px] font-extrabold ${
                             item.type === 'image' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
                             item.type === 'video' ? 'bg-sky-50 text-sky-600 border border-sky-100' :
-                            'bg-amber-50 text-amber-600 border border-amber-100'
+                            item.type === 'document' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                            'bg-slate-50 text-slate-600 border border-slate-100'
                           }`}>
-                            {item.type}
+                            {getTypeLabel(item.type)}
                           </span>
                         </td>
 
@@ -704,8 +719,8 @@ export default function AdminAssetsPage() {
                       </div>
                       <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mt-1">
                         <span>大小: {item.size}</span>
-                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[8px] font-black uppercase text-slate-500">
-                          {item.type}
+                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[8px] font-black text-slate-500">
+                          {getTypeLabel(item.type)}
                         </span>
                       </div>
                     </div>

@@ -66,7 +66,7 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
   };
 
   return (
-    <section className="bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-slate-250/60 shadow-xs space-y-8 mt-12">
+    <section className="bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-slate-200/60 shadow-xs space-y-8 mt-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 pb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center">
@@ -87,12 +87,12 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
                 <Star
                   key={s}
                   className={`w-4 h-4 ${
-                    s <= Math.round(Number(averageRating)) ? 'fill-yellow-450 text-yellow-450' : 'text-slate-300'
+                    s <= Math.round(Number(averageRating)) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'
                   }`}
                 />
               ))}
             </div>
-            <div className="text-[10px] text-slate-450 font-bold mt-1">來自 {courseReviews.length} 位學員</div>
+            <div className="text-[10px] text-slate-400 font-bold mt-1">來自 {courseReviews.length} 位學員</div>
           </div>
         </div>
       </div>
@@ -118,11 +118,11 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
                       onClick={() => setUserRating(star)}
                       onMouseEnter={() => setHoveredStar(star)}
                       onMouseLeave={() => setHoveredStar(null)}
-                      className="text-yellow-450 hover:scale-110 transition duration-150 focus:outline-none"
+                      className="text-yellow-400 hover:scale-110 transition duration-150 focus:outline-none"
                     >
                       <Star
                         className={`w-6 h-6 ${
-                          star <= (hoveredStar ?? userRating) ? 'fill-yellow-450 text-yellow-450' : 'text-slate-300'
+                          star <= (hoveredStar ?? userRating) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'
                         }`}
                       />
                     </button>
@@ -147,7 +147,7 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-indigo-650 hover:bg-indigo-750 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center shadow-xs cursor-pointer active:scale-95"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center shadow-xs cursor-pointer active:scale-95"
                 >
                   發佈評價
                 </button>
@@ -172,11 +172,11 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
                 </div>
                 <div>
                   <div className="text-xs font-bold text-gray-800">{review.studentName}</div>
-                  <div className="flex text-yellow-450 mt-1">
+                  <div className="flex text-yellow-400 mt-1">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
                         key={s}
-                        className={`w-3 h-3 ${s <= review.rating ? 'fill-yellow-450 text-yellow-450' : 'text-slate-200'}`}
+                        className={`w-3 h-3 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'}`}
                       />
                     ))}
                   </div>

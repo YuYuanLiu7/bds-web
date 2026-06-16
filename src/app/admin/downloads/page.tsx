@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Search, Plus, Edit3, Trash2, Copy, Check, MoreVertical, FileText, ShoppingBag, DollarSign, Activity, Filter } from 'lucide-react';
+import { Download, Search, Plus, Edit3, Trash2, Copy, Check, MoreVertical, FileText, ShoppingBag, Activity, Filter } from 'lucide-react';
 import DownloadModal from '@/components/admin/DownloadModal';
 
 interface DownloadProduct {
@@ -15,13 +15,6 @@ interface DownloadProduct {
   file_url?: string;
   created_at?: string;
 }
-
-// Seed/Mock fallback data in case database is empty or not yet migrated
-const MOCK_DOWNLOADS: DownloadProduct[] = [
-  { id: '1', title: 'BDS 獨家：半導體高階業務求職信與履歷模板', price: 499, type: 'PDF 文件', description: '針對半導體設備、IC 通路、代工廠業務職缺量身打造的英文履歷與動機信模板，助您脫穎而出。', downloads_count: 125, status: 'published', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-  { id: '2', title: '硬體產業 ODM 生意開發策略白皮書 (2026 最新版)', price: 1200, type: 'PDF/PPT 簡報', description: '深度解析電子製造與 ODM 大廠商務拓展核心方法論，包含客戶導入、RFQ 報價與銷售談判策略。', downloads_count: 86, status: 'published', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-  { id: '3', title: '外商商務開發面試經典 50 問與模擬解題手冊', price: 699, type: 'PDF 電子書', description: '由資深外商 BD 總監編寫，涵蓋 50 個經典面試提問、Star 原則回答公式與商務思維模擬解密。', downloads_count: 234, status: 'published', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
-];
 
 export default function AdminDownloadsPage() {
   const [downloads, setDownloads] = useState<DownloadProduct[]>([]);
@@ -49,12 +42,13 @@ export default function AdminDownloadsPage() {
       if (Array.isArray(data) && data.length > 0) {
         setDownloads(data);
       } else {
-        // Fallback to mock data to prevent blank screen if DB table is unmigrated
-        setDownloads(MOCK_DOWNLOADS);
+        // 空資料時呈現空狀態，不以假商品魚目混珠
+        setDownloads([]);
       }
     } catch (err) {
-      console.warn('API Error, falling back to local seed data:', err);
-      setDownloads(MOCK_DOWNLOADS);
+      // API 失敗時呈現空狀態，避免顯示假商品與假數字
+      console.warn('讀取數位商品失敗：', err);
+      setDownloads([]);
     } finally {
       setLoading(false);
     }
@@ -95,12 +89,10 @@ export default function AdminDownloadsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('確定要刪除此數位商品嗎？')) return;
     try {
-      // Check if it's a real DB product (non-mock numeric string id usually)
-      if (id.length > 5) {
-        const res = await fetch(`/api/admin/downloads?id=${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('刪除失敗');
-      }
-      
+      // 一律呼叫刪除 API，確保刪除行為與畫面一致
+      const res = await fetch(`/api/admin/downloads?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('刪除失敗');
+
       setDownloads(prev => prev.filter(item => item.id !== id));
     } catch (err) {
       alert('刪除失敗');
@@ -115,8 +107,7 @@ export default function AdminDownloadsPage() {
 
   // Calculations for KPI cards
   const totalProducts = downloads.length;
-  const totalVolume = downloads.reduce((acc, curr) => acc + (curr.downloads_count || 0), 0);
-  const totalSalesRevenue = downloads.reduce((acc, curr) => acc + ((curr.price || 0) * (curr.downloads_count || 0)), 0);
+  const totalDownloads = downloads.reduce((acc, curr) => acc + (curr.downloads_count || 0), 0);
   const averagePrice = totalProducts > 0 ? Math.round(downloads.reduce((acc, curr) => acc + (curr.price || 0), 0) / totalProducts) : 0;
 
   // Extract all available formats for filter dropdown
@@ -158,29 +149,18 @@ export default function AdminDownloadsPage() {
           </div>
         </div>
 
-        {/* Stat 2: Total Net Sales Volume */}
+        {/* Stat 2: Total Downloads */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">累計淨銷售量</span>
-            <div className="text-xl font-black text-emerald-600">{totalVolume.toLocaleString()} <span className="text-xs font-semibold text-emerald-400">次</span></div>
+            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">累計下載次數</span>
+            <div className="text-xl font-black text-emerald-600">{totalDownloads.toLocaleString()} <span className="text-xs font-semibold text-emerald-400">次</span></div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
             <Download className="w-5 h-5" />
           </div>
         </div>
 
-        {/* Stat 3: Total Net Sales Revenue */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">累計淨銷售總額</span>
-            <div className="text-xl font-black text-indigo-600">NT$ {totalSalesRevenue.toLocaleString()}</div>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-            <DollarSign className="w-5 h-5" />
-          </div>
-        </div>
-
-        {/* Stat 4: Average Order Price */}
+        {/* Stat 3: Average Order Price */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">商品平均單價</span>
@@ -205,23 +185,21 @@ export default function AdminDownloadsPage() {
             {loading && <span className="text-indigo-600 animate-pulse">連線更新中...</span>}
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xs border border-slate-150 overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse table-auto min-w-[700px]">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-150 h-12 select-none">
+                  <tr className="bg-slate-50 border-b border-slate-200 h-12 select-none">
                     <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3 w-[40%]">商品名稱</th>
                     <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3 text-center">發布狀態</th>
                     <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">定價</th>
-                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">淨銷售量 (次)</th>
-                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">淨銷售總額</th>
+                    <th className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3">累計下載次數</th>
                     <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider py-3 text-right">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredDownloads.length > 0 ? (
                     filteredDownloads.map((item) => {
-                      const netSalesTotal = (item.price || 0) * (item.downloads_count || 0);
                       return (
                         <tr key={item.id} className="hover:bg-slate-50/40 transition duration-150 group">
                           
@@ -234,7 +212,7 @@ export default function AdminDownloadsPage() {
                               >
                                 {item.title}
                               </span>
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-50 border border-slate-150 text-slate-500 font-extrabold text-[9px] uppercase tracking-wider select-none">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-500 font-extrabold text-[9px] uppercase tracking-wider select-none">
                                 {item.type}
                               </span>
                             </div>
@@ -243,12 +221,14 @@ export default function AdminDownloadsPage() {
                           {/* Status */}
                           <td className="px-5 py-4.5 text-center select-none">
                             {item.status === 'published' ? (
-                              <span className="inline-flex items-center px-2 py-0.8 rounded-full bg-emerald-50 text-emerald-700 font-black text-[9px] border border-emerald-150">
-                                🟢 已上架
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-black text-[9px] border border-emerald-100">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
+                                已上架
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-0.8 rounded-full bg-amber-50 text-amber-700 font-black text-[9px] border border-amber-150">
-                                🟡 草稿
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-black text-[9px] border border-amber-100">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5" />
+                                草稿
                               </span>
                             )}
                           </td>
@@ -258,17 +238,12 @@ export default function AdminDownloadsPage() {
                             NT$ {item.price.toLocaleString()}
                           </td>
 
-                          {/* Net Sales Volume */}
+                          {/* Total Downloads */}
                           <td className="px-5 py-4.5 text-slate-800 font-extrabold text-xs select-none">
                             <div className="flex items-center space-x-1">
                               <Download className="w-3.5 h-3.5 text-emerald-500" />
                               <span>{item.downloads_count}</span>
                             </div>
-                          </td>
-
-                          {/* Net Sales Total */}
-                          <td className="px-5 py-4.5 text-indigo-600 font-black text-sm select-none">
-                            NT$ {netSalesTotal.toLocaleString()}
                           </td>
 
                           {/* Actions */}
@@ -310,8 +285,8 @@ export default function AdminDownloadsPage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic text-xs">
-                        沒有找到符合篩選條件的數位商品。
+                      <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic text-xs">
+                        目前尚無上架商品。
                       </td>
                     </tr>
                   )}
@@ -323,7 +298,7 @@ export default function AdminDownloadsPage() {
 
         {/* Filter Aside (lg:col-span-1) */}
         <div className="lg:col-span-1 lg:order-first">
-          <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-xs space-y-4">
+          <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center pb-2.5 border-b border-slate-100">
               <Filter className="w-4 h-4 mr-2 text-indigo-500 shrink-0" />
               <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">商品篩選</h3>

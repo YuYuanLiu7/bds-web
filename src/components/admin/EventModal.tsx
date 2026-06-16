@@ -304,7 +304,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                     required
                     value={formData.date}
                     onChange={e => setFormData({...formData, date: e.target.value})}
-                    className="w-full px-4 py-2.2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition text-xs font-semibold"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition text-xs font-semibold"
                   />
                 </div>
 
@@ -349,7 +349,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                     onChange={e => setFormData({...formData, status: e.target.value as any})}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition bg-white text-xs font-semibold"
                   >
-                    <option value="upcoming">進行中</option>
+                    <option value="upcoming">即將舉行</option>
                     <option value="completed">已結束</option>
                   </select>
                 </div>
@@ -404,7 +404,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                   <div className="mt-3 relative aspect-[16/10] rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-50 select-none group">
                     <img 
                       src={formData.image_url} 
-                      alt="Event Preview" 
+                      alt="活動封面預覽"
                       className="w-full h-full object-cover"
                     />
                     {uploading && (

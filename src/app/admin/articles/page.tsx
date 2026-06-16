@@ -251,7 +251,7 @@ export default function AdminArticlesPage() {
                           <div className="flex items-center">
                             <Eye className="w-3.5 h-3.5 mr-1 text-slate-300 flex-shrink-0" />
                             <span>
-                              觀看量: <strong className="text-slate-600 font-black ml-1">{article.views}次</strong>
+                              觀看量: <strong className="text-slate-600 font-black ml-1">{article.views ?? 0}次</strong>
                             </span>
                           </div>
                         </td>
@@ -361,10 +361,6 @@ export default function AdminArticlesPage() {
                   {uniqueCategories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
-                  <option value="商務開發">商務開發</option>
-                  <option value="半導體產業">半導體產業</option>
-                  <option value="職涯成長">職涯成長</option>
-                  <option value="活動公告">活動公告</option>
                 </select>
               </div>
 

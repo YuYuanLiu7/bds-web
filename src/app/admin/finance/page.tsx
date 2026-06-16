@@ -74,7 +74,7 @@ export default function AdminFinancePage() {
         order.users?.phone || '',
         order.amount || 0,
         order.payment_type === 'SIMULATED_TEST' ? '模擬支付' : (order.payment_type || 'PayUni'),
-        order.status === 'paid' ? '已付款' : '未付款'
+        order.status === 'paid' ? '已付款' : (order.status === 'failed' ? '付款失敗' : '未付款')
       ];
     });
 
@@ -128,11 +128,10 @@ export default function AdminFinancePage() {
       // If affiliate system is modeled, otherwise ignore
     }
 
-    // Status Filter
+    // 付款狀態篩選：已付款受「已付款」核取方塊控制，待付款與付款失敗皆受「未付款」核取方塊控制
     result = result.filter(o => {
-      if (o.status === 'paid' && statusPaid) return true;
-      if (o.status === 'pending' && statusUnpaid) return true;
-      if (o.status === 'failed') return true; // Failures are displayed
+      if (o.status === 'paid') return statusPaid;
+      if (o.status === 'pending' || o.status === 'failed') return statusUnpaid;
       return false;
     });
 
@@ -222,7 +221,7 @@ export default function AdminFinancePage() {
                 type="text" 
                 value={searchCustomer}
                 onChange={(e) => setSearchCustomer(e.target.value)}
-                placeholder="example@teachify.net"
+                placeholder="輸入客戶信箱或姓名"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
               />
             </div>
@@ -311,7 +310,7 @@ export default function AdminFinancePage() {
 
       {/* Item Count row */}
       <div className="text-xs text-slate-400 font-bold">
-        共 <span className="text-slate-700 font-extrabold">{filteredOrders.length}</span> 項，顯示 <span className="text-slate-700 font-extrabold">1-{Math.min(25, filteredOrders.length)}</span>
+        共 <span className="text-slate-700 font-extrabold">{filteredOrders.length}</span> 項
       </div>
 
       {/* Orders Table Container */}
@@ -320,11 +319,11 @@ export default function AdminFinancePage() {
           <table className="w-full text-left border-collapse table-fixed">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 h-12">
-                <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-32 text-center">狀態</th>
+                <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/12 text-center">狀態</th>
                 <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">訂單編號</th>
                 <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">付款時間</th>
                 <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">顧客名稱 / 帳號</th>
-                <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/5">金額</th>
+                <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/6">金額</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -341,6 +340,10 @@ export default function AdminFinancePage() {
                       {order.status === 'paid' ? (
                         <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold text-[11px]">
                           已付款
+                        </div>
+                      ) : order.status === 'failed' ? (
+                        <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-50 border border-rose-100 text-rose-600 font-bold text-[11px]">
+                          付款失敗
                         </div>
                       ) : (
                         <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-50 border border-slate-200 text-slate-400 font-bold text-[11px]">
@@ -368,7 +371,7 @@ export default function AdminFinancePage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 font-extrabold text-slate-800 text-sm">
-                      NT$ {order.amount.toLocaleString()}
+                      NT$ {(order.amount ?? 0).toLocaleString()}
                     </td>
                   </tr>
                 ))

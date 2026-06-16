@@ -649,7 +649,7 @@ export default function AdminSettingsPage() {
             </div>
             <form onSubmit={handleSaveStatus} className="p-5 space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase block">網站上上線狀態</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block">網站上線狀態</label>
                 <div className="grid grid-cols-2 gap-3">
                   <label className={`flex items-center justify-center p-3 rounded-xl border text-xs font-bold transition cursor-pointer select-none ${siteStatus === 'online' ? 'border-indigo-600 bg-indigo-50/30 text-indigo-700' : 'border-slate-200 text-slate-500 bg-slate-50'}`}>
                     <input 

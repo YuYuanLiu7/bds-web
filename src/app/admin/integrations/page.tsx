@@ -6,9 +6,9 @@ import Link from 'next/link';
 
 export default function AdminIntegrationsPage() {
   const [integrations, setIntegrations] = useState([
-    { id: '1', name: 'Google Analytics 4', description: '監測網站流量、使用者行為、轉換率與行銷成效。', key: 'G-64BBZQXXRZ', status: 'connected', type: '數據分析' },
-    { id: '2', name: 'Rewardful', description: 'BDS 學校聯盟行銷與推廣夥伴追蹤工具，促進社交銷售。', key: 'e80386', status: 'connected', type: '行銷推廣' },
-    { id: '3', name: 'Meta Pixel (Facebook Pixel)', description: '追蹤 Facebook 廣告投放成效與自訂廣告受眾。', key: '未綁定', status: 'disconnected', type: '廣告追蹤' }
+    { id: '1', name: 'Google Analytics 4', description: '監測網站流量、使用者行為、轉換率與行銷成效。', key: '尚未綁定', status: 'disconnected', type: '數據分析' },
+    { id: '2', name: 'Rewardful', description: 'BDS 聯盟行銷與推廣夥伴追蹤工具，促進社交銷售。', key: '尚未綁定', status: 'disconnected', type: '行銷推廣' },
+    { id: '3', name: 'Meta Pixel (Facebook Pixel)', description: '追蹤 Facebook 廣告投放成效與自訂廣告受眾。', key: '尚未綁定', status: 'disconnected', type: '廣告追蹤' }
   ]);
 
   const handleToggle = (id: string) => {
@@ -26,10 +26,10 @@ export default function AdminIntegrationsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <Grid className="w-6.5 h-6.5 mr-2 text-indigo-600" />
+            <Grid className="w-6 h-6 mr-2 text-indigo-600" />
             第三方整合
           </h1>
-          <p className="text-slate-400 text-xs mt-1 font-semibold">快速連結與管理 GA4 數據追蹤、Meta 像素、LINE 登入與聯盟行銷工具。</p>
+          <p className="text-slate-400 text-xs mt-1 font-semibold">快速連結與管理 GA4 數據追蹤、Meta 像素與聯盟行銷工具。</p>
         </div>
       </div>
 

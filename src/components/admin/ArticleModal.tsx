@@ -54,7 +54,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
     justifyRight: false,
   });
   const [currentHeading, setCurrentHeading] = useState('Paragraph');
-  const [currentSize, setCurrentSize] = useState('Size');
+  const [currentSize, setCurrentSize] = useState('字級');
   const [isHtmlMode, setIsHtmlMode] = useState(false);
 
   const [showHeadingDropdown, setShowHeadingDropdown] = useState(false);
@@ -555,7 +555,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                             className="flex items-center space-x-1 px-2.5 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-black text-slate-700 bg-white cursor-pointer transition min-w-[70px] justify-between"
                           >
                             <span>
-                              {currentHeading === 'Paragraph' ? 'P' : currentHeading}
+                              {currentHeading === 'Paragraph' ? '內文' : currentHeading}
                             </span>
                             <ChevronDown className="w-3 h-3 text-slate-400" />
                           </button>

@@ -173,7 +173,7 @@ export default function AdminRewardsPage() {
         </div>
 
         {/* Card 2: Pending Commission */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-105 shadow-xs flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">審核中分潤</span>
             <div className="flex items-baseline space-x-1">
@@ -211,7 +211,7 @@ export default function AdminRewardsPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Gradient Referral Banner */}
-          <div className="bg-gradient-to-br from-indigo-600 via-indigo-750 to-purple-800 rounded-3xl p-8 text-white relative overflow-hidden shadow-lg border border-indigo-700/50">
+          <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-3xl p-8 text-white relative overflow-hidden shadow-lg border border-indigo-700/50">
             {/* Ambient glows inside card */}
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -223,7 +223,7 @@ export default function AdminRewardsPage() {
               </div>
               <h2 className="text-xl md:text-2xl font-black leading-tight">邀請合作夥伴加入 BDS<br />雙向贏取推薦福利！</h2>
               <p className="text-indigo-100 text-xs leading-relaxed font-semibold">
-                分享您的專屬推薦連結給其他課程創作者或學員。當他們透過連結註冊並成功訂閱 or 購買課程，您即可享有該筆交易金額 {commissionRate}% 的推廣分潤，且被推薦人將獲得價值 NT$ 200 的購課折價券！
+                分享您的專屬推薦連結給其他課程創作者或學員。當他們透過連結註冊並成功訂閱或購買課程，您即可享有該筆交易金額 {commissionRate}% 的推廣分潤，且被推薦人將獲得價值 NT$ 200 的購課折價券！
               </p>
 
               <div className="space-y-4 pt-2">
@@ -307,7 +307,7 @@ export default function AdminRewardsPage() {
             <div className="overflow-x-auto rounded-xl border border-slate-50">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-55/40 text-slate-400 font-bold border-b border-slate-100">
+                  <tr className="bg-slate-50/40 text-slate-400 font-bold border-b border-slate-100">
                     <th className="p-4">學員</th>
                     <th className="p-4">註冊/推廣時間</th>
                     <th className="p-4">購買課程</th>
@@ -318,7 +318,7 @@ export default function AdminRewardsPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {filteredReferrals.map((record) => (
-                    <tr key={record.id} className="hover:bg-slate-50/50 font-semibold text-slate-650">
+                    <tr key={record.id} className="hover:bg-slate-50/50 font-semibold text-slate-600">
                       <td className="p-4">
                         <div>
                           <div className="font-extrabold text-slate-800">{record.name}</div>
@@ -382,7 +382,7 @@ export default function AdminRewardsPage() {
                   累積的佣金何時會撥付？
                 </div>
                 <p className="pl-3.5">
-                  因有消保法猶豫期（退款期），推薦訂單完成後的 7 天內會呈現「審核中」。確認訂單無退款紀錄後，系統會於**每月 25 日**前自動撥付累積已審核通過的款項至您的設定帳戶。
+                  因有消保法猶豫期（退款期），推薦訂單完成後的 7 天內會呈現「審核中」。確認訂單無退款紀錄後，系統會於<strong className="text-slate-800">每月 25 日</strong>前自動撥付累積已審核通過的款項至您的設定帳戶。
                 </p>
               </div>
 
@@ -392,7 +392,7 @@ export default function AdminRewardsPage() {
                   如何設定提領的銀行帳戶？
                 </div>
                 <p className="pl-3.5">
-                  您可以前往後台「系統主設定 (Settings)」-「金流與帳務」頁面填寫您的銀行代碼、帳號與戶名。完成設定後系統即會準時自動撥款，不收提領手續費。
+                  您可以前往後台「系統主設定」中的「金流與帳務」頁面填寫您的銀行代碼、帳號與戶名。完成設定後系統即會準時自動撥款，不收提領手續費。
                 </p>
               </div>
 

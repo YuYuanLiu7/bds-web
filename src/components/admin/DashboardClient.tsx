@@ -13,7 +13,6 @@ import {
   Copy, 
   Check, 
   Calendar as CalendarIcon,
-  TrendingDown,
   ChevronDown
 } from "lucide-react";
 import Link from 'next/link';
@@ -29,10 +28,10 @@ export default function DashboardClient({
   initialUsersCount, 
   initialRevenue 
 }: DashboardClientProps) {
-  // Use DB data if populated, otherwise use exact values from screenshot
-  const coursesCount = initialCoursesCount > 0 ? initialCoursesCount : 21;
-  const usersCount = initialUsersCount > 0 ? initialUsersCount : 543;
-  const revenueAmount = initialRevenue > 0 ? initialRevenue : 238835;
+  // 直接採用資料庫提供的真實統計值，無資料時顯示 0，避免呈現假數據
+  const coursesCount = initialCoursesCount ?? 0;
+  const usersCount = initialUsersCount ?? 0;
+  const revenueAmount = initialRevenue ?? 0;
 
   const [activeTab, setActiveTab] = useState<'operating' | 'marketing'>('operating');
   const [copiedLink, setCopiedLink] = useState<'frontend' | 'backend' | null>(null);
@@ -112,7 +111,6 @@ export default function DashboardClient({
             <div className="flex flex-wrap items-center gap-4 py-2">
               <div className="relative">
                 <select className="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition cursor-pointer">
-                  <option>Select...</option>
                   <option>最近 7 天</option>
                   <option>最近 30 天</option>
                   <option>本月</option>
@@ -123,16 +121,16 @@ export default function DashboardClient({
               <div className="flex items-center space-x-2.5 text-sm font-medium text-slate-500">
                 <span className="font-semibold text-slate-600">資料區間</span>
                 <div className="flex items-center space-x-2 border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white">
-                  <input 
-                    type="text" 
-                    defaultValue="2026/05/01 00:00" 
+                  <input
+                    type="text"
+                    placeholder="開始日期"
                     className="w-36 text-center outline-none text-slate-700 font-semibold text-xs"
                     readOnly
                   />
                   <span className="text-slate-300">~</span>
-                  <input 
-                    type="text" 
-                    defaultValue="2026/05/31 23:59" 
+                  <input
+                    type="text"
+                    placeholder="結束日期"
                     className="w-36 text-center outline-none text-slate-700 font-semibold text-xs"
                     readOnly
                   />
@@ -143,161 +141,33 @@ export default function DashboardClient({
             {/* Twin Charts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               
-              {/* Chart 1: 淨營業額 */}
+              {/* 圖表 1：淨營業額（圖表資料尚未串接，暫不顯示假數據） */}
               <div className="border border-slate-100 rounded-2xl p-6 space-y-4 hover:shadow-sm transition bg-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1.5 text-[13px] font-bold text-slate-400">
                     <span>淨營業額</span>
                     <HelpCircle className="w-3.5 h-3.5 text-slate-300 cursor-pointer hover:text-slate-400" />
                   </div>
-                  {/* Badge: -36.92% */}
-                  <div className="flex items-center px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 text-[11px] font-bold">
-                    <TrendingDown className="w-3 h-3 mr-0.5" />
-                    -36.92%
-                  </div>
-                </div>
-                <div className="text-2xl font-extrabold text-slate-800">
-                  NT$ 32,020
                 </div>
 
-                {/* SVG Graph for Net Revenue */}
-                <div className="relative h-44 w-full">
-                  <svg className="w-full h-full" viewBox="0 0 500 160" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="chart1BlueGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2563EB" stopOpacity="0.15" />
-                        <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                      </linearGradient>
-                    </defs>
-
-                    {/* Horizontal Grid Lines */}
-                    <line x1="0" y1="20" x2="500" y2="20" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="0" y1="60" x2="500" y2="60" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="0" y1="100" x2="500" y2="100" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="0" y1="140" x2="500" y2="140" stroke="#F1F5F9" strokeWidth="1" />
-
-                    {/* Gray Line (Previous period) */}
-                    <path 
-                      d="M 0 135 C 50 130, 100 120, 150 128 C 200 135, 250 80, 300 100 C 350 120, 400 30, 450 110 L 500 70" 
-                      fill="none" 
-                      stroke="#CBD5E1" 
-                      strokeWidth="2.5" 
-                    />
-
-                    {/* Blue Line Gradient Fill */}
-                    <path 
-                      d="M 0 140 C 60 138, 120 135, 180 137 C 240 140, 290 85, 330 92 C 370 100, 420 40, 460 125 L 500 75 L 500 160 L 0 160 Z" 
-                      fill="url(#chart1BlueGrad)" 
-                    />
-
-                    {/* Blue Line (Current period) */}
-                    <path 
-                      d="M 0 140 C 60 138, 120 135, 180 137 C 240 140, 290 85, 330 92 C 370 100, 420 40, 460 125 L 500 75" 
-                      fill="none" 
-                      stroke="#2563EB" 
-                      strokeWidth="3" 
-                    />
-
-                    {/* Selected Highlight Marker */}
-                    <circle cx="330" cy="92" r="5" fill="#2563EB" stroke="#FFFFFF" strokeWidth="2.5" className="shadow-sm" />
-                  </svg>
-                </div>
-
-                {/* X-Axis labels */}
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 px-1">
-                  <span>5/1/2026</span>
-                  <span>5/17/2026</span>
-                </div>
-
-                {/* Legend */}
-                <div className="flex justify-center space-x-6 text-xs font-bold pt-2">
-                  <span className="flex items-center text-slate-500">
-                    <span className="w-2.5 h-2.5 bg-blue-600 rounded-full mr-2"></span>
-                    淨營業額
-                  </span>
-                  <span className="flex items-center text-slate-400">
-                    <span className="w-2.5 h-2.5 bg-slate-300 rounded-full mr-2"></span>
-                    前一階段數據
-                  </span>
+                {/* 圖表資料尚未串接，顯示資料準備中佔位 */}
+                <div className="relative h-44 w-full flex items-center justify-center text-sm font-semibold text-slate-400">
+                  資料準備中
                 </div>
               </div>
 
-              {/* Chart 2: 成交營業額 */}
+              {/* 圖表 2：成交營業額（圖表資料尚未串接，暫不顯示假數據） */}
               <div className="border border-slate-100 rounded-2xl p-6 space-y-4 hover:shadow-sm transition bg-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1.5 text-[13px] font-bold text-slate-400">
                     <span>成交營業額</span>
                     <HelpCircle className="w-3.5 h-3.5 text-slate-300 cursor-pointer hover:text-slate-400" />
                   </div>
-                  {/* Badge: -35.17% */}
-                  <div className="flex items-center px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 text-[11px] font-bold">
-                    <TrendingDown className="w-3 h-3 mr-0.5" />
-                    -35.17%
-                  </div>
-                </div>
-                <div className="text-2xl font-extrabold text-slate-800">
-                  NT$ 32,910
                 </div>
 
-                {/* SVG Graph for Gross GTV */}
-                <div className="relative h-44 w-full">
-                  <svg className="w-full h-full" viewBox="0 0 500 160" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="chart2BlueGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2563EB" stopOpacity="0.15" />
-                        <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                      </linearGradient>
-                    </defs>
-
-                    {/* Horizontal Grid Lines */}
-                    <line x1="0" y1="20" x2="500" y2="20" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="0" y1="60" x2="500" y2="60" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="0" y1="100" x2="500" y2="100" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="0" y1="140" x2="500" y2="140" stroke="#F1F5F9" strokeWidth="1" />
-
-                    {/* Gray Line (Previous period) */}
-                    <path 
-                      d="M 0 130 C 60 120, 110 115, 160 122 C 210 130, 260 75, 310 95 C 360 115, 410 25, 460 105 L 500 65" 
-                      fill="none" 
-                      stroke="#CBD5E1" 
-                      strokeWidth="2.5" 
-                    />
-
-                    {/* Blue Line Gradient Fill */}
-                    <path 
-                      d="M 0 138 C 65 135, 125 132, 185 134 C 245 137, 295 82, 335 88 C 375 95, 425 35, 465 120 L 500 70 L 500 160 L 0 160 Z" 
-                      fill="url(#chart2BlueGrad)" 
-                    />
-
-                    {/* Blue Line (Current period) */}
-                    <path 
-                      d="M 0 138 C 65 135, 125 132, 185 134 C 245 137, 295 82, 335 88 C 375 95, 425 35, 465 120 L 500 70" 
-                      fill="none" 
-                      stroke="#2563EB" 
-                      strokeWidth="3" 
-                    />
-
-                    {/* Selected Highlight Marker */}
-                    <circle cx="335" cy="88" r="5" fill="#2563EB" stroke="#FFFFFF" strokeWidth="2.5" className="shadow-sm" />
-                  </svg>
-                </div>
-
-                {/* X-Axis labels */}
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 px-1">
-                  <span>5/1/2026</span>
-                  <span>5/17/2026</span>
-                </div>
-
-                {/* Legend */}
-                <div className="flex justify-center space-x-6 text-xs font-bold pt-2">
-                  <span className="flex items-center text-slate-500">
-                    <span className="w-2.5 h-2.5 bg-blue-600 rounded-full mr-2"></span>
-                    成交營業額
-                  </span>
-                  <span className="flex items-center text-slate-400">
-                    <span className="w-2.5 h-2.5 bg-slate-300 rounded-full mr-2"></span>
-                    前一階段數據
-                  </span>
+                {/* 圖表資料尚未串接，顯示資料準備中佔位 */}
+                <div className="relative h-44 w-full flex items-center justify-center text-sm font-semibold text-slate-400">
+                  資料準備中
                 </div>
               </div>
 
@@ -410,14 +280,14 @@ export default function DashboardClient({
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500">管理後台網址</label>
                 <div className="flex bg-slate-50 border border-slate-200 rounded-xl overflow-hidden p-1.5 items-center">
-                  <input 
-                    type="text" 
-                    value="https://outliersadmin38.kaik.io/admin/dashboard" 
+                  <input
+                    type="text"
+                    value="https://bds.fu-notes.com/admin"
                     className="bg-transparent flex-1 text-xs px-2 text-slate-500 truncate outline-none select-all font-semibold"
                     readOnly
                   />
-                  <button 
-                    onClick={() => handleCopy('https://outliersadmin38.kaik.io/admin/dashboard', 'backend')}
+                  <button
+                    onClick={() => handleCopy('https://bds.fu-notes.com/admin', 'backend')}
                     className="p-2 bg-white text-slate-500 hover:text-slate-800 rounded-lg shadow-sm border border-slate-100 transition active:scale-95"
                   >
                     {copiedLink === 'backend' ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}

@@ -88,9 +88,10 @@ export default function AdminGlobalSettingsPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500">預設二級子網域</label>
-                <input 
-                  type="text" 
-                  defaultValue="outliersadmin38.kaik.io" 
+                <input
+                  type="text"
+                  value="bds.fu-notes.com"
+                  readOnly
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-400 outline-none"
                   disabled
                 />

@@ -76,7 +76,7 @@ export default function HelpFAQPage() {
             <ArrowLeft className="w-3.5 h-3.5 mr-1" /> 回首頁
           </Link>
           <div className="space-y-2">
-            <span className="text-[10px] uppercase font-black tracking-widest text-white/50 block">常見問答與常見技術排障</span>
+            <span className="text-[10px] uppercase font-black tracking-widest text-white/50 block">常見問答與技術排障</span>
             <h1 className="text-3xl md:text-5xl font-black tracking-tight">常見問答 (FAQ)</h1>
             <p className="text-white/70 text-xs md:text-sm font-semibold max-w-xl leading-relaxed">
               如果您在購買、帳號開通、金流結帳或看課播放過程中遇到任何疑問，都可以在下方找到最快速的解答。

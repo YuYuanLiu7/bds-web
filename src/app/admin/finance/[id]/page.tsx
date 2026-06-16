@@ -193,7 +193,7 @@ export default function OrderDetailPage() {
                 <div className="space-y-3 pt-2 text-xs font-semibold text-slate-500">
                   <div className="flex justify-between">
                     <span>商品小計</span>
-                    <span className="text-slate-800 font-bold">NT$ {order.amount.toLocaleString()}</span>
+                    <span className="text-slate-800 font-bold">NT$ {(order.amount ?? 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>優惠折扣</span>
@@ -204,7 +204,7 @@ export default function OrderDetailPage() {
                       實收實付金額
                     </span>
                     <span className="text-emerald-600 text-base font-black">
-                      NT$ {order.amount.toLocaleString()}
+                      NT$ {(order.amount ?? 0).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -322,8 +322,22 @@ export default function OrderDetailPage() {
                   管理員小指南
                 </h4>
                 <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                  本筆訂單已完成付款驗證，學員目前應已成功獲得本項線上課程或會員訂閱的完整觀看權限。
-                  您可以在**學員名冊**中搜尋該學員信箱以隨時核對其詳細存取權限。如有任何退款或爭議，請至 PayUni 測試平台進行後續退款註銷操作。
+                  {order.status === 'paid' ? (
+                    <>
+                      本筆訂單已完成付款驗證，學員目前應已成功獲得本項線上課程或會員訂閱的完整觀看權限。
+                      您可以在<strong className="text-white">學員名冊</strong>中搜尋該學員信箱以隨時核對其詳細存取權限。如有任何退款或爭議，請至 PayUni 後台（商店管理平台）進行後續退款註銷操作。
+                    </>
+                  ) : order.status === 'failed' ? (
+                    <>
+                      本筆訂單交易失敗，學員尚未取得本項線上課程或會員訂閱的觀看權限。
+                      您可以在<strong className="text-white">學員名冊</strong>中搜尋該學員信箱以核對其存取權限。若學員反映已扣款，請至 PayUni 後台（商店管理平台）查核交易結果。
+                    </>
+                  ) : (
+                    <>
+                      本筆訂單仍在待付款狀態，學員尚未完成付款，因此尚未取得本項線上課程或會員訂閱的觀看權限。
+                      您可以在<strong className="text-white">學員名冊</strong>中搜尋該學員信箱以核對其存取權限。如需協助請至 PayUni 後台（商店管理平台）查詢交易狀態。
+                    </>
+                  )}
                 </p>
               </div>
 

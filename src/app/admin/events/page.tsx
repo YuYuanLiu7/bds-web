@@ -353,7 +353,7 @@ export default function AdminEventsPage() {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
                 >
                   <option value="all">全部活動</option>
-                  <option value="upcoming">進行中</option>
+                  <option value="upcoming">報名中</option>
                   <option value="completed">已結束</option>
                 </select>
               </div>
@@ -370,9 +370,6 @@ export default function AdminEventsPage() {
                   {uniqueCategories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
-                  <option value="工作坊">工作坊</option>
-                  <option value="線上讀書會">線上讀書會</option>
-                  <option value="線下聚會">線下聚會</option>
                 </select>
               </div>
 

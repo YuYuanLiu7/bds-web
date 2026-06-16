@@ -1,14 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Code, Save, Plus, Copy, Check, Terminal, Shield, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDeveloperPage() {
+  // 尚未串接後端金鑰產生 API，故暫無可用的正式金鑰
+  const apiKey = '';
   const [copiedKey, setCopiedKey] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
+
+  // 每秒更新系統當前時間，避免顯示固定的過期時間
+  useEffect(() => {
+    const formatTime = () => {
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    };
+    setCurrentTime(formatTime());
+    const timer = setInterval(() => setCurrentTime(formatTime()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText('bds_live_api_key_849ab2e3d938ac47102e3b2e3f');
+    if (!apiKey) return;
+    navigator.clipboard.writeText(apiKey);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
   };
@@ -44,17 +60,18 @@ export default function AdminDeveloperPage() {
                 這是您的系統 API 金鑰，可用於自訂系統整合，例如串接第三方 CRM、Line 機器人或自動化工具。請妥善保存，切勿公開。
               </p>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500">Live API Key</label>
+                <label className="text-[10px] font-bold text-slate-500">正式 API 金鑰</label>
                 <div className="flex bg-slate-50 border border-slate-200 rounded-xl overflow-hidden p-1.5 items-center">
-                  <input 
-                    type="password" 
-                    value="bds_live_api_key_849ab2e3d938ac47102e3b2e3f" 
+                  <input
+                    type={apiKey ? 'password' : 'text'}
+                    value={apiKey || '尚未產生金鑰'}
                     className="bg-transparent flex-1 text-xs px-2 text-slate-500 font-mono outline-none select-all"
                     readOnly
                   />
-                  <button 
+                  <button
                     onClick={handleCopy}
-                    className="p-2 bg-white text-slate-500 hover:text-slate-800 rounded-lg shadow-sm border border-slate-100 transition active:scale-95 cursor-pointer"
+                    disabled={!apiKey}
+                    className="p-2 bg-white text-slate-500 hover:text-slate-800 rounded-lg shadow-sm border border-slate-100 transition active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {copiedKey ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
@@ -76,9 +93,9 @@ export default function AdminDeveloperPage() {
               </p>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500">接收 Webhook URL</label>
-                <input 
-                  type="text" 
-                  defaultValue="https://your-crm-endpoint.com/webhooks/bds" 
+                <input
+                  type="text"
+                  placeholder="https://你的網域/webhooks/bds"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
                 />
               </div>
@@ -89,7 +106,7 @@ export default function AdminDeveloperPage() {
         {/* Right Info Aside */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm">系統狀態 (Health Logs)</h3>
+            <h3 className="font-bold text-slate-800 text-sm">系統狀態</h3>
             <div className="border-t border-slate-50 pt-3 space-y-3">
               <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                 <span>資料庫連接狀況</span>
@@ -101,7 +118,7 @@ export default function AdminDeveloperPage() {
               </div>
               <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                 <span>系統當前時間</span>
-                <span className="text-[10px] text-slate-400 font-mono font-semibold">2026-05-25 21:55</span>
+                <span className="text-[10px] text-slate-400 font-mono font-semibold">{currentTime || '載入中…'}</span>
               </div>
             </div>
           </div>

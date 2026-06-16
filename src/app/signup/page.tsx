@@ -154,7 +154,7 @@ export default function SignupPage() {
             <p className="text-xs text-gray-500">
               點擊「建立帳號」即表示您同意我們的
               <br />
-              <Link href="#" className="underline">服務條款</Link> 與 <Link href="#" className="underline">隱私權政策</Link>
+              <Link href="/privacy#terms" className="underline">服務條款</Link> 與 <Link href="/privacy#privacy" className="underline">隱私權政策</Link>
             </p>
           </div>
         </div>

@@ -379,7 +379,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                     <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white">
                       <img 
                         src={localCoverPreview || formData.thumbnail_url} 
-                        alt="Preview" 
+                        alt="課程封面預覽"
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">

@@ -91,7 +91,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
       form.submit();
     } catch (error) {
       console.error('Membership checkout failed:', error);
-      alert('❌ 結帳金流初始化失敗，請確保您的 .env.local 已填入正確的 PayUni 測試密鑰。');
+      alert('❌ 結帳服務暫時無法使用，請稍後再試或聯絡客服。');
     } finally {
       setLoadingPlanId(null);
     }
@@ -261,7 +261,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
                 <div className="text-sm font-black text-indigo-600 mt-1">NT$ {simulatingPlan.price.toLocaleString()} / {simulatingPlan.period}</div>
               </div>
 
-              <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl space-y-2 select-none">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 select-none">
                 <div className="text-xs font-black text-slate-800 flex items-center">
                   <ShieldCheck className="w-4 h-4 text-emerald-500 mr-1.5 shrink-0" />
                   目前偵測為開發測試環境

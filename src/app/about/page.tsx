@@ -66,7 +66,7 @@ export default function AboutPage() {
         <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-6 whitespace-pre-line">
           {pageData.title}
         </h1>
-        <p className="text-slate-600 max-w-2.5xl mx-auto text-sm md:text-base leading-relaxed font-semibold whitespace-pre-line">
+        <p className="text-slate-600 max-w-2xl mx-auto text-sm md:text-base leading-relaxed font-semibold whitespace-pre-line">
           {pageData.subtitle}
         </p>
       </section>
@@ -101,7 +101,7 @@ export default function AboutPage() {
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
               <img 
                 src={pageData.imageUrl} 
-                alt="About Visual"
+                alt="關於我們示意圖"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -118,7 +118,7 @@ export default function AboutPage() {
           {coreValues.map((val, idx) => (
             <div key={idx} className="bg-white/80 backdrop-blur-md border border-slate-200/50 p-8 rounded-2xl shadow-xs space-y-4 hover:shadow-md transition">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <val.icon className="w-5.5 h-5.5" />
+                <val.icon className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-slate-800 text-lg">{val.title}</h3>
               <p className="text-slate-500 text-sm leading-relaxed font-semibold">{val.desc}</p>

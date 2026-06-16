@@ -223,7 +223,7 @@ export default function AdminMembershipPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Stat Card 1 */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">總會員方案數</span>
             <span className="text-2xl font-black text-slate-800">{totalPlans} <span className="text-xs text-slate-400 font-semibold">項</span></span>
@@ -234,7 +234,7 @@ export default function AdminMembershipPage() {
         </div>
 
         {/* Stat Card 2 */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">已啟動方案</span>
             <span className="text-2xl font-black text-slate-800">{activePlans} <span className="text-xs text-slate-400 font-semibold">個</span></span>
@@ -245,7 +245,7 @@ export default function AdminMembershipPage() {
         </div>
 
         {/* Stat Card 3 */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">累計訂閱會員</span>
             <span className="text-2xl font-black text-slate-800">{totalSubscribers.toLocaleString()} <span className="text-xs text-slate-400 font-semibold">人</span></span>
@@ -256,7 +256,7 @@ export default function AdminMembershipPage() {
         </div>
 
         {/* Stat Card 4 */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">訂閱預估總營收</span>
             <span className="text-2xl font-black text-slate-800">NT$ {totalEstimatedRevenue.toLocaleString()}</span>
@@ -274,14 +274,14 @@ export default function AdminMembershipPage() {
         {/* Table List */}
         <div className="lg:col-span-3 space-y-4">
           <div className="text-xs text-slate-400 font-bold flex justify-between items-center">
-            <span>共 <span className="text-slate-700 font-extrabold">{filteredPlans.length}</span> 項，顯示 <span className="text-slate-700 font-extrabold">1-{filteredPlans.length}</span></span>
+            <span>共 <span className="text-slate-700 font-extrabold">{filteredPlans.length}</span> 項</span>
             {loading && <span className="text-indigo-600 font-bold animate-pulse text-[10px]">資料同步中...</span>}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-150 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-150 h-12 select-none">
+                <tr className="bg-slate-50 border-b border-slate-200 h-12 select-none">
                   <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider w-[40%]">方案名稱 & 權益</th>
                   <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider w-[20%]">定價</th>
                   <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider w-[25%]">週期 / 累計會員</th>
@@ -382,7 +382,7 @@ export default function AdminMembershipPage() {
 
         {/* Filter Aside */}
         <div className="lg:col-span-1 lg:order-first">
-          <div className="bg-white p-5 rounded-2xl border border-slate-150 shadow-xs space-y-4">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center pb-2.5 border-b border-slate-100">
               <Search className="w-4 h-4 text-indigo-500 mr-1.5 shrink-0" />
               <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">方案篩選</h3>
@@ -537,8 +537,8 @@ export default function AdminMembershipPage() {
                   onChange={e => setFormData({...formData, status: e.target.value as any})}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition cursor-pointer"
                 >
-                  <option value="active">已啟動上架 (Active)</option>
-                  <option value="draft">暫存草稿 (Draft)</option>
+                  <option value="active">已啟動上架</option>
+                  <option value="draft">暫存草稿</option>
                 </select>
               </div>
 
@@ -590,7 +590,7 @@ export default function AdminMembershipPage() {
             </form>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4.5 border-t border-slate-150 bg-slate-50/50 flex space-x-3 justify-end select-none">
+            <div className="px-6 py-4.5 border-t border-slate-200 bg-slate-50/50 flex space-x-3 justify-end select-none">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}

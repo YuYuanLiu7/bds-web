@@ -43,13 +43,13 @@ const DEFAULT_PAGES = [
   },
   { 
     id: '4', 
-    name: '隱私權與服務條款條約', 
+    name: '隱私權與服務條款',
     path: '/privacy', 
     type: 'custom', 
     status: 'published', 
     lastUpdated: '2026-04-30 09:15',
     title: '服務條款與隱私權政策',
-    subtitle: '法律與條約規定說明',
+    subtitle: '使用本平台前請詳閱以下服務條款與隱私權政策',
     content: '歡迎您使用 BDS By Doing So（以下簡稱「本平台」）。本服務條款旨在規範本平台與註冊會員（以下簡稱「會員」）之間的權利義務關係。當您註冊成為本平台會員或開始使用本平台提供的付費/免費課程時，即表示您已閱讀、理解並同意接受本條款之所有內容。',
     imageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80&w=1200'
   },

@@ -10,6 +10,21 @@ export default function AdminMarketingPage() {
     { id: '3', name: '醫材沙龍推廣促銷', code: 'SALON100', discount: '折價 NT$ 100', limit: '限量 100 張', used: 15, status: 'active', end: '2026-05-30' }
   ]);
 
+  // 依優惠券狀態與到期日判斷顯示文字與樣式（避免將已過期券標示為發送中）
+  const getCouponStatus = (coupon: { status: string; end: string }) => {
+    if (coupon.status !== 'active') {
+      return { label: '已停用', className: 'bg-slate-100 text-slate-500' };
+    }
+    // 到期日為實際日期且早於今日時，視為已過期
+    if (coupon.end && coupon.end !== '無期限') {
+      const endDate = new Date(coupon.end);
+      if (!isNaN(endDate.getTime()) && endDate.getTime() < Date.now()) {
+        return { label: '已過期', className: 'bg-slate-100 text-slate-500' };
+      }
+    }
+    return { label: '發送中', className: 'bg-emerald-50 text-emerald-600' };
+  };
+
   // 行銷篩選（針對示範清單做即時關鍵字過濾）
   const [query, setQuery] = useState('');
   const [activeQuery, setActiveQuery] = useState('');
@@ -28,7 +43,7 @@ export default function AdminMarketingPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <Tag className="w-6.5 h-6.5 mr-2 text-indigo-600" />
+            <Tag className="w-6 h-6 mr-2 text-indigo-600" />
             行銷
           </h1>
           <p className="text-slate-400 text-xs mt-1 font-semibold">建立促銷折扣代碼、行銷優惠券以提高學員的轉單與購買意願。</p>
@@ -53,7 +68,10 @@ export default function AdminMarketingPage() {
         {/* Table List */}
         <div className="lg:col-span-3 space-y-4">
           <div className="text-xs text-slate-400 font-bold">
-            共 <span className="text-slate-700 font-extrabold">{filteredCoupons.length}</span> 項，顯示 <span className="text-slate-700 font-extrabold">1-{filteredCoupons.length}</span>
+            共 <span className="text-slate-700 font-extrabold">{filteredCoupons.length}</span> 項
+            {filteredCoupons.length > 0 && (
+              <>，顯示 <span className="text-slate-700 font-extrabold">1-{filteredCoupons.length}</span></>
+            )}
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -66,12 +84,14 @@ export default function AdminMarketingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredCoupons.map((coupon) => (
+                {filteredCoupons.map((coupon) => {
+                  const couponStatus = getCouponStatus(coupon);
+                  return (
                   <tr key={coupon.id} className="hover:bg-slate-50/50 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold text-[10px]">
-                          發送中
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[10px] ${couponStatus.className}`}>
+                          {couponStatus.label}
                         </span>
                       </div>
                       <div className="block font-bold text-slate-700 text-sm mt-1.5 leading-snug">
@@ -92,7 +112,8 @@ export default function AdminMarketingPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -39,7 +39,7 @@ export default async function CategoryPage({ params }: PageProps) {
     { id: 'fs006', title: 'BDS爐邊對談 Vol.1｜業務表達及提案關鍵', price: 0, category: '爐邊對談', thumbnail_url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=800', instructor: 'BDS 團隊', rating: 5.0, students: 230 }
   ];
 
-  const displayedCourses = courses.length > 0 
+  const displayedCourses = courses.length > 0
     ? courses.map(c => ({
         id: c.id,
         title: c.title,
@@ -47,8 +47,8 @@ export default async function CategoryPage({ params }: PageProps) {
         category: c.category || '精選',
         thumbnail_url: c.thumbnail_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
         instructor: 'BDS 團隊',
-        rating: 5.0,
-        students: Math.floor(Math.random() * 80) + 12
+        rating: undefined as number | undefined,
+        students: undefined as number | undefined
       }))
     : fallbackCourses;
 
@@ -104,7 +104,7 @@ export default async function CategoryPage({ params }: PageProps) {
             {filteredCourses.map((course) => (
               <div 
                 key={course.id}
-                className="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/70 overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-350 transition-all duration-300"
+                className="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/70 overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 transition-all duration-300"
               >
                 {/* Thumbnail Cover */}
                 <Link href={`/courses/${course.id}`} className="block relative aspect-[16/9] w-full overflow-hidden bg-slate-50">
@@ -124,7 +124,6 @@ export default async function CategoryPage({ params }: PageProps) {
                     <Link 
                       href={`/courses/${course.id}`}
                       className="block font-black text-slate-800 hover:text-[#21448e] transition leading-snug line-clamp-2"
-                      style={{ hover: { color: primaryColor } } as any}
                     >
                       {course.title}
                     </Link>
@@ -133,17 +132,23 @@ export default async function CategoryPage({ params }: PageProps) {
                     </span>
                   </div>
 
-                  {/* Rating Stars & Student Count */}
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-semibold border-t border-b border-slate-50 py-2.5 select-none">
-                    <div className="flex items-center">
-                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 mr-1" />
-                      <span className="text-slate-600 font-extrabold">{course.rating.toFixed(1)}</span>
+                  {/* 評分與學習人數：僅在有真實資料時顯示 */}
+                  {(course.rating != null || course.students != null) && (
+                    <div className="flex items-center justify-between text-xs text-slate-400 font-semibold border-t border-b border-slate-50 py-2.5 select-none">
+                      {course.rating != null ? (
+                        <div className="flex items-center">
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 mr-1" />
+                          <span className="text-slate-600 font-extrabold">{course.rating.toFixed(1)}</span>
+                        </div>
+                      ) : <span />}
+                      {course.students != null && (
+                        <div className="flex items-center">
+                          <Users className="w-3.5 h-3.5 text-slate-300 mr-1" />
+                          <span>{course.students} 人已學習</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center">
-                      <Users className="w-3.5 h-3.5 text-slate-300 mr-1" />
-                      <span>{course.students} 人已學習</span>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Pricing and Action */}
                   <div className="flex items-center justify-between pt-1 select-none">

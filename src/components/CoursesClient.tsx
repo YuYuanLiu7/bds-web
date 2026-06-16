@@ -53,15 +53,14 @@ export default function CoursesClient({ courses }: CoursesClientProps) {
               key={course.id}
               id={course.id}
               title={course.title}
-              thumbnail={course.thumbnail_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800'}
+              thumbnail={course.thumbnail_url || '/images/course-placeholder.svg'}
               price={course.price}
               category={course.category || '未分類'}
-              instructor="BDS 團隊"
             />
           ))
         ) : (
           <p className="text-slate-500 col-span-full text-center py-20 italic font-semibold">
-            {activeCategory === '全部' ? '目前尚無課程...' : `「${activeCategory}」分類目前尚無課程`}
+            {activeCategory === '全部' ? '目前尚無上架課程' : `「${activeCategory}」分類目前尚無課程`}
           </p>
         )}
       </div>

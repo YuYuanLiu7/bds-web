@@ -32,7 +32,9 @@ export default function CourseCard({ id, title, thumbnail, price, category, inst
         </h3>
         {instructor && <p className="text-gray-500 text-sm mb-3">講師：{instructor}</p>}
         <div className="flex items-center justify-between mt-auto">
-          <span className="text-blue-600 font-bold text-xl">NT$ {price.toLocaleString()}</span>
+          <span className="text-blue-600 font-bold text-xl">
+            {price === 0 ? '免費領取' : `NT$ ${(price ?? 0).toLocaleString()}`}
+          </span>
           <span className="text-gray-400 text-xs font-medium border border-gray-200 px-2 py-1 rounded">
             立即報名
           </span>

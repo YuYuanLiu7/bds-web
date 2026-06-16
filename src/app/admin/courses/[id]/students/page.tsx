@@ -253,7 +253,7 @@ export default function CourseStudentsPage() {
   const handleSaveChapter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chapterTitle.trim()) {
-      showToast('error', '請填寫單元單元標題！');
+      showToast('error', '請填寫單元標題！');
       return;
     }
 
@@ -283,7 +283,7 @@ export default function CourseStudentsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast('success', isEdit ? '單元單元已成功更新！' : '新單元單元已成功建立！');
+        showToast('success', isEdit ? '單元已成功更新！' : '新單元已成功建立！');
         setIsChapterModalOpen(false);
         fetchChapters(); // refresh
       } else {
@@ -471,7 +471,7 @@ export default function CourseStudentsPage() {
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-extrabold text-xs shadow-md transition flex items-center cursor-pointer active:scale-95"
           >
             <Plus className="w-4 h-4 mr-1.5" />
-            建立單元單元
+            建立單元
           </button>
         )}
       </div>
@@ -615,7 +615,7 @@ export default function CourseStudentsPage() {
                         聯絡電話
                       </th>
                       <th className="px-6 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-                        權限分類 (Access Category)
+                        權限分類
                       </th>
                       <th className="px-6 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
                         授權 / 購買日期
@@ -844,7 +844,7 @@ export default function CourseStudentsPage() {
             </div>
           ) : (
             <div className="py-24 text-center text-slate-400 font-bold text-xs italic">
-              本課程目前尚未建立任何單元大綱。請點擊右上角「建立單元單元」新增。
+              本課程目前尚未建立任何單元大綱。請點擊右上角「建立單元」新增。
             </div>
           )}
 
@@ -985,7 +985,7 @@ export default function CourseStudentsPage() {
               
               {/* Title */}
               <div className="space-y-1">
-                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">單元單元標題 <span className="text-rose-500">*</span></label>
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">單元標題 <span className="text-rose-500">*</span></label>
                 <input 
                   type="text" 
                   required

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, Star, User as UserIcon, BookOpen, GraduationCap, ChevronDown, Users, DollarSign, Filter, Search } from "lucide-react";
+import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, Star, BookOpen, GraduationCap, ChevronDown, Users, DollarSign, Filter, Search } from "lucide-react";
 import Image from "next/image";
 import CourseModal from "@/components/admin/CourseModal";
 
@@ -204,10 +204,8 @@ export default function AdminCoursesPage() {
           ) : filteredCourses.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-in fade-in duration-300">
               {filteredCourses.map((course) => {
-                const mockLecturer = {
-                  name: course.instructor || 'BDS 團隊',
-                  avatar: 'https://warehouse.kaik.network/lecturer/avatar/182000da-6fcd-4748-86df-e1f3b122a8c2/92222ca2-c0b8-421e-a120-a42236f5b80a.jpg'
-                };
+                const lecturerName: string = course.instructor || 'BDS 團隊';
+                const lecturerAvatar: string | null = course.instructor_avatar || null;
 
                 return (
                   <div 
@@ -320,23 +318,25 @@ export default function AdminCoursesPage() {
                       {/* Footer Stats & Lecturer avatar row */}
                       <div className="flex items-center justify-between border-t border-slate-50 pt-3 gap-2">
                         <div className="flex items-center min-w-0">
-                          <img 
-                            src={mockLecturer.avatar} 
-                            alt={mockLecturer.name} 
-                            className="w-5.5 h-5.5 rounded-full object-cover flex-shrink-0"
-                          />
+                          {lecturerAvatar ? (
+                            <img
+                              src={lecturerAvatar}
+                              alt={`${lecturerName} 講師頭像`}
+                              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-black flex-shrink-0">
+                              {lecturerName.charAt(0)}
+                            </span>
+                          )}
                           <span className="ml-1.5 text-[11px] font-bold text-slate-400 truncate flex-1">
-                            {mockLecturer.name}
+                            {lecturerName}
                           </span>
                         </div>
 
                         <div className="flex items-center space-x-2.5 text-[10px] font-bold text-slate-400 flex-shrink-0">
                           <span className="flex items-center">
-                            <span className="text-amber-400 mr-0.5">★</span>
-                            <span>5.0</span>
-                          </span>
-                          <span className="flex items-center">
-                            <UserIcon className="w-3 h-3 mr-0.5 text-slate-300" />
+                            <BookOpen className="w-3 h-3 mr-0.5 text-slate-300" />
                             <span>{course.chapters?.length || 0} 章</span>
                           </span>
                         </div>

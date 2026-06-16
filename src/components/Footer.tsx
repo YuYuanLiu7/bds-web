@@ -28,7 +28,7 @@ export default function Footer() {
 
         {/* Copyright & Policy links */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 font-semibold gap-3">
-          <div>© {new Date().getFullYear()} BDS All Rights Reserved.</div>
+          <div>© {new Date().getFullYear()} BDS 版權所有，保留一切權利。</div>
           <div className="flex items-center space-x-4">
             <Link href="/about" className="hover:underline transition text-slate-400 hover:text-slate-600">
               關於我們
@@ -46,10 +46,6 @@ export default function Footer() {
               隱私權政策
             </Link>
           </div>
-        </div>
-
-        <div className="text-[10px] text-slate-300 font-medium">
-          ♥ 本站使用 <a href="https://teachify.tw/?ref=outliersadmin38" target="_blank" className="underline hover:text-slate-500 transition">Teachify</a> 架設
         </div>
 
       </div>

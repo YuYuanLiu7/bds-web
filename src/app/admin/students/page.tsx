@@ -403,7 +403,7 @@ export default function AdminStudentsPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-800 flex items-center">
-            <Users className="w-6.5 h-6.5 mr-2 text-indigo-600" />
+            <Users className="w-6 h-6 mr-2 text-indigo-600" />
             成員管理
           </h1>
           <p className="text-[11px] text-slate-400 font-bold mt-1">管理您平台上的學員、講師、助教與後台管理帳號</p>
@@ -946,7 +946,7 @@ export default function AdminStudentsPage() {
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block flex items-center">
                           <BookOpen className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                          授權購買單堂課程 (一堂一堂買)
+                          授權單堂課程（單堂個別授權）
                         </label>
                         
                         {/* Course inner filter */}
@@ -980,7 +980,7 @@ export default function AdminStudentsPage() {
                                       className="w-3.5 h-3.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
                                     />
                                     <span className="truncate flex-1">{course.title}</span>
-                                    {isGranted && <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-100">已選</span>}
+                                    {isGranted && <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100">已選</span>}
                                   </label>
                                 );
                               })

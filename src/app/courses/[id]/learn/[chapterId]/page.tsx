@@ -84,11 +84,13 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
           <div className="p-6 lg:px-0">
             <h1 className="text-2xl font-bold mb-4">{currentChapter.title}</h1>
             <div className="h-px bg-gray-800 w-full mb-6"></div>
-            <div className="prose prose-invert max-w-none">
-              <p className="text-gray-400 text-sm leading-relaxed">
-                這是課程章節的詳細描述內容。您可以在這裡閱讀本單元的重點大綱。
-              </p>
-            </div>
+            {(currentChapter as { description?: string | null }).description ? (
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">
+                  {(currentChapter as { description?: string | null }).description}
+                </p>
+              </div>
+            ) : null}
 
             {/* Extra details (Attachments & Comment section) */}
             <LearnExtraDetails 

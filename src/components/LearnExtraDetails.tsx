@@ -161,7 +161,7 @@ export default function LearnExtraDetails({
         {allowComments ? (
           <div className="space-y-6">
             {/* New Comment Input */}
-            <form onSubmit={handleSubmitComment} className="bg-slate-900/50 border border-slate-850 p-4 rounded-xl space-y-3">
+            <form onSubmit={handleSubmitComment} className="bg-slate-900/50 border border-slate-800 p-4 rounded-xl space-y-3">
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold">
                   {studentName?.charAt(0) || 'U'}

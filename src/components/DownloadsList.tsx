@@ -137,7 +137,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
             <div 
               key={item.id}
               onClick={() => handleCardClick(item)}
-              className="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-slate-200/70 shadow-sm flex flex-col justify-between hover:shadow-xl hover:border-slate-350 transition-all duration-300 group text-left cursor-pointer transform hover:-translate-y-1.5"
+              className="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-slate-200/70 shadow-sm flex flex-col justify-between hover:shadow-xl hover:border-slate-300 transition-all duration-300 group text-left cursor-pointer transform hover:-translate-y-1.5"
             >
               <div className="space-y-4">
                 {/* Visual Icon Header */}
@@ -147,7 +147,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
 
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <span className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-150 text-slate-500 font-extrabold text-[9px] uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 font-extrabold text-[9px] uppercase tracking-wider">
                       {item.type}
                     </span>
                     <span className="text-[10px] text-slate-400 font-bold flex items-center">
@@ -253,7 +253,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
               {/* Price & Value Proposition */}
               <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-2xl flex justify-between items-center">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">限時特惠價</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">商品售價</span>
                   <div className="text-xl font-black text-slate-900">
                     NT$ {selectedProduct.price.toLocaleString()}
                   </div>
@@ -274,11 +274,11 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-slate-150 bg-slate-50/30 flex flex-col space-y-2">
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/30 flex flex-col space-y-2">
               {downloadSuccess ? (
                 <div className="w-full py-3 bg-emerald-50 text-emerald-700 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 border border-emerald-200">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 animate-bounce" />
-                  <span>🎉 授權驗證成功！正在為您開啟下載連結...</span>
+                  <span>驗證成功，正在為您開啟下載連結…</span>
                 </div>
               ) : (
                 <button

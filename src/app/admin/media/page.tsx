@@ -11,7 +11,7 @@ export default function AdminMediaRedirectPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[300px] text-slate-400 text-xs font-semibold">
-      正在導向至素材庫 (Assets)...
+      正在導向至素材庫…
     </div>
   );
 }

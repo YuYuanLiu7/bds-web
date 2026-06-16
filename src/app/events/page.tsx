@@ -328,14 +328,14 @@ export default function EventsPage() {
                 {filteredEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white/90 backdrop-blur-md rounded-3xl border border-slate-200/70 shadow-sm overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-350 transition-all duration-300 text-left"
+                    className="bg-white/90 backdrop-blur-md rounded-3xl border border-slate-200/70 shadow-sm overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 transition-all duration-300 text-left"
                   >
                     {/* Event Cover Image */}
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-50 select-none">
                       <img
                         src={event.imageUrl}
                         alt={event.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {/* Badge */}
                       <span
@@ -361,7 +361,7 @@ export default function EventsPage() {
                           <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">{event.category}</span>
                           <span className="text-[9px] text-[#21448e] font-black px-2 py-0.5 rounded bg-[#21448e]/5" style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}>{event.type}</span>
                         </div>
-                        <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[#21448e] transition duration-200 line-clamp-2" style={{ groupHover: { color: primaryColor } } as any}>
+                        <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[#21448e] transition duration-200 line-clamp-2">
                           {event.title}
                         </h3>
                         <p className="text-xs text-slate-400 font-medium leading-relaxed line-clamp-2">
