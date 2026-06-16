@@ -29,6 +29,8 @@ export const proxy = withAuth(
 );
 
 export const config = {
-  // 保護後台首頁、所有後台子頁面與後台 API
-  matcher: ["/admin", "/admin/:path*", "/api/admin/:path*"],
+  // 保護後台首頁、所有後台子頁面與後台 API。
+  // 例外：/api/admin/site-settings 的 GET 為前台公開讀取（Navbar logo、主色、slogan 等視覺設定），
+  //       不可被登入守衛攔截；其 POST 已於該路由內自行驗證管理員身分，故安全。
+  matcher: ["/admin", "/admin/:path*", "/api/admin/((?!site-settings).*)"],
 };
