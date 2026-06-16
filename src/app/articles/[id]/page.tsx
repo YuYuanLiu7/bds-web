@@ -188,7 +188,10 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
 
   const renderContent = (markdownText: string) => {
     if (!markdownText) return null;
-    return markdownText.split('\n').map((line, idx) => {
+    // 內容可能以字面 "\n"（反斜線+n，常見於 SQL 單引號字串種子資料）儲存，
+    // 先正規化為真正的換行，避免整篇擠成一行而露出 ###、**、--- 等 Markdown 符號
+    const normalized = markdownText.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
+    return normalized.split('\n').map((line, idx) => {
       const trimmed = line.trim();
       if (trimmed.startsWith('###')) {
         return (
@@ -309,9 +312,13 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
             {/* Cover Image */}
             {article.imageUrl && (
               <div className="aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 shadow-xs select-none">
-                <img 
-                  src={article.imageUrl} 
+                <img
+                  src={article.imageUrl}
                   alt={article.title}
+                  onError={(e) => {
+                    const t = e.currentTarget;
+                    if (!t.src.endsWith('/images/course-placeholder.svg')) t.src = '/images/course-placeholder.svg';
+                  }}
                   className="w-full h-full object-cover"
                 />
               </div>
