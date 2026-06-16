@@ -914,15 +914,18 @@ export default function AdminSettingsPage() {
               </button>
             </div>
             <form onSubmit={handleSavePayUni} className="p-5 space-y-4">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] font-semibold text-amber-700 leading-relaxed">
+                ⚠️ 為避免金鑰外洩，PayUni 金鑰一律以伺服器環境變數（<code className="font-mono">PAYUNI_MERID</code>、<code className="font-mono">PAYUNI_HASH_KEY</code>、<code className="font-mono">PAYUNI_HASH_IV</code>）為準，
+                請於 <code className="font-mono">.env</code> 或部署平台設定。此頁僅供檢視參考，無法在此儲存金鑰。
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400 uppercase">商店代號 (MerID)</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={merId}
-                    onChange={(e) => setMerId(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 outline-none"
-                    required
+                    readOnly
+                    className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-400 outline-none cursor-not-allowed"
                   />
                 </div>
                 <div className="space-y-1">
@@ -937,22 +940,22 @@ export default function AdminSettingsPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 uppercase">HashKey</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={hashKey}
-                  onChange={(e) => setHashKey(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none"
-                  required
+                  readOnly
+                  placeholder="由環境變數 PAYUNI_HASH_KEY 管理"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-400 outline-none cursor-not-allowed"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 uppercase">HashIV</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={hashIv}
-                  onChange={(e) => setHashIv(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none"
-                  required
+                  readOnly
+                  placeholder="由環境變數 PAYUNI_HASH_IV 管理"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-400 outline-none cursor-not-allowed"
                 />
               </div>
               <div className="space-y-1">
@@ -961,29 +964,31 @@ export default function AdminSettingsPage() {
                   <label className="flex items-center text-xs font-semibold text-slate-700 cursor-pointer">
                     <input 
                       type="radio" 
-                      name="payuniMode" 
+                      name="payuniMode"
                       value="sandbox"
-                      checked={payuniMode === 'sandbox'} 
-                      onChange={() => setPayuniMode('sandbox')}
-                      className="w-4 h-4 text-indigo-600 border-slate-300 mr-2" 
+                      checked={payuniMode === 'sandbox'}
+                      readOnly
+                      disabled
+                      className="w-4 h-4 text-indigo-600 border-slate-300 mr-2"
                     />
                     測試環境 (Sandbox)
                   </label>
                   <label className="flex items-center text-xs font-semibold text-slate-700 cursor-pointer">
                     <input 
                       type="radio" 
-                      name="payuniMode" 
+                      name="payuniMode"
                       value="production"
-                      checked={payuniMode === 'production'} 
-                      onChange={() => setPayuniMode('production')}
-                      className="w-4 h-4 text-indigo-600 border-slate-300 mr-2" 
+                      checked={payuniMode === 'production'}
+                      readOnly
+                      disabled
+                      className="w-4 h-4 text-indigo-600 border-slate-300 mr-2"
                     />
                     正式環境 (Production)
                   </label>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-md transition active:scale-98 cursor-pointer">
-                儲存金流參數
+              <button type="button" onClick={() => setActiveModal(null)} className="w-full bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold text-xs shadow-md transition active:scale-98 cursor-pointer">
+                關閉
               </button>
             </form>
           </div>

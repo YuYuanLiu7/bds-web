@@ -20,11 +20,6 @@ export default function Navbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMobileCourseDropdown, setShowMobileCourseDropdown] = useState(false);
 
-  // If in admin dashboard, do not render the frontend Navbar
-  if (pathname?.startsWith('/admin')) {
-    return null;
-  }
-
   // Dynamic visual settings
   const [logoUrl, setLogoUrl] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#21448e');
@@ -58,6 +53,12 @@ export default function Navbar() {
       })
       .catch(err => console.warn("Failed to load announcements:", err));
   }, []);
+
+  // 後台路徑不渲染前台 Navbar；置於所有 hooks 之後以符合 React Hooks 規則
+  // （避免 admin↔前台切換時 hooks 數量改變而擲出執行期錯誤）
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'BDS 會員';
   const isAdmin = (session?.user as any)?.role === 'admin';

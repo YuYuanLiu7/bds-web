@@ -38,11 +38,11 @@ export default function Footer() {
               聯絡我們
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/privacy" className="hover:underline transition text-slate-400 hover:text-slate-600">
+            <Link href="/privacy#terms" className="hover:underline transition text-slate-400 hover:text-slate-600">
               使用者條款
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/privacy" className="hover:underline transition text-slate-400 hover:text-slate-600">
+            <Link href="/privacy#privacy" className="hover:underline transition text-slate-400 hover:text-slate-600">
               隱私權政策
             </Link>
           </div>

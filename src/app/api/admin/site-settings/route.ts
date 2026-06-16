@@ -41,8 +41,8 @@ export async function POST(req: Request) {
     // C. 寫入設定
     const body = await req.json();
     
-    // 簡單驗證資料完整性
-    if (!body.logoUrl || !body.carouselSlides || !body.sectionImage1 || !body.sectionImage2) {
+    // 簡單驗證資料完整性：欄位需存在即可（logoUrl 允許留空字串，代表不顯示 Logo）
+    if (body.logoUrl === undefined || !body.carouselSlides || !body.sectionImage1 || !body.sectionImage2) {
       return NextResponse.json({ error: "Invalid visual settings payload: Missing fields" }, { status: 400 });
     }
 
