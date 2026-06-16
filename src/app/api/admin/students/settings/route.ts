@@ -20,9 +20,13 @@ const DEFAULT_STUDENT_SETTINGS = {
   requireTosAgreement: true
 };
 
-// 1. GET：取得當前學員設定值
+// 1. GET：取得當前學員設定值（含服務條款/隱私權文案，僅供後台編輯介面，須為管理員）
 export async function GET() {
   try {
+    if (!(await checkAdmin())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .select('value')

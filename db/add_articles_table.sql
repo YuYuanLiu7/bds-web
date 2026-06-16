@@ -16,6 +16,16 @@ CREATE TABLE IF NOT EXISTS articles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 補齊付費牆與 SEO 相關欄位（若本檔先於 init.sql 執行，CREATE TABLE IF NOT EXISTS 會短路，
+-- 導致以下欄位永遠不會被建立，付費牆 visibility / required_course_ids 將失效，故以 ALTER 補齊）
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS slug TEXT UNIQUE;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS tags TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS seo_title TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS seo_description TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS visibility TEXT DEFAULT 'public';
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS required_course_ids TEXT;
+
 -- Insert Initial Premium Mock Articles
 INSERT INTO articles (id, title, author, date, views, category, summary, content, image_url, status)
 VALUES 

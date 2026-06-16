@@ -17,8 +17,15 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    // 前端表單防呆：密碼至少 6 位（後端 API 仍會再次驗證）
+    if (formData.password.length < 6) {
+      setError('密碼長度至少需要 6 位');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch('/api/auth/signup', {
@@ -119,6 +126,7 @@ export default function SignupPage() {
                 <input
                   type="password"
                   required
+                  minLength={6}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"

@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
 import { sendPurchaseSuccessEmail } from '@/lib/email';
@@ -6,7 +5,6 @@ import { sendPurchaseSuccessEmail } from '@/lib/email';
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const merId = formData.get('MerID') as string;
     const encryptInfo = formData.get('EncryptInfo') as string;
     const hashInfo = formData.get('HashInfo') as string;
 
@@ -32,19 +30,51 @@ export async function POST(req: Request) {
 
     // 3. 檢查支付狀態
     if (decodedData.Status === 'SUCCESS') {
-      // 更新訂單狀態
+      // 先取出資料庫中的原始訂單，後續據此進行防重送與金額校驗
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .update({ 
-          status: 'paid', 
+        .select('*')
+        .eq('id', merTradeNo)
+        .single();
+
+      if (!order || orderError) {
+        console.error('Callback success for unknown order:', merTradeNo);
+        return new Response('ERROR');
+      }
+
+      // 防重送攻擊 (Replay Attack)：已完成的訂單不再重複開通權限與重寄信，
+      // 但仍回傳 SUCCESS 讓 PayUni 不再重送通知。
+      if (order.status === 'paid') {
+        console.warn('Duplicate paid callback ignored for order:', merTradeNo);
+        return new Response('SUCCESS');
+      }
+
+      // 金額一致性校驗：比對 PayUni 回傳的 TradeAmt 與資料庫預存金額，
+      // 防止有心人士在金流端竄改交易金額（低買）。
+      const callbackAmount = Number(decodedData.TradeAmt);
+      if (!Number.isFinite(callbackAmount) || callbackAmount !== Number(order.amount)) {
+        console.error(
+          `Amount mismatch on callback for order ${merTradeNo}: ` +
+          `callback=${decodedData.TradeAmt} vs db=${order.amount}`
+        );
+        await supabase
+          .from('orders')
+          .update({ status: 'failed', updated_at: new Date().toISOString() })
+          .eq('id', merTradeNo);
+        return new Response('ERROR');
+      }
+
+      // 校驗通過，更新訂單為已付款
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: 'paid',
           payment_type: decodedData.PaymentType,
           updated_at: new Date().toISOString()
         })
-        .eq('id', merTradeNo)
-        .select()
-        .single();
+        .eq('id', merTradeNo);
 
-      if (order && !orderError) {
+      if (!updateError) {
         if (order.course_id) {
           // 開通課程權限
           await supabase.from('user_courses').upsert({
@@ -73,10 +103,9 @@ export async function POST(req: Request) {
                 expiresAt = now.toISOString();
               } // '一次性' expiresAt 為 null 代表無期限
             } else {
-              // 備援：若查不到方案，依交易慣例預設月繳 30 天
-              const now = new Date();
-              now.setMonth(now.getMonth() + 1);
-              expiresAt = now.toISOString();
+              // 查不到方案時不臆測付款週期，保留 expiresAt 為 null，
+              // 避免把「一次性永久會員」誤設成 30 天到期。改以記錄警告供後台稽核補正。
+              console.warn(`Membership plan ${order.membership_plan_id} not found in callback; leaving membership_expires_at as null.`);
             }
 
             // 更新使用者的訂閱方案與過期日
