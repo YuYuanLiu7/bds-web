@@ -764,13 +764,13 @@ export default function CourseStudentsPage() {
                   >
                     重設
                   </button>
-                  <button 
-                    type="button"
-                    className="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl font-extrabold text-xs transition select-none flex items-center justify-center cursor-default"
+                  <span
+                    className="w-full bg-emerald-50 text-emerald-600 border border-emerald-100 py-2.5 rounded-xl font-extrabold text-xs select-none flex items-center justify-center"
+                    title="篩選條件已即時套用"
                   >
                     <Check className="w-3.5 h-3.5 mr-1" />
-                    已套用
-                  </button>
+                    即時生效中
+                  </span>
                 </div>
               </div>
             </div>

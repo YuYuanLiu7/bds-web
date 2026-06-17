@@ -1,27 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { Grid, Cpu, Save, Plus, ArrowLeft } from 'lucide-react';
+import { Grid, Cpu, ArrowLeft, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminIntegrationsPage() {
-  const [integrations, setIntegrations] = useState([
+  // 目前為未串接的示範資料，皆顯示為未連接狀態（功能開發中）
+  const integrations = [
     { id: '1', name: 'Google Analytics 4', description: '監測網站流量、使用者行為、轉換率與行銷成效。', key: '尚未綁定', status: 'disconnected', type: '數據分析' },
     { id: '2', name: 'Rewardful', description: 'BDS 聯盟行銷與推廣夥伴追蹤工具，促進社交銷售。', key: '尚未綁定', status: 'disconnected', type: '行銷推廣' },
     { id: '3', name: 'Meta Pixel (Facebook Pixel)', description: '追蹤 Facebook 廣告投放成效與自訂廣告受眾。', key: '尚未綁定', status: 'disconnected', type: '廣告追蹤' }
-  ]);
-
-  const handleToggle = (id: string) => {
-    setIntegrations(integrations.map(item => 
-      item.id === id 
-        ? { ...item, status: item.status === 'connected' ? 'disconnected' : 'connected' }
-        : item
-    ));
-  };
+  ];
 
   return (
     <div className="space-y-6 select-none font-sans text-slate-700">
-      
+
+      {/* 返回後台首頁 */}
+      <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-indigo-600 transition">
+        <ArrowLeft className="w-4 h-4" />
+        返回後台首頁
+      </Link>
+
+      {/* 開發中橫幅 */}
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl px-4 py-3">
+        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+        <p className="text-xs font-bold leading-relaxed">第三方整合功能開發中，敬請期待。</p>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
@@ -70,17 +74,14 @@ export default function AdminIntegrationsPage() {
               </div>
             </div>
 
-            {/* Toggle Button */}
+            {/* Toggle Button（功能開發中，暫時停用） */}
             <div className="pt-5 border-t border-slate-50 mt-5">
-              <button 
-                onClick={() => handleToggle(item.id)}
-                className={`w-full py-2 rounded-xl font-bold text-xs shadow-sm transition active:scale-98 cursor-pointer ${
-                  item.status === 'connected'
-                    ? 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
+              <button
+                type="button"
+                disabled
+                className="w-full py-2 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 cursor-not-allowed"
               >
-                {item.status === 'connected' ? '中斷連線' : '開始連接'}
+                即將推出
               </button>
             </div>
 

@@ -43,6 +43,9 @@ export default function AdminMembershipPage() {
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
+  // 狀態切換中的方案 ID（避免切換期間重複點擊造成競態）
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
   const fetchPlans = async () => {
     setLoading(true);
     try {
@@ -122,17 +125,25 @@ export default function AdminMembershipPage() {
         alert('🎉 方案已成功刪除！');
         fetchPlans();
       } else {
-        const errData = await res.json();
-        alert(`❌ 刪除失敗：${errData.error}`);
+        let errData: { error?: string } | null = null;
+        try {
+          errData = await res.json();
+        } catch {
+          errData = null;
+        }
+        alert(`❌ 刪除失敗：${errData?.error || '未知錯誤'}`);
       }
-    } catch (error: any) {
-      alert(`❌ 刪除失敗：${error.message}`);
+    } catch (error) {
+      alert(`❌ 刪除失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
     }
   };
 
   // Toggle status shortcut
   const handleToggleStatus = async (plan: MembershipPlan) => {
+    // 切換進行中時，忽略重複點擊以避免競態
+    if (togglingId) return;
     const nextStatus = plan.status === 'active' ? 'draft' : 'active';
+    setTogglingId(plan.id);
     try {
       const res = await fetch('/api/admin/membership', {
         method: 'PUT',
@@ -144,9 +155,20 @@ export default function AdminMembershipPage() {
       });
       if (res.ok) {
         fetchPlans();
+      } else {
+        let errData: { error?: string } | null = null;
+        try {
+          errData = await res.json();
+        } catch {
+          errData = null;
+        }
+        alert(`❌ 狀態切換失敗：${errData?.error || '未知錯誤'}`);
       }
     } catch (error) {
       console.error("Failed to toggle plan status:", error);
+      alert(`❌ 狀態切換失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -301,16 +323,17 @@ export default function AdminMembershipPage() {
                     <tr key={plan.id} className="hover:bg-slate-50/50 transition">
                       <td className="px-6 py-4 space-y-1.5">
                         <div className="flex items-center space-x-2">
-                          <button 
+                          <button
                             type="button"
                             onClick={() => handleToggleStatus(plan)}
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase tracking-wider select-none cursor-pointer border ${
-                              plan.status === 'active' 
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                            disabled={togglingId === plan.id}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase tracking-wider select-none cursor-pointer border disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-pulse ${
+                              plan.status === 'active'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                                 : 'bg-slate-100 text-slate-500 border-slate-200'
                             }`}
                           >
-                            {plan.status === 'active' ? '已啟動' : '草稿'}
+                            {togglingId === plan.id ? '切換中...' : (plan.status === 'active' ? '已啟動' : '草稿')}
                           </button>
                           {plan.is_popular && (
                             <span className="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full font-black text-[9px] uppercase tracking-wider flex items-center">

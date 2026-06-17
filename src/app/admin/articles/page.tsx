@@ -75,8 +75,11 @@ export default function AdminArticlesPage() {
         method: 'DELETE',
       });
 
-      if (!res.ok) throw new Error('刪除失敗');
-      
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '刪除失敗');
+      }
+
       fetchArticles();
     } catch (err: any) {
       alert('刪除失敗：' + err.message);
@@ -84,9 +87,12 @@ export default function AdminArticlesPage() {
   };
 
   const handleCopyId = (id: string) => {
-    navigator.clipboard.writeText(id);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    navigator.clipboard?.writeText(id)
+      .then(() => {
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+      })
+      .catch(() => alert('複製失敗，請手動複製'));
   };
 
   const formatTaiwanDate = (dateStr: string) => {
@@ -110,10 +116,10 @@ export default function AdminArticlesPage() {
 
   // Filter logic
   const filteredArticles = articles.filter(e => {
-    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = (e.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (e.summary && e.summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                          e.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          e.category.toLowerCase().includes(searchQuery.toLowerCase());
+                          (e.author || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (e.category || "").toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;

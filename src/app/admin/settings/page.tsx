@@ -202,6 +202,11 @@ export default function AdminSettingsPage() {
     e.preventDefault();
     if (!faqForm.q || !faqForm.a) return;
 
+    // 保留先前狀態，儲存失敗時可還原前端畫面
+    const prevFaqs = faqs;
+    const prevEditingIndex = editingFaqIndex;
+    const prevForm = faqForm;
+
     let newFaqs;
     if (editingFaqIndex !== null) {
       newFaqs = faqs.map((f, idx) => idx === editingFaqIndex ? faqForm : f);
@@ -210,20 +215,41 @@ export default function AdminSettingsPage() {
       newFaqs = [...faqs, faqForm];
     }
     setFaqs(newFaqs);
-    await saveSetting('faqs', newFaqs);
     setFaqForm({ q: '', a: '' });
+
+    const ok = await saveSetting('faqs', newFaqs);
+    if (!ok) {
+      // 儲存失敗，還原 FAQ 清單與表單狀態
+      setFaqs(prevFaqs);
+      setEditingFaqIndex(prevEditingIndex);
+      setFaqForm(prevForm);
+      handleShowToast('儲存失敗，請稍後再試');
+    }
   };
 
   const handleDeleteFaq = async (index: number) => {
+    // 保留先前狀態，儲存失敗時可還原前端畫面
+    const prevFaqs = faqs;
     const newFaqs = faqs.filter((_, idx) => idx !== index);
     setFaqs(newFaqs);
-    await saveSetting('faqs', newFaqs);
+
+    const ok = await saveSetting('faqs', newFaqs);
+    if (!ok) {
+      // 儲存失敗，還原 FAQ 清單
+      setFaqs(prevFaqs);
+      handleShowToast('儲存失敗，請稍後再試');
+    }
   };
 
   // Announcement Manager helpers
   const handleAddAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!announcementForm.content) return;
+
+    // 保留先前狀態，儲存失敗時可還原前端畫面
+    const prevAnn = announcements;
+    const prevEditingIndex = editingAnnouncementIndex;
+    const prevForm = announcementForm;
 
     let newAnn;
     if (editingAnnouncementIndex !== null) {
@@ -233,14 +259,30 @@ export default function AdminSettingsPage() {
       newAnn = [...announcements, announcementForm];
     }
     setAnnouncements(newAnn);
-    await saveSetting('announcements', newAnn);
     setAnnouncementForm({ content: '', url: '', status: 'published' });
+
+    const ok = await saveSetting('announcements', newAnn);
+    if (!ok) {
+      // 儲存失敗，還原公告清單與表單狀態
+      setAnnouncements(prevAnn);
+      setEditingAnnouncementIndex(prevEditingIndex);
+      setAnnouncementForm(prevForm);
+      handleShowToast('儲存失敗，請稍後再試');
+    }
   };
 
   const handleDeleteAnnouncement = async (index: number) => {
+    // 保留先前狀態，儲存失敗時可還原前端畫面
+    const prevAnn = announcements;
     const newAnn = announcements.filter((_, idx) => idx !== index);
     setAnnouncements(newAnn);
-    await saveSetting('announcements', newAnn);
+
+    const ok = await saveSetting('announcements', newAnn);
+    if (!ok) {
+      // 儲存失敗，還原公告清單
+      setAnnouncements(prevAnn);
+      handleShowToast('儲存失敗，請稍後再試');
+    }
   };
 
   // Image Upload general uploader
@@ -278,10 +320,11 @@ export default function AdminSettingsPage() {
         const result = await res.json();
         setter(result.url);
       } else {
-        alert('圖片上傳失敗');
+        alert('圖片上傳失敗，請稍後再試');
       }
     } catch (err) {
       console.error(err);
+      alert('圖片上傳發生錯誤，請檢查網路連線後再試');
     } finally {
       setUploadingField(null);
     }
@@ -322,9 +365,12 @@ export default function AdminSettingsPage() {
         const updated = [...slides];
         updated[idx] = { ...updated[idx], imageUrl: result.url };
         setSlides(updated);
+      } else {
+        alert('輪播圖片上傳失敗，請稍後再試');
       }
     } catch(e) {
       console.error(e);
+      alert('輪播圖片上傳發生錯誤，請檢查網路連線後再試');
     } finally {
       setUploadingField(null);
     }
@@ -589,7 +635,7 @@ export default function AdminSettingsPage() {
                       />
                       <label className="bg-indigo-50 text-indigo-600 px-3 py-1 text-[10px] font-bold cursor-pointer select-none">
                         上傳 Banner
-                        <input type="file" accept="image/*" onChange={(e) => handleGeneralImageUpload(e, (url) => setSecImage1({ ...secImage1, imageUrl: url }), 'banner1')} className="hidden" />
+                        <input type="file" accept="image/*" onChange={(e) => handleGeneralImageUpload(e, (url) => setSecImage1(prev => ({ ...prev, imageUrl: url })), 'banner1')} className="hidden" />
                       </label>
                     </div>
                     <input 
@@ -613,7 +659,7 @@ export default function AdminSettingsPage() {
                       />
                       <label className="bg-indigo-50 text-indigo-600 px-3 py-1 text-[10px] font-bold cursor-pointer select-none">
                         上傳 Banner
-                        <input type="file" accept="image/*" onChange={(e) => handleGeneralImageUpload(e, (url) => setSecImage2({ ...secImage2, imageUrl: url }), 'banner2')} className="hidden" />
+                        <input type="file" accept="image/*" onChange={(e) => handleGeneralImageUpload(e, (url) => setSecImage2(prev => ({ ...prev, imageUrl: url })), 'banner2')} className="hidden" />
                       </label>
                     </div>
                     <input 

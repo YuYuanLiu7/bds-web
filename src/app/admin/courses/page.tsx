@@ -49,6 +49,19 @@ export default function AdminCoursesPage() {
     fetchCourses();
   }, []);
 
+  // 點擊選單與觸發鈕以外的區域時，自動關閉三點選單
+  useEffect(() => {
+    if (!activeMenuId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-course-menu]')) {
+        setActiveMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeMenuId]);
+
   const handleEdit = (course: any) => {
     setEditingCourse(course);
     setIsModalOpen(true);
@@ -65,12 +78,19 @@ export default function AdminCoursesPage() {
     
     try {
       const res = await fetch(`/api/admin/courses?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('刪除失敗');
+      // 解析後端回傳內容，取得真實的刪除失敗原因（例如外鍵約束）
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || '刪除失敗');
+        return;
+      }
       fetchCourses();
     } catch (err) {
+      console.error(err);
       alert('刪除失敗');
+    } finally {
+      setActiveMenuId(null);
     }
-    setActiveMenuId(null);
   };
 
   const handleCopyId = (id: string) => {
@@ -246,7 +266,7 @@ export default function AdminCoursesPage() {
                           </div>
                           
                           {/* Vertical Menu Trigger */}
-                          <div className="relative">
+                          <div className="relative" data-course-menu>
                             <button 
                               onClick={() => setActiveMenuId(activeMenuId === course.id ? null : course.id)}
                               className="p-1 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-700 transition"

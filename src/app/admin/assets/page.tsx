@@ -32,7 +32,7 @@ export default function AdminAssetsPage() {
   
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedType, setSelectedType] = useState('all'); // all, image, video, document, other
+  const [selectedType, setSelectedType] = useState('all'); // all, image, video, document
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list'); // list or grid
   
   // Selection
@@ -246,7 +246,7 @@ export default function AdminAssetsPage() {
     navigator.clipboard.writeText(fullUrl).then(() => {
       setCopiedId(item.id);
       setTimeout(() => setCopiedId(null), 2000);
-    });
+    }).catch(() => alert('複製失敗'));
   };
 
   // Selection handlers
@@ -281,8 +281,7 @@ export default function AdminAssetsPage() {
     if (selectedType === 'image') return matchesSearch && m.type === 'image';
     if (selectedType === 'video') return matchesSearch && m.type === 'video';
     if (selectedType === 'document') return matchesSearch && m.type === 'document';
-    if (selectedType === 'other') return matchesSearch && m.type !== 'image' && m.type !== 'video' && m.type !== 'document';
-    
+
     return matchesSearch;
   });
 
@@ -410,7 +409,6 @@ export default function AdminAssetsPage() {
             { id: 'image', label: '圖片' },
             { id: 'video', label: '影片' },
             { id: 'document', label: '文件' },
-            { id: 'other', label: '其他' },
           ].map((tab) => (
             <button
               key={tab.id}

@@ -1,21 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  Gift, 
-  Copy, 
-  ArrowLeft, 
-  Users, 
-  DollarSign, 
-  CheckCircle, 
-  Clock, 
-  Search, 
+import { useState } from 'react';
+import {
+  Gift,
+  Copy,
+  ArrowLeft,
+  Users,
+  DollarSign,
+  CheckCircle,
+  Clock,
+  Search,
   HelpCircle,
-  TrendingUp,
-  Award
+  Award,
+  AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 
 interface ReferralRecord {
   id: string;
@@ -29,102 +28,29 @@ interface ReferralRecord {
 }
 
 export default function AdminRewardsPage() {
-  const { data: session } = useSession();
-  const [customCode, setCustomCode] = useState('admin');
-  const [isComposing, setIsComposing] = useState(false);
-  const [referralLink, setReferralLink] = useState('https://bydoingso.com/signup?ref=admin');
-  
-  // Set default customCode from session username prefix on mount/session load
-  useEffect(() => {
-    if (session?.user?.email) {
-      const userRef = session.user.email.split('@')[0].replace(/[^a-zA-Z]/g, '').toLowerCase();
-      setCustomCode(userRef || 'admin');
-    }
-  }, [session]);
-
-  // Compute final referralLink when customCode changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const safeCode = encodeURIComponent(customCode.replace(/[^a-zA-Z]/g, '').toLowerCase()) || 'admin';
-      setReferralLink(`${window.location.origin}/signup?ref=${safeCode}`);
-    }
-  }, [customCode]);
-
-  const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [copied, setCopied] = useState(false);
   const commissionRate = 5;
 
-  const [referrals] = useState<ReferralRecord[]>([
-    {
-      id: 'ref-1',
-      name: '林修平',
-      email: 'hsuan.lin@gmail.com',
-      date: '2026-06-05 14:22',
-      course: '硬體業務新手村',
-      amount: 3200,
-      commission: 480,
-      status: 'pending'
-    },
-    {
-      id: 'ref-2',
-      name: '張佳穎',
-      email: 'cathy.chang@outlook.com',
-      date: '2026-06-03 09:15',
-      course: '外商遠距求職攻略',
-      amount: 2800,
-      commission: 420,
-      status: 'pending'
-    },
-    {
-      id: 'ref-3',
-      name: '王大同',
-      email: 'datong.wang@gmail.com',
-      date: '2026-05-28 18:30',
-      course: '醫材產業新手村',
-      amount: 3500,
-      commission: 525,
-      status: 'paid'
-    },
-    {
-      id: 'ref-4',
-      name: '許美華',
-      email: 'meihua.hsu@yahoo.com.tw',
-      date: '2026-05-24 11:05',
-      course: '文組跨領域高薪轉職',
-      amount: 2900,
-      commission: 435,
-      status: 'paid'
-    },
-    {
-      id: 'ref-5',
-      name: '趙敏安',
-      email: 'minan.chao@gmail.com',
-      date: '2026-05-20 16:40',
-      course: '秒錄取的面試提問策略',
-      amount: 1800,
-      commission: 270,
-      status: 'paid'
-    }
-  ]);
+  // 推薦分潤功能尚未串接後端，暫以空資料呈現，避免顯示假明細
+  const referrals: ReferralRecord[] = [];
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      alert('複製失敗，請手動選取連結複製。');
+    }
   };
 
-  // Stats calculation
-  const totalInvited = referrals.length;
-  const pendingCommission = referrals
-    .filter(r => r.status === 'pending')
-    .reduce((sum, r) => sum + Math.round(r.amount * (commissionRate / 100)), 0);
-  const paidCommission = referrals
-    .filter(r => r.status === 'paid')
-    .reduce((sum, r) => sum + Math.round(r.amount * (commissionRate / 100)), 0);
+  // 推廣連結功能開發中，暫以固定示意連結呈現
+  const referralLink = 'https://bydoingso.com/signup?ref=（功能開發中）';
 
   const filteredReferrals = referrals.filter(r => {
-    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           r.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           r.course.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
@@ -152,6 +78,17 @@ export default function AdminRewardsPage() {
         </div>
       </div>
 
+      {/* 開發中橫幅 */}
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-extrabold text-amber-800">推薦分潤功能開發中</p>
+          <p className="text-xs font-semibold text-amber-700 mt-0.5">
+            此頁面之推廣連結、分潤統計與推薦明細尚未串接後端，目前僅為介面預覽，所有數據暫不代表實際成效。
+          </p>
+        </div>
+      </div>
+
       {/* Grid: 3 Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
@@ -160,12 +97,10 @@ export default function AdminRewardsPage() {
           <div className="space-y-1">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">推薦註冊人次</span>
             <div className="flex items-baseline space-x-1">
-              <span className="text-3xl font-extrabold text-slate-800">{totalInvited}</span>
+              <span className="text-3xl font-extrabold text-slate-800">0</span>
               <span className="text-xs text-slate-500 font-semibold">人</span>
             </div>
-            <span className="text-[10px] text-emerald-500 font-extrabold flex items-center">
-              <TrendingUp className="w-3 h-3 mr-0.5" /> 本月新增 2 人
-            </span>
+            <span className="text-[10px] text-slate-400 font-semibold block">尚未開放統計</span>
           </div>
           <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
             <Users className="w-6 h-6" />
@@ -177,7 +112,7 @@ export default function AdminRewardsPage() {
           <div className="space-y-1">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">審核中分潤</span>
             <div className="flex items-baseline space-x-1">
-              <span className="text-3xl font-extrabold text-amber-600">NT$ {pendingCommission.toLocaleString()}</span>
+              <span className="text-3xl font-extrabold text-amber-600">—</span>
             </div>
             <span className="text-[10px] text-slate-400 font-semibold block">確認無退款後發放</span>
           </div>
@@ -191,10 +126,10 @@ export default function AdminRewardsPage() {
           <div className="space-y-1">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">已發放分潤</span>
             <div className="flex items-baseline space-x-1">
-              <span className="text-3xl font-extrabold text-emerald-600">NT$ {paidCommission.toLocaleString()}</span>
+              <span className="text-3xl font-extrabold text-emerald-600">—</span>
             </div>
-            <span className="text-[10px] text-emerald-500 font-extrabold flex items-center">
-              <CheckCircle className="w-3 h-3 mr-0.5" /> 匯款已撥付
+            <span className="text-[10px] text-slate-400 font-semibold flex items-center">
+              <CheckCircle className="w-3 h-3 mr-0.5" /> 尚未開放撥付
             </span>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -228,41 +163,33 @@ export default function AdminRewardsPage() {
 
               <div className="space-y-4 pt-2">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-indigo-200 uppercase tracking-wider block">自訂推廣代碼（如講師姓名或代號）</label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-[10px] font-black text-indigo-200 uppercase tracking-wider block">自訂推廣代碼（如講師姓名或代號）</label>
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-white/20 text-white">功能開發中</span>
+                  </div>
                   <input
                     type="text"
-                    value={customCode}
-                    onChange={e => {
-                      const val = e.target.value;
-                      if (!isComposing) {
-                        setCustomCode(val.replace(/[^a-zA-Z]/g, ''));
-                      } else {
-                        setCustomCode(val);
-                      }
-                    }}
-                    onCompositionStart={() => setIsComposing(true)}
-                    onCompositionEnd={e => {
-                      setIsComposing(false);
-                      setCustomCode(e.currentTarget.value.replace(/[^a-zA-Z]/g, ''));
-                    }}
-                    onBlur={e => setCustomCode(e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase())}
-                    placeholder="輸入自訂代碼，例如: kaik"
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-xs text-white placeholder-indigo-300/60 outline-none focus:border-white focus:bg-white/15 transition font-bold"
+                    value=""
+                    disabled
+                    readOnly
+                    placeholder="推廣代碼功能即將推出"
+                    className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 text-xs text-white placeholder-indigo-300/60 outline-none transition font-bold cursor-not-allowed opacity-60"
                   />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 flex items-center justify-between overflow-hidden">
-                    <span className="text-xs font-bold font-sans text-indigo-50 truncate mr-3">{referralLink}</span>
+                    <span className="text-xs font-bold font-sans text-indigo-50/70 truncate mr-3">{referralLink}</span>
                     {copied ? (
                       <span className="text-[10px] bg-emerald-500 text-white font-extrabold px-2.5 py-1 rounded-md animate-pulse shrink-0">
                         已複製
                       </span>
                     ) : null}
                   </div>
-                  <button 
+                  <button
                     onClick={copyToClipboard}
-                    className="bg-white hover:bg-slate-100 active:scale-95 text-indigo-700 px-6 py-3 rounded-2xl text-xs font-black transition flex items-center justify-center cursor-pointer shadow-md shrink-0"
+                    disabled
+                    className="bg-white/80 text-indigo-700/70 px-6 py-3 rounded-2xl text-xs font-black transition flex items-center justify-center shadow-md shrink-0 cursor-not-allowed opacity-60"
                   >
                     <Copy className="w-4 h-4 mr-1.5" /> 複製自訂連結
                   </button>
@@ -343,7 +270,7 @@ export default function AdminRewardsPage() {
                   {filteredReferrals.length === 0 && (
                     <tr>
                       <td colSpan={6} className="text-center py-12 text-slate-400 italic">
-                        尚無任何推薦記錄。
+                        目前尚無推薦紀錄
                       </td>
                     </tr>
                   )}

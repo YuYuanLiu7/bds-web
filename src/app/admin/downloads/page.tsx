@@ -20,7 +20,8 @@ export default function AdminDownloadsPage() {
   const [downloads, setDownloads] = useState<DownloadProduct[]>([]);
   const [filteredDownloads, setFilteredDownloads] = useState<DownloadProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [error, setError] = useState(false);
+
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('All');
@@ -34,11 +35,12 @@ export default function AdminDownloadsPage() {
 
   const fetchDownloads = async () => {
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch('/api/admin/downloads');
       if (!res.ok) throw new Error('API request failed');
       const data = await res.json();
-      
+
       if (Array.isArray(data) && data.length > 0) {
         setDownloads(data);
       } else {
@@ -46,9 +48,10 @@ export default function AdminDownloadsPage() {
         setDownloads([]);
       }
     } catch (err) {
-      // API 失敗時呈現空狀態，避免顯示假商品與假數字
+      // API 失敗時標記載入失敗，與「無資料」空狀態做區分
       console.warn('讀取數位商品失敗：', err);
       setDownloads([]);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -235,14 +238,14 @@ export default function AdminDownloadsPage() {
 
                           {/* Original Price */}
                           <td className="px-5 py-4.5 text-slate-700 font-bold text-xs select-none">
-                            NT$ {item.price.toLocaleString()}
+                            NT$ {(item.price ?? 0).toLocaleString()}
                           </td>
 
                           {/* Total Downloads */}
                           <td className="px-5 py-4.5 text-slate-800 font-extrabold text-xs select-none">
                             <div className="flex items-center space-x-1">
                               <Download className="w-3.5 h-3.5 text-emerald-500" />
-                              <span>{item.downloads_count}</span>
+                              <span>{(item.downloads_count ?? 0)}</span>
                             </div>
                           </td>
 
@@ -283,6 +286,12 @@ export default function AdminDownloadsPage() {
                         </tr>
                       );
                     })
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-rose-500 font-semibold text-xs">
+                        資料載入失敗，請重新整理或確認登入狀態。
+                      </td>
+                    </tr>
                   ) : (
                     <tr>
                       <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic text-xs">

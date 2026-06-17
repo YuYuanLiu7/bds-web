@@ -116,10 +116,10 @@ export default function AdminEventsPage() {
 
   // Filter logic
   const filteredEvents = events.filter(e => {
-    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = (e.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (e.description && e.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
                           (e.location && e.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                          e.type.toLowerCase().includes(searchQuery.toLowerCase());
+                          (e.type || '').toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;

@@ -15,7 +15,6 @@ export default function AdminFinancePage() {
   const [searchCustomer, setSearchCustomer] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [searchAffiliate, setSearchAffiliate] = useState('');
   const [statusPaid, setStatusPaid] = useState(true);
   const [statusUnpaid, setStatusUnpaid] = useState(true);
 
@@ -124,10 +123,6 @@ export default function AdminFinancePage() {
       end.setHours(23, 59, 59, 999);
       result = result.filter(o => new Date(o.created_at) <= end);
     }
-    if (searchAffiliate.trim()) {
-      // If affiliate system is modeled, otherwise ignore
-    }
-
     // 付款狀態篩選：已付款受「已付款」核取方塊控制，待付款與付款失敗皆受「未付款」核取方塊控制
     result = result.filter(o => {
       if (o.status === 'paid') return statusPaid;
@@ -143,7 +138,6 @@ export default function AdminFinancePage() {
     setSearchCustomer('');
     setStartDate('');
     setEndDate('');
-    setSearchAffiliate('');
     setStatusPaid(true);
     setStatusUnpaid(true);
     setFilteredOrders(orders);
@@ -173,19 +167,12 @@ export default function AdminFinancePage() {
         
         {/* Export buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <button 
+          <button
             onClick={handleExportCSV}
             className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
           >
             <Download className="w-4 h-4 mr-1.5" />
-            匯出所有訂單
-          </button>
-          <button 
-            onClick={handleExportCSV}
-            className="flex items-center px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 bg-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95 hover:bg-slate-50"
-          >
-            <Download className="w-4 h-4 mr-1.5" />
-            匯出 Excel
+            匯出目前清單
           </button>
         </div>
       </div>
@@ -201,7 +188,7 @@ export default function AdminFinancePage() {
         <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">進階篩選</h3>
         
         <form onSubmit={handleSearch} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {/* Trade No */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-slate-500">訂單編號</label>
@@ -248,17 +235,6 @@ export default function AdminFinancePage() {
               />
             </div>
 
-            {/* Affiliate Code */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500">導購代碼</label>
-              <input 
-                type="text" 
-                value={searchAffiliate}
-                onChange={(e) => setSearchAffiliate(e.target.value)}
-                placeholder="輸入導購代碼"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
-              />
-            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-4 border-t border-slate-50">

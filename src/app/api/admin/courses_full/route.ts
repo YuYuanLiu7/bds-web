@@ -47,37 +47,16 @@ export async function GET(req: Request) {
       }
     });
 
-    // Retrieve active subscribers count who have full access to all courses
-    let activeSubscribersCount = 0;
-    try {
-      const { data: subUsers, error: subError } = await supabase
-        .from('users')
-        .select('id, membership_expires_at')
-        .not('membership_plan_id', 'is', null);
-
-      if (!subError && Array.isArray(subUsers)) {
-        const now = new Date();
-        const activeSubs = subUsers.filter(u => {
-          if (!u.membership_expires_at) return true;
-          return new Date(u.membership_expires_at) > now;
-        });
-        activeSubscribersCount = activeSubs.length;
-      }
-    } catch (e) {
-      console.warn("Failed to retrieve active subscribers count:", e);
-    }
-
-    // Enrich courses with calculated stats
+    // 計算每門課程的統計數據
     const enrichedCourses = courses.map(course => {
+      // 僅計算該課程於 user_courses 對應的實際購買人數，避免將全站訂閱數灌入每門課
       const directStudentCount = studentCountMap[course.id] || 0;
-      // Total students authorized = direct buyers + active subscription members
-      const totalStudentCount = directStudentCount + activeSubscribersCount;
       const netSales = netSalesMap[course.id] || 0;
 
       return {
         ...course,
         chapters: (course.chapters || []).sort((a: any, b: any) => a.order_index - b.order_index),
-        studentCount: totalStudentCount,
+        studentCount: directStudentCount,
         directStudentCount,
         netSales
       };

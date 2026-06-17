@@ -70,7 +70,6 @@ export default function DashboardClient({
   const rangeLabel =
     hasSeries ? `${revenueSeries[0].label} – ${revenueSeries[revenueSeries.length - 1].label}` : '';
 
-  const [activeTab, setActiveTab] = useState<'operating' | 'marketing'>('operating');
   const [copiedLink, setCopiedLink] = useState<'frontend' | 'backend' | null>(null);
 
   const handleCopy = (text: string, type: 'frontend' | 'backend') => {
@@ -115,32 +114,10 @@ export default function DashboardClient({
         <div className="lg:col-span-9 space-y-6">
           <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
             
-            {/* Inner Header with Tabs */}
+            {/* Inner Header（已移除無作用的分頁切換，僅保留營收儀表板） */}
             <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-800">儀表板</h2>
-              </div>
-              <div className="flex space-x-6 text-sm font-semibold">
-                <button 
-                  onClick={() => setActiveTab('operating')}
-                  className={`pb-4 -mb-[17px] border-b-2 transition ${
-                    activeTab === 'operating' 
-                      ? 'border-indigo-600 text-indigo-600' 
-                      : 'border-transparent text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  網站營運
-                </button>
-                <button 
-                  onClick={() => setActiveTab('marketing')}
-                  className={`pb-4 -mb-[17px] border-b-2 transition ${
-                    activeTab === 'marketing' 
-                      ? 'border-indigo-600 text-indigo-600' 
-                      : 'border-transparent text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  行銷
-                </button>
               </div>
             </div>
 

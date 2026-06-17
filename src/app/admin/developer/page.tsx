@@ -32,6 +32,11 @@ export default function AdminDeveloperPage() {
   return (
     <div className="space-y-6 select-none font-sans text-slate-700">
       
+      {/* 開發中提示橫幅 */}
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
+        本頁部分開發者功能仍在開發中，所顯示的設定與狀態尚未正式啟用。
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
@@ -50,9 +55,12 @@ export default function AdminDeveloperPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* API Keys */}
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5">
-            <h2 className="text-sm font-extrabold text-slate-800 flex items-center">
-              <Shield className="w-4.5 h-4.5 mr-2 text-slate-400" />
-              BDS 系統 API 授權金鑰 (API Key)
+            <h2 className="text-sm font-extrabold text-slate-800 flex items-center justify-between">
+              <span className="flex items-center">
+                <Shield className="w-4.5 h-4.5 mr-2 text-slate-400" />
+                BDS 系統 API 授權金鑰 (API Key)
+              </span>
+              <span className="inline-flex px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold">即將推出</span>
             </h2>
             <div className="border-t border-slate-50 my-1"></div>
             <div className="space-y-4">
@@ -95,8 +103,9 @@ export default function AdminDeveloperPage() {
                 <label className="text-xs font-bold text-slate-500">接收 Webhook URL</label>
                 <input
                   type="text"
-                  placeholder="https://你的網域/webhooks/bds"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition"
+                  placeholder="功能開發中"
+                  disabled
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -110,11 +119,11 @@ export default function AdminDeveloperPage() {
             <div className="border-t border-slate-50 pt-3 space-y-3">
               <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                 <span>資料庫連接狀況</span>
-                <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">健康</span>
+                <span className="inline-flex px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold">尚未啟用監測</span>
               </div>
               <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                 <span>PayUni 閘道器連線</span>
-                <span className="inline-flex px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">健康</span>
+                <span className="inline-flex px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold">尚未啟用監測</span>
               </div>
               <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                 <span>系統當前時間</span>
