@@ -10,6 +10,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '請填寫所有欄位' }, { status: 400 });
     }
 
+    // Email 格式後端驗證（防止前端被繞過）
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) {
+      return NextResponse.json({ error: '電子郵件格式不正確' }, { status: 400 });
+    }
+
     if (password.length < 6) {
       return NextResponse.json({ error: '密碼長度至少需要 6 位' }, { status: 400 });
     }

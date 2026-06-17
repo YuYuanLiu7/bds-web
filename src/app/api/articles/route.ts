@@ -54,10 +54,10 @@ export async function GET(req: Request) {
       }
       return NextResponse.json(data);
     } else {
-      // Fetch all published articles
+      // Fetch all published articles（清單僅取必要欄位，不抓大欄位 content：兼顧效能與不外洩付費正文）
       const { data, error } = await supabase
         .from('articles')
-        .select('*')
+        .select('id, title, author, date, views, category, summary, image_url, status, slug, tags, is_pinned, visibility, required_course_ids')
         .eq('status', 'published')
         .order('date', { ascending: false });
 
