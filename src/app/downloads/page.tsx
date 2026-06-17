@@ -8,6 +8,11 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export const revalidate = 0;
 
+export const metadata = {
+  title: "數位資源下載",
+  description: "即裝即用的專業履歷模板、生意開發策略白皮書與經典面試手冊。",
+};
+
 // Seed/Mock fallback data in case database is empty or not yet migrated
 const MOCK_DOWNLOADS = [
   { 

@@ -8,6 +8,11 @@ import MembershipList from "@/components/MembershipList";
 
 export const revalidate = 0;
 
+export const metadata = {
+  title: "會員方案",
+  description: "訂閱 BDS 會員方案，暢讀產業觀察專欄、解鎖線上課程與專屬社群資源。",
+};
+
 // Seed/Mock fallback data in case database is empty or not yet migrated
 const SEED_PLANS = [
   { 

@@ -9,6 +9,16 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Link from 'next/link';
 import CourseReviews from '@/components/CourseReviews';
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const course = await getCourseById(id);
+  if (!course) return { title: "課程" };
+  return {
+    title: course.title,
+    description: course.description || `${course.title} — BDS By Doing So 線上實戰課程。`,
+  };
+}
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
