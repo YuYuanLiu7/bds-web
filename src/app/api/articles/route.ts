@@ -62,7 +62,17 @@ export async function GET(req: Request) {
         .order('date', { ascending: false });
 
       if (error) throw error;
-      return NextResponse.json(data || []);
+
+      // 🔒 列表不外洩付費文章正文：非公開（members/course_purchasers）文章清空 content，
+      //    避免訪客直接打 /api/articles 就能讀到付費全文而繞過單篇付費牆。
+      //    列表 UI 僅使用標題/摘要/中繼資料，不需要 content。
+      const sanitized = (data || []).map((a: any) => {
+        if ((a.visibility || 'public') !== 'public') {
+          return { ...a, content: '', locked: true, lockType: a.visibility };
+        }
+        return a;
+      });
+      return NextResponse.json(sanitized);
     }
   } catch (error: any) {
     console.error("Public API GET articles error:", error.message);
