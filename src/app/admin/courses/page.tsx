@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, Star, BookOpen, GraduationCap, ChevronDown, Users, DollarSign, Filter, Search } from "lucide-react";
-import Image from "next/image";
+import SafeImage from '@/components/SafeImage';
 import CourseModal from "@/components/admin/CourseModal";
 
 export default function AdminCoursesPage() {
@@ -214,12 +214,10 @@ export default function AdminCoursesPage() {
                   >
                     {/* Course Cover Photo */}
                     <div className="relative aspect-[16/10] overflow-hidden bg-slate-50 border-b border-slate-50">
-                      <Image 
-                        src={course.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"} 
-                        alt={course.title}
-                        fill
-                        className="object-cover group-hover:scale-[1.03] transition duration-500"
-                        unoptimized={true}
+                      <SafeImage
+                        src={course.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"}
+                        alt={course.title || '課程封面'}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
                       />
                     </div>
 
@@ -323,6 +321,7 @@ export default function AdminCoursesPage() {
                               src={lecturerAvatar}
                               alt={`${lecturerName} 講師頭像`}
                               className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                              onError={(e)=>{const t=e.currentTarget; if(!t.src.endsWith('/images/course-placeholder.svg')) t.src='/images/course-placeholder.svg';}}
                             />
                           ) : (
                             <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-black flex-shrink-0">

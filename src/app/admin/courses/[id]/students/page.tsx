@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 import { 
   ArrowLeft, 
   Users, 
@@ -490,12 +490,10 @@ export default function CourseStudentsPage() {
           <div className="flex items-center space-x-4 z-10">
             {/* Course Thumbnail */}
             <div className="relative w-20 h-12.5 rounded-lg overflow-hidden bg-slate-800 border border-slate-700/50 flex-shrink-0">
-              <Image 
+              <SafeImage
                 src={course.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"}
-                alt={course.title}
-                fill
-                className="object-cover"
-                unoptimized={true}
+                alt={course.title || '課程縮圖'}
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
             

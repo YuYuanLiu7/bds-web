@@ -987,10 +987,11 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                   <div>
                     {formData.image_url && (
                       <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-slate-200/80 shadow-xs bg-slate-50 select-none">
-                        <img 
-                          src={formData.image_url} 
-                          alt="Cover Preview" 
+                        <img
+                          src={formData.image_url}
+                          alt="封面圖片預覽"
                           className="w-full h-full object-cover"
+                          onError={(e) => { const t = e.currentTarget; if (!t.src.endsWith('/images/course-placeholder.svg')) t.src = '/images/course-placeholder.svg'; }}
                         />
                         {uploading && (
                           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center text-white text-[10px] font-bold">

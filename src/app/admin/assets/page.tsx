@@ -558,7 +558,15 @@ export default function AdminAssetsPage() {
                             {/* Icon / Mini-Thumbnail */}
                             <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                               {item.type === 'image' && item.url ? (
-                                <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                <img
+                                  src={item.url}
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const t = e.currentTarget;
+                                    if (!t.src.endsWith('/images/course-placeholder.svg')) t.src = '/images/course-placeholder.svg';
+                                  }}
+                                />
                               ) : (
                                 getFileIcon(item.type)
                               )}
@@ -669,10 +677,14 @@ export default function AdminAssetsPage() {
                   {/* File Preview block */}
                   <div className="aspect-[16/10] bg-slate-50 flex items-center justify-center border-b border-slate-100 relative overflow-hidden">
                     {item.type === 'image' && item.url ? (
-                      <img 
-                        src={item.url} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                      <img
+                        src={item.url}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        onError={(e) => {
+                          const t = e.currentTarget;
+                          if (!t.src.endsWith('/images/course-placeholder.svg')) t.src = '/images/course-placeholder.svg';
+                        }}
                       />
                     ) : (
                       <div className="scale-150">

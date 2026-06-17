@@ -20,7 +20,7 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -153,12 +153,10 @@ export default function OrderDetailPage() {
                   /* Course Product Display */
                   <div className="flex items-start space-x-4 p-2 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="relative w-28 h-16.5 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
-                      <Image 
+                      <SafeImage
                         src={order.courses.thumbnail_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"}
-                        alt={order.courses.title}
-                        fill
-                        className="object-cover"
-                        unoptimized={true}
+                        alt={order.courses.title || '課程縮圖'}
+                        className="absolute inset-0 w-full h-full object-cover"
                       />
                     </div>
                     <div className="space-y-1 flex-1 min-w-0">

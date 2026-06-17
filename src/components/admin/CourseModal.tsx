@@ -17,7 +17,6 @@ import {
   Upload,
   Loader2
 } from 'lucide-react';
-import Image from 'next/image';
 
 interface Chapter {
   id?: string;
@@ -377,10 +376,11 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                     </div>
                   ) : (localCoverPreview || formData.thumbnail_url) ? (
                     <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white">
-                      <img 
-                        src={localCoverPreview || formData.thumbnail_url} 
+                      <img
+                        src={localCoverPreview || formData.thumbnail_url}
                         alt="課程封面預覽"
                         className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { const t = e.currentTarget; if (!t.src.endsWith('/images/course-placeholder.svg')) t.src = '/images/course-placeholder.svg'; }}
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                         <span className="text-white text-xs font-bold bg-black/60 px-3.5 py-2 rounded-xl">重新選取圖片</span>

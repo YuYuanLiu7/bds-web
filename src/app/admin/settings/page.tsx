@@ -518,7 +518,7 @@ export default function AdminSettingsPage() {
                     <label className="text-[9px] font-bold text-slate-400">前台 Logo 圖片</label>
                     <div className="flex space-x-2 items-center bg-white p-2 rounded-lg border border-slate-200/80">
                       <div className="w-10 h-8 rounded border bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
-                        {logoUrl ? <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-0.5" /> : <ImageIcon className="w-4 h-4 text-slate-300" />}
+                        {logoUrl ? <img src={logoUrl} alt="網站 Logo 預覽" className="w-full h-full object-contain p-0.5" onError={(e)=>{const t=e.currentTarget; if(!t.src.endsWith('/images/course-placeholder.svg')) t.src='/images/course-placeholder.svg';}} /> : <ImageIcon className="w-4 h-4 text-slate-300" />}
                         {uploadingField === 'logo' && <div className="absolute inset-0 bg-black/50 text-[8px] text-white flex items-center justify-center">...</div>}
                       </div>
                       <input 
@@ -545,7 +545,7 @@ export default function AdminSettingsPage() {
                         <div className="space-y-1">
                           <label className="text-[9px] text-slate-400">上傳投影片圖片</label>
                           <div className="aspect-[21/9] w-full rounded border overflow-hidden bg-slate-50 relative flex items-center justify-center">
-                            {slide.imageUrl ? <img src={slide.imageUrl} alt="Slide" className="w-full h-full object-cover" /> : <ImageIcon className="w-6 h-6 text-slate-300" />}
+                            {slide.imageUrl ? <img src={slide.imageUrl} alt="首頁輪播圖片預覽" className="w-full h-full object-cover" onError={(e)=>{const t=e.currentTarget; if(!t.src.endsWith('/images/course-placeholder.svg')) t.src='/images/course-placeholder.svg';}} /> : <ImageIcon className="w-6 h-6 text-slate-300" />}
                             {uploadingField === `slide-${sIdx}` && <div className="absolute inset-0 bg-black/60 text-xs text-white flex items-center justify-center">上傳中...</div>}
                             <label className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 flex items-center justify-center text-white text-[9px] cursor-pointer transition select-none">
                               點此上傳

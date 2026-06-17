@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Save, Image as ImageIcon, Link2, Calendar, MapPin, Users, Award, Tag, Compass } from 'lucide-react';
-import Image from 'next/image';
+import SafeImage from '@/components/SafeImage';
 
 interface Event {
   id?: string;
@@ -402,8 +402,8 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
 
                 {formData.image_url && (
                   <div className="mt-3 relative aspect-[16/10] rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-50 select-none group">
-                    <img 
-                      src={formData.image_url} 
+                    <SafeImage
+                      src={formData.image_url}
                       alt="活動封面預覽"
                       className="w-full h-full object-cover"
                     />

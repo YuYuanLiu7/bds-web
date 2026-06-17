@@ -24,52 +24,6 @@ export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [events, setEvents] = useState<any[]>([]);
 
-  // Default mock events as a robust failsafe fallback
-  const MOCK_EVENTS = [
-    { 
-      id: '1', 
-      title: 'BDS 半導體業務核心思維實戰營', 
-      date: '2026-06-15 14:00', 
-      location: '線上直播 (Zoom)', 
-      attendees: 48, 
-      status: 'upcoming', 
-      type: '線上實戰營', 
-      category: '工作坊',
-      price: 'NT$ 1,980', 
-      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
-      desc: '專門為半導體上中下游業務人員設計的核心思維實戰營，帶您突破業績瓶頸與大客戶談判。',
-      registration_url: 'https://zoom.us'
-    },
-    { 
-      id: '2', 
-      title: '醫材商務開發與法規布局沙龍', 
-      date: '2026-05-18 19:30', 
-      location: '台北市大安區信義路四段', 
-      attendees: 32, 
-      status: 'completed', 
-      type: '線下沙龍', 
-      category: '線下聚會',
-      price: 'NT$ 800', 
-      imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
-      desc: '匯聚生技與醫材領域商務開發專家，深度剖析法規申請流程與海內外代理商通路布局策略。',
-      registration_url: ''
-    },
-    { 
-      id: '3', 
-      title: 'BDS 爐邊對話：硬體 ODM 的全球銷售戰略', 
-      date: '2026-04-10 20:00', 
-      location: '線上直播 (Zoom)', 
-      attendees: 75, 
-      status: 'completed', 
-      type: '線上講座', 
-      category: '線上讀書會',
-      price: '免費活動', 
-      imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=800',
-      desc: '爐邊對談特別場——特邀業界高階銷售主管，分享硬體製造與全球品牌客戶銷售談判的實戰心法。',
-      registration_url: ''
-    }
-  ];
-
   useEffect(() => {
     // 1. Fetch site settings
     fetch('/api/admin/site-settings')
@@ -109,8 +63,8 @@ export default function EventsPage() {
         }
       })
       .catch(err => {
-        console.warn("Using fallback mock data for events (database table not yet created):", err);
-        setEvents(MOCK_EVENTS);
+        console.warn("Failed to load events:", err);
+        setEvents([]);
       });
   }, []);
 

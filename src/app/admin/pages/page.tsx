@@ -492,10 +492,11 @@ export default function AdminPagesPage() {
                   <div className="flex items-center space-x-3 bg-white p-3 rounded-xl border border-slate-200/80">
                     <div className="w-16 h-12 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
                       {formData.imageUrl ? (
-                        <img 
-                          src={formData.imageUrl} 
-                          alt="Cover Preview" 
+                        <img
+                          src={formData.imageUrl}
+                          alt="封面預覽"
                           className="w-full h-full object-cover"
+                          onError={(e)=>{const t=e.currentTarget; if(!t.src.endsWith('/images/course-placeholder.svg')) t.src='/images/course-placeholder.svg';}}
                         />
                       ) : (
                         <ImageIcon className="w-5 h-5 text-slate-300" />
