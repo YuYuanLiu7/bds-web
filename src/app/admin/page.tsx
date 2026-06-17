@@ -7,6 +7,8 @@ export default async function AdminDashboardPage() {
   let initialCoursesCount = 0;
   let initialUsersCount = 0;
   let initialRevenue = 0;
+  // 近 30 天每日營收/成交筆數時序（接真實 orders 資料）
+  const revenueSeries: { date: string; label: string; revenue: number; count: number }[] = [];
 
   try {
     // 1. Fetch courses count
@@ -36,15 +38,41 @@ export default async function AdminDashboardPage() {
     if (!ordersError && paidOrders) {
       initialRevenue = paidOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
     }
+
+    // 4. 近 30 天每日營收與成交筆數（以已付款訂單的建立日分桶）
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - 29);
+    const buckets: Record<string, { date: string; label: string; revenue: number; count: number }> = {};
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(since);
+      d.setDate(since.getDate() + i);
+      const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+      buckets[key] = { date: key, label: `${d.getMonth() + 1}/${d.getDate()}`, revenue: 0, count: 0 };
+    }
+    const { data: recentOrders } = await supabase
+      .from('orders')
+      .select('amount, created_at')
+      .eq('status', 'paid')
+      .gte('created_at', since.toISOString());
+    (recentOrders || []).forEach((o: { amount: number | null; created_at: string | null }) => {
+      const key = (o.created_at || '').slice(0, 10);
+      if (buckets[key]) {
+        buckets[key].revenue += o.amount || 0;
+        buckets[key].count += 1;
+      }
+    });
+    revenueSeries.push(...Object.values(buckets));
   } catch (error) {
     console.error("Failed to fetch dashboard initial statistics:", error);
   }
 
   return (
-    <DashboardClient 
+    <DashboardClient
       initialCoursesCount={initialCoursesCount}
       initialUsersCount={initialUsersCount}
       initialRevenue={initialRevenue}
+      revenueSeries={revenueSeries}
     />
   );
 }
