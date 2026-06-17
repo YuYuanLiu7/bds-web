@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -13,6 +14,12 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+
+        // 速率限制：同一帳號每 10 分鐘最多 8 次登入嘗試，防止密碼暴力破解
+        if (!(await rateLimit(`login:${credentials.email.toLowerCase()}`, 8, 600))) {
+          console.warn("Login rate limit exceeded for:", credentials.email);
+          return null;
+        }
 
         // 從資料庫找使用者
         const { data: user, error } = await supabase

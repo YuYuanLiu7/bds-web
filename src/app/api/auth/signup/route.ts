@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+import { rateLimit, clientIp } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
   try {
+    // 速率限制：同一 IP 每小時最多 10 次註冊嘗試，防止洗註冊
+    if (!(await rateLimit(`signup:${clientIp(req)}`, 10, 3600))) {
+      return NextResponse.json({ error: '操作過於頻繁，請稍後再試' }, { status: 429 });
+    }
+
     const { email, password, name } = await req.json();
 
     if (!email || !password || !name) {

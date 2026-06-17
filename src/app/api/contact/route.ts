@@ -1,9 +1,15 @@
 import { sendContactEmail } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 // 聯絡我們表單：將訪客訊息寄送至客服信箱（使用 Resend）
 export async function POST(req: Request) {
   try {
+    // 速率限制：同一 IP 每 10 分鐘最多 5 次，防止灌爆客服信箱與耗用寄信額度
+    if (!(await rateLimit(`contact:${clientIp(req)}`, 5, 600))) {
+      return NextResponse.json({ error: "送出過於頻繁，請稍後再試" }, { status: 429 });
+    }
+
     const { name, email, subject, message } = await req.json();
 
     // 基本欄位驗證
