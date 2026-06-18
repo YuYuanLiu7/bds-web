@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { useSettings } from '@/components/SettingsProvider';
+import { useToast } from '@/components/Toast';
 import { 
   Calendar, 
   MapPin, 
@@ -21,10 +22,13 @@ import {
 export default function EventsPage() {
   // 主色改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch site-settings
   const primaryColor = useSettings().visual.primaryColor || '#21448e';
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [searchQuery, setSearchQuery] = useState('');
   const [events, setEvents] = useState<any[]>([]);
+  // 載入中旗標：避免資料未到位前先閃出「尚無活動」空狀態
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch dynamic database events
@@ -56,7 +60,8 @@ export default function EventsPage() {
       .catch(err => {
         console.warn("Failed to load events:", err);
         setEvents([]);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   // Compute categories dynamically based on loaded events to ensure modularity
@@ -90,7 +95,7 @@ export default function EventsPage() {
     if (url) {
       window.open(url, '_blank');
     } else {
-      alert('感謝您的關注！此活動的報名連結即將上線，敬請期待。如需預訂席位，歡迎直接聯絡 BDS 團隊！');
+      toast.info('感謝您的關注！此活動的報名連結即將上線，敬請期待。如需預訂席位，歡迎直接聯絡 BDS 團隊！');
     }
   };
 
@@ -269,7 +274,29 @@ export default function EventsPage() {
 
           {/* Right Column: Main list of cards */}
           <div className="lg:col-span-3">
-            {filteredEvents.length > 0 ? (
+            {loading ? (
+              /* 載入中骨架屏：與真實卡片同尺寸，避免版面跳動與「尚無活動」誤閃 */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8" aria-busy="true" aria-label="活動載入中">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white/80 rounded-3xl border border-slate-200/70 shadow-sm overflow-hidden flex flex-col animate-pulse">
+                    <div className="aspect-[16/10] w-full bg-slate-200/70" />
+                    <div className="p-6 space-y-4">
+                      <div className="h-3 w-1/3 bg-slate-200/70 rounded" />
+                      <div className="h-4 w-3/4 bg-slate-200/70 rounded" />
+                      <div className="h-3 w-full bg-slate-200/60 rounded" />
+                      <div className="space-y-2 border-t border-slate-50 pt-3">
+                        <div className="h-3 w-2/3 bg-slate-200/60 rounded" />
+                        <div className="h-3 w-1/2 bg-slate-200/60 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                        <div className="h-4 w-20 bg-slate-200/70 rounded" />
+                        <div className="h-9 w-24 bg-slate-200/70 rounded-xl" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredEvents.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {filteredEvents.map((event) => (
                   <div
