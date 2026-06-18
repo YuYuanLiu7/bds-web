@@ -25,10 +25,13 @@
 1. 建立 Supabase 專案，記下專案 URL 與 API 金鑰（Project Settings → API）：
    - `anon` public 金鑰
    - `service_role` secret 金鑰
-2. 開啟 **SQL Editor**，把專案內 `db/init.sql` 整份貼上執行。它會：
-   - 建立所有資料表（使用者、課程、章節、訂單、文章、活動、下載、會員方案、評價、留言、設定…）
-   - 建立初始示範資料（會員方案、活動、文章等，可日後在後台調整或刪除）
-3. **啟用 Row Level Security（RLS）以保護資料**：本平台所有資料存取都在伺服器端、以 `service_role` 金鑰進行，因此可（且建議）對所有資料表開啟 RLS，阻擋任何人用 public 金鑰直接連線存取。
+2. 開啟 **SQL Editor**，依序貼上執行下列 SQL（皆冪等、可重複執行）：
+   - `db/init.sql`：建立所有資料表與初始示範資料（使用者、課程、章節、訂單、文章、活動、下載、會員方案、評價、留言、設定…）
+   - `db/add_performance_indexes.sql`：效能索引（規模化重要）
+   - `db/add_rate_limiting.sql`：速率限制表與函式（登入/註冊/表單防濫用）
+3. **建立檔案儲存空間（Storage）**：後台上傳圖片需要。系統會在第一次上傳時自動建立名為 `uploads` 的公開 bucket；若想手動建立，到 Supabase **Storage → New bucket**，命名 `uploads` 並勾選 **Public**。
+   > 在 Netlify/Vercel 這類無狀態平台，上傳一定要走 Supabase Storage（不能存主機本機）。
+4. **啟用 Row Level Security（RLS）以保護資料**：本平台所有資料存取都在伺服器端、以 `service_role` 金鑰進行，因此可（且建議）對所有資料表開啟 RLS，阻擋任何人用 public 金鑰直接連線存取。
    > 注意：開啟 RLS 後務必設定下方的 `SUPABASE_SERVICE_ROLE_KEY`，否則伺服器將讀不到資料。
 
 ---
@@ -69,18 +72,38 @@ npx tsc --noEmit   # 型別檢查
 
 ---
 
-## 6. 部署到 Vercel
+## 6. 部署（擇一平台）
+
+本專案是標準 Next.js，可部署到多種平台。常見三種：
+
+### 6A. Netlify（免費版即可商業使用，適合中小規模、最省錢）
+1. 將專案推到 GitHub，於 Netlify **Add new site → Import from GitHub** 選此 repo。
+2. Build 設定一般會自動偵測（Next.js）；若需手動：Build command `npm run build`、發佈交由官方 Next.js Runtime 處理。
+3. **Site configuration → Environment variables** 填入與 `.env.local` 相同的所有變數（`NEXTAUTH_URL` 改為你的正式網域）。
+4. Deploy。
+   > 注意：Netlify 為無狀態平台，上傳檔案必須走 Supabase Storage（本專案已內建）。
+   > 提醒：本專案使用較新的 Next.js 版本，第一次部署請先以測試資料完整點過（首頁/登入/後台/結帳），確認 Netlify 的 Next.js Runtime 相容無誤，再正式導入會員。
+
+### 6B. Vercel（Next.js 原廠、相容性最佳；商業營運需 Pro 方案）
 1. 將專案推到 GitHub，於 Vercel 匯入該 repo。
-2. 在 Vercel 專案 **Settings → Environment Variables** 填入與 `.env.local` 相同的所有變數
-   （`NEXTAUTH_URL` 改為你的 Vercel/正式網域）。
-3. Deploy。完成後到 PayUni 後台把 NotifyURL / ReturnURL 指向你的正式網域
-   （`https://你的網域/api/checkout/callback`）。
+2. **Settings → Environment Variables** 填入與 `.env.local` 相同的所有變數（`NEXTAUTH_URL` 改為正式網域）。
+3. Deploy。
+   > 注意：Vercel 免費（Hobby）方案**禁止商業用途**，販售課程請使用 Pro 方案。
+
+### 6C. VPS / 自架 Node 主機（最省、無相容性顧慮，但需自行維運）
+1. 在主機 `git clone`、`npm install`、`npm run build`。
+2. 設定環境變數，以 `npm run start`（預設埠 3000）啟動，建議用 `pm2` 常駐並以 Nginx 反向代理 + HTTPS。
+   > 直接跑原生 `next start`，與本機行為一致、無轉換器相容問題；上傳也可走 Supabase Storage 或本機磁碟。
+
+**所有平台共通**：部署完成後到 PayUni 後台把 NotifyURL / ReturnURL 指向你的正式網域
+（`https://你的網域/api/checkout/callback`）。
 
 ---
 
 ## 7. 上線前檢查清單
-- [ ] Supabase 已執行 `db/init.sql` 且已開啟 RLS
+- [ ] Supabase 已執行 `db/init.sql`、`db/add_performance_indexes.sql`、`db/add_rate_limiting.sql` 且已開啟 RLS
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` 已設定（伺服器端讀寫正常）
+- [ ] Supabase Storage 有 `uploads`（Public）bucket，後台上傳圖片正常
 - [ ] 已建立管理員帳號並能登入 `/admin`
 - [ ] PayUni 已換成正式商店金鑰與正式 UPP 端點，`ENABLE_PAYMENT_SIMULATION` 未設為 true
 - [ ] Resend 寄件網域已驗證，`RESEND_FROM_EMAIL` 使用該網域
