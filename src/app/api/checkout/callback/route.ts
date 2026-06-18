@@ -70,15 +70,24 @@ export async function POST(req: Request) {
         return new Response('ERROR');
       }
 
-      // 校驗通過，更新訂單為已付款
-      const { error: updateError } = await supabase
+      // 校驗通過，原子地將訂單由「非 paid」更新為 paid（條件式更新 + 回傳受影響列），
+      // 避免 PayUni 並發/重送通知造成「先讀後寫」競態而重複開通、重複寄信。
+      const { data: updatedRows, error: updateError } = await supabase
         .from('orders')
         .update({
           status: 'paid',
           payment_type: decodedData.PaymentType,
           updated_at: new Date().toISOString()
         })
-        .eq('id', merTradeNo);
+        .eq('id', merTradeNo)
+        .neq('status', 'paid')
+        .select('id');
+
+      // 若沒有任何列被更新（已被另一個並發回呼搶先標記 paid），視為重送，直接結束不重複開通
+      if (!updateError && (!updatedRows || updatedRows.length === 0)) {
+        console.warn('Concurrent duplicate paid callback ignored for order:', merTradeNo);
+        return new Response('SUCCESS');
+      }
 
       if (!updateError) {
         if (order.course_id) {
