@@ -53,7 +53,7 @@ npm run dev
 - [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) — 賣方上線前最終檢查單
 - [`CUSTOMER-ACCEPTANCE.md`](./CUSTOMER-ACCEPTANCE.md) — 客戶 30 分鐘驗收清單
 - [`GO-LIVE-TEST.md`](./GO-LIVE-TEST.md) — 逐項上線測試（含金流真卡）
-- [`DEPLOYMENT.md`](./DEPLOYMENT.md)、[`SETUP-GUIDE.md`](./SETUP-GUIDE.md) — 部署與新手設定
+- [`SETUP-GUIDE.md`](./SETUP-GUIDE.md) — 從零到上線設定（含 Supabase / Bunny / PayUni / Netlify）
 
 ## 遷移步驟 (Migration Guide)
 1. **影片遷移**: 將影片上傳至 **Bunny.net Stream Library**，開啟 Embed Token 驗證，於後台課程章節填入影片網址或 GUID（影片以限時簽章網址保護，防盜看）。

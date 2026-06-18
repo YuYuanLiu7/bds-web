@@ -1,7 +1,7 @@
 # 🚀 上線前最終檢查單（一頁勾選版）
 
 > 程式與 UX 已達商業等級。本清單只列「**設定／營運**」的必做事項——全部打勾才算「能實際收錢營運」。
-> 詳細步驟見 [`DEPLOYMENT.md`](./DEPLOYMENT.md)、[`SETUP-GUIDE.md`](./SETUP-GUIDE.md)、逐項測試見 [`GO-LIVE-TEST.md`](./GO-LIVE-TEST.md)。
+> 詳細步驟見 [`SETUP-GUIDE.md`](./SETUP-GUIDE.md)，逐項測試見 [`GO-LIVE-TEST.md`](./GO-LIVE-TEST.md)。
 
 ---
 
