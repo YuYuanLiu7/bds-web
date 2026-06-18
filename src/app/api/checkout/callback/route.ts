@@ -1,6 +1,7 @@
 import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
 import { sendPurchaseSuccessEmail } from '@/lib/email';
+import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
@@ -8,16 +9,21 @@ export async function POST(req: Request) {
     const encryptInfo = formData.get('EncryptInfo') as string;
     const hashInfo = formData.get('HashInfo') as string;
 
-    const PAYUNI_CONFIG = {
-      HashKey: process.env.PAYUNI_HASH_KEY || 'YOUR_PAYUNI_HASH_KEY',
-      HashIV: process.env.PAYUNI_HASH_IV || 'YOUR_PAYUNI_HASH_IV',
-    };
+    // 🔒 金鑰必須由環境變數提供；缺漏直接拒絕，避免以可預測預設金鑰驗章而被偽造
+    const HashKey = process.env.PAYUNI_HASH_KEY;
+    const HashIV = process.env.PAYUNI_HASH_IV;
+    if (!HashKey || !HashIV) {
+      console.error('PayUni env not configured in callback');
+      return new Response('ERROR');
+    }
 
-    const tool = new PayuniTool(PAYUNI_CONFIG.HashKey, PAYUNI_CONFIG.HashIV);
+    const tool = new PayuniTool(HashKey, HashIV);
 
-    // 1. 驗證 HashInfo
+    // 1. 驗證 HashInfo（常數時間比較，消除時序側信道）
     const calculatedHash = tool.generateHash(encryptInfo);
-    if (calculatedHash !== hashInfo) {
+    const a = Buffer.from(calculatedHash);
+    const b = Buffer.from(hashInfo || '');
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       console.error('Invalid HashInfo');
       return new Response('ERROR');
     }

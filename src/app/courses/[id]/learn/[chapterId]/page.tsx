@@ -7,6 +7,7 @@ import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";
 import { ChevronLeft, Play } from "lucide-react";
 import LearnExtraDetails from "@/components/LearnExtraDetails";
+import { isBunnyVideo, signBunnyEmbedUrl } from "@/lib/bunny";
 
 export default async function ChapterPage({ params }: { params: Promise<{ id: string, chapterId: string }> }) {
   const { id, chapterId } = await params;
@@ -34,6 +35,15 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
   const currentChapter = course.chapters.find(c => c.id === chapterId);
   if (!currentChapter) {
     redirect(`/courses/${id}/learn`);
+  }
+
+  // 🔒 影片防盜：此頁已通過登入＋課程存取權驗證，於伺服器端為 Bunny 影片簽發
+  //    短效（6 小時）Token 嵌入網址，不把可永久存取的原始網址暴露給前端。
+  //    未設定 Bunny env 時維持原值（degrade，仍可播放未啟用 token 的影片）。
+  let videoUrl = currentChapter.video_url || '';
+  if (videoUrl && isBunnyVideo(videoUrl)) {
+    const signed = signBunnyEmbedUrl(videoUrl);
+    if (signed) videoUrl = signed;
   }
 
   return (
@@ -72,8 +82,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
       <div className="flex-1 flex flex-col h-2/3 lg:h-full overflow-y-auto">
         <div className="p-0 lg:p-8 max-w-5xl mx-auto w-full pb-20">
           <div className="bg-black lg:rounded-2xl overflow-hidden shadow-2xl">
-            {currentChapter.video_url ? (
-              <VideoPlayer url={currentChapter.video_url} />
+            {videoUrl ? (
+              <VideoPlayer url={videoUrl} />
             ) : (
               <div className="aspect-video bg-gray-800 flex items-center justify-center italic text-gray-500">
                 本章節尚未上傳影片

@@ -100,19 +100,34 @@ npx tsc --noEmit   # 型別檢查
 
 ---
 
-## 7. 上線前檢查清單
+## 7. 影片防盜（Bunny.net Token）
+1. 影片上傳到 Bunny **Stream Library**，到該影片庫 **Security** 開啟「Embed View Token Authentication」。
+2. `.env`／部署平台填入 `BUNNY_STREAM_LIBRARY_ID` 與 `BUNNY_TOKEN_AUTH_KEY`（皆勿加 NEXT_PUBLIC_）。
+3. 後台課程章節的「影片網址」填 Bunny 影片的 embed 網址或影片 GUID 即可；系統會在學員（已驗證購課權限）開啟單元時，於伺服器端簽發 6 小時短效 Token 播放網址。
+   > 上線前請以一支測試影片確認可正常播放；若 Bunny 端驗章失敗，請依 `src/lib/bunny.ts` 註解調整 token 串接順序。
+
+## 8. 自動化排程（GitHub Actions，已內建於 `.github/workflows/`）
+推到 GitHub 後，於 repo **Settings → Secrets and variables → Actions** 設定以下 secrets 即會自動生效：
+- **每日備份到 Google Drive**（`db-backup.yml`）：`SUPABASE_DB_URL`（Supabase 直連字串）、`RCLONE_CONFIG_BASE64`（本機 `rclone config` 設好 Google Drive remote 後的設定檔 base64）、`RCLONE_REMOTE`（remote 名稱）。即使未設 rclone，也會保留一份 GitHub artifact 備份。
+- **Supabase 保活**（`keep-alive.yml`）：`SUPABASE_URL`、`SUPABASE_ANON_KEY`。每 3 天查詢一次防止免費版休眠。
+
+---
+
+## 9. 上線前檢查清單
 - [ ] Supabase 已執行 `db/init.sql`、`db/add_performance_indexes.sql`、`db/add_rate_limiting.sql` 且已開啟 RLS
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` 已設定（伺服器端讀寫正常）
 - [ ] Supabase Storage 有 `uploads`（Public）bucket，後台上傳圖片正常
 - [ ] 已建立管理員帳號並能登入 `/admin`
-- [ ] PayUni 已換成正式商店金鑰與正式 UPP 端點，`ENABLE_PAYMENT_SIMULATION` 未設為 true
+- [ ] PayUni 已換成正式商店金鑰與正式 UPP 端點，`ENABLE_PAYMENT_SIMULATION` 未設為 true，NotifyURL 指向 `/api/webhook/payuni`
+- [ ] Bunny 影片庫已開啟 Token Authentication，`BUNNY_STREAM_LIBRARY_ID` / `BUNNY_TOKEN_AUTH_KEY` 已設定，測試影片可播放
+- [ ] GitHub Actions 每日備份與保活的 secrets 已設定且首次執行成功
 - [ ] Resend 寄件網域已驗證，`RESEND_FROM_EMAIL` 使用該網域
 - [ ] 後台「設定」中的網站名稱、Logo、主色、聯絡信箱、FAQ、公告皆已更新為你的品牌
 - [ ] 已新增實際課程 / 文章 / 活動 / 下載商品，移除不需要的示範資料
 
 ---
 
-## 8. 後台功能總覽（`/admin`）
+## 10. 後台功能總覽（`/admin`）
 - **儀表板**：課程數、學員數、營收即時統計
 - **課程 / 章節**：建立課程、上傳影片與教材、管理章節
 - **文章**：部落格／專欄（支援會員或購課限定的付費牆）

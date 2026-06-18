@@ -1,0 +1,53 @@
+name: 每日資料庫備份（Google Drive）
+
+# PRD「必備安全機制」：每天自動以 pg_dump 匯出 Supabase 資料庫，
+# 上傳到 Google Drive（rclone），並同時保留一份 GitHub Actions artifact 作雙保險。
+#
+# 需在 GitHub repo → Settings → Secrets and variables → Actions 設定：
+#   SUPABASE_DB_URL      Supabase 直連連線字串（Supabase → Settings → Database → Connection string → URI，port 5432）
+#   RCLONE_CONFIG_BASE64 本機執行 `rclone config` 設好 Google Drive remote 後，
+#                        將 ~/.config/rclone/rclone.conf 以 base64 編碼後貼上（例：base64 -w0 rclone.conf）
+#   RCLONE_REMOTE        你的 rclone remote 名稱（例如 gdrive）
+# 若尚未設定 rclone 相關 secret，仍會保留 GitHub artifact 備份（不會失敗）。
+
+on:
+  schedule:
+    - cron: '0 18 * * *'   # 每日 UTC 18:00 = 台灣時間 02:00
+  workflow_dispatch:        # 也可手動觸發
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 以 pg_dump 匯出資料庫（用 postgres:16 容器避免版本不符）
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          STAMP="$(date +%Y%m%d-%H%M%S)"
+          FILE="bds-backup-${STAMP}.sql"
+          docker run --rm -e PGCONN="$SUPABASE_DB_URL" postgres:16-alpine \
+            sh -c 'pg_dump "$PGCONN" --no-owner --no-privileges' > "backup/${FILE}"
+          gzip "backup/${FILE}"
+          echo "備份完成：${FILE}.gz（$(du -h backup/${FILE}.gz | cut -f1)）"
+
+      - name: 保留 GitHub artifact 備份（保險，預設保留 90 天）
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup
+          path: backup/*.sql.gz
+          retention-days: 90
+
+      - name: 上傳到 Google Drive（rclone）
+        if: ${{ secrets.RCLONE_CONFIG_BASE64 != '' && secrets.RCLONE_REMOTE != '' }}
+        env:
+          RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
+          RCLONE_REMOTE: ${{ secrets.RCLONE_REMOTE }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p ~/.config/rclone
+          echo "$RCLONE_CONFIG_BASE64" | base64 -d > ~/.config/rclone/rclone.conf
+          rclone copy backup/ "${RCLONE_REMOTE}:BDS-Backups/" --no-traverse
+          echo "已上傳備份到 Google Drive（${RCLONE_REMOTE}:BDS-Backups/）"

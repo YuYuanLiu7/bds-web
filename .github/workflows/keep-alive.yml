@@ -1,0 +1,30 @@
+name: Supabase 保活（防免費版休眠）
+
+# Supabase 免費版閒置約 7 天會自動休眠（下次查詢需等喚醒）。
+# 此排程每 3 天對資料庫做一次輕量查詢，保持喚醒。
+#
+# 需在 GitHub repo Secrets 設定：
+#   SUPABASE_URL        你的 Supabase 專案 URL（https://xxxx.supabase.co）
+#   SUPABASE_ANON_KEY   anon public 金鑰
+
+on:
+  schedule:
+    - cron: '0 3 */3 * *'   # 每 3 天一次
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 對 Supabase 做輕量查詢以保持喚醒
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "尚未設定 SUPABASE_URL / SUPABASE_ANON_KEY secret，略過"; exit 0
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/courses?select=id&limit=1")
+          echo "Supabase 保活查詢回應碼：$code"

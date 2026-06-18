@@ -7,6 +7,21 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
+    // 🔒 未登入不可發起結帳（避免產生無對應使用者的付款）
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: '請先登入再進行結帳' }, { status: 401 });
+    }
+
+    // 🔒 金流金鑰必須由環境變數提供；缺漏時直接拒絕（fail-fast），
+    //    避免以無效預設金鑰送出交易、產生髒訂單或可被偽造的簽章
+    const MerID = process.env.PAYUNI_MERID;
+    const HashKey = process.env.PAYUNI_HASH_KEY;
+    const HashIV = process.env.PAYUNI_HASH_IV;
+    if (!MerID || !HashKey || !HashIV) {
+      console.error('PayUni env not configured (PAYUNI_MERID/HASH_KEY/HASH_IV)');
+      return NextResponse.json({ error: '金流尚未設定，請聯絡客服' }, { status: 500 });
+    }
+
     const body = await req.json();
     const { courseId, planId, downloadId, type = 'course' } = body;
 
@@ -49,15 +64,15 @@ export async function POST(req: Request) {
     }
 
     const PAYUNI_CONFIG = {
-      MerID: process.env.PAYUNI_MERID || 'MS12345678',
-      HashKey: process.env.PAYUNI_HASH_KEY || 'YOUR_PAYUNI_HASH_KEY',
-      HashIV: process.env.PAYUNI_HASH_IV || 'YOUR_PAYUNI_HASH_IV',
+      MerID,
+      HashKey,
+      HashIV,
       ReturnURL: type === 'membership'
         ? `${process.env.NEXTAUTH_URL}/membership`
         : type === 'download'
           ? `${process.env.NEXTAUTH_URL}/downloads`
           : `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
-      NotifyURL: `${process.env.NEXTAUTH_URL}/api/checkout/callback`,
+      NotifyURL: `${process.env.NEXTAUTH_URL}/api/webhook/payuni`,
     };
 
     const tool = new PayuniTool(PAYUNI_CONFIG.HashKey, PAYUNI_CONFIG.HashIV);

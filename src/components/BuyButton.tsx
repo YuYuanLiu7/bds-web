@@ -22,6 +22,13 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
 
       const params = await response.json();
 
+      // 檢查後端是否回傳錯誤（如未登入/找不到課程/金流未設定），避免把錯誤物件當付款參數送出
+      if (!response.ok) {
+        alert(params.error || '結帳失敗，請稍後再試。');
+        setLoading(false);
+        return;
+      }
+
       // Create a hidden form and submit it to PayUni (UPP)
       const form = document.createElement('form');
       form.method = 'POST';
