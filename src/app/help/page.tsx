@@ -3,34 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, HelpCircle, ChevronDown } from 'lucide-react';
+import { useSettings } from '@/components/SettingsProvider';
 
 export default function HelpFAQPage() {
-  const [logoUrl, setLogoUrl] = useState('');
-  const [primaryColor, setPrimaryColor] = useState('#21448e');
+  // 主色與 FAQ 改由 Context（root layout 伺服器端取一次）提供，不再各自 fetch
+  const { visual, faqs: ctxFaqs } = useSettings();
+  const primaryColor = visual.primaryColor || '#21448e';
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const [faqs, setFaqs] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/site-settings')
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Failed to fetch settings');
-      })
-      .then(data => {
-        setLogoUrl(data.logoUrl || '');
-        setPrimaryColor(data.primaryColor || '#21448e');
-      })
-      .catch(err => console.warn("Using default settings in FAQ page:", err));
-
-    // Load FAQs from server (persisted in DB)
-    fetch('/api/settings?key=faqs')
-      .then(res => (res.ok ? res.json() : null))
-      .then(list => {
-        setFaqs(Array.isArray(list) && list.length > 0 ? list : DEFAULT_FAQS);
-      })
-      .catch(() => setFaqs(DEFAULT_FAQS));
-  }, []);
+    setFaqs(Array.isArray(ctxFaqs) && ctxFaqs.length > 0 ? ctxFaqs : DEFAULT_FAQS);
+  }, [ctxFaqs]);
 
   const DEFAULT_FAQS = [
     {

@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { 
-  ChevronDown, 
-  User, 
-  LogOut, 
-  Menu, 
+import { useSettings } from '@/components/SettingsProvider';
+import {
+  ChevronDown,
+  User,
+  LogOut,
+  Menu,
   X,
   Globe
 } from 'lucide-react';
@@ -16,43 +17,18 @@ import {
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const { visual, announcements } = useSettings();
   const [showCourseDropdown, setShowCourseDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMobileCourseDropdown, setShowMobileCourseDropdown] = useState(false);
 
-  // Dynamic visual settings
-  const [logoUrl, setLogoUrl] = useState('');
-  const [primaryColor, setPrimaryColor] = useState('#21448e');
-  const [slogan, setSlogan] = useState('業務不是超人，卻有超能力！');
+  // 視覺設定與公告改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch
+  const logoUrl = visual.logoUrl || '';
+  const primaryColor = visual.primaryColor || '#21448e';
+  const slogan = visual.slogan || '業務不是超人，卻有超能力！';
+  const announcement = announcements.find((a) => a.status === 'published') || null;
 
-  // Announcement state
-  const [announcement, setAnnouncement] = useState<any>(null);
   const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/admin/site-settings')
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Failed to fetch settings');
-      })
-      .then(data => {
-        setLogoUrl(data.logoUrl || '');
-        setPrimaryColor(data.primaryColor || '#21448e');
-        setSlogan(data.slogan || '');
-      })
-      .catch(err => console.warn("Using default settings in Navbar:", err));
-
-    // Load active announcement from server (persisted in DB, visible to all visitors)
-    fetch('/api/settings?key=announcements')
-      .then(res => (res.ok ? res.json() : []))
-      .then(list => {
-        if (Array.isArray(list)) {
-          const active = list.find((a: any) => a.status === 'published');
-          if (active) setAnnouncement(active);
-        }
-      })
-      .catch(err => console.warn("Failed to load announcements:", err));
-  }, []);
 
   // 後台路徑不渲染前台 Navbar；置於所有 hooks 之後以符合 React Hooks 規則
   // （避免 admin↔前台切換時 hooks 數量改變而擲出執行期錯誤）

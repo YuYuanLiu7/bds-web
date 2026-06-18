@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
+import { SettingsProvider, type PublicSettings } from "@/components/SettingsProvider";
+import { getSiteSettingsServer, getJsonSetting, SETTINGS_DEFAULTS } from "@/lib/site-settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,11 +61,40 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+// 公開設定於伺服器端取得一次（取代各前端元件/各頁的重複 fetch）
+async function loadPublicSettings(): Promise<PublicSettings> {
+  try {
+    const [visual, announcements, general, faqs] = await Promise.all([
+      getSiteSettingsServer(),
+      getJsonSetting("announcements", SETTINGS_DEFAULTS.announcements),
+      getJsonSetting("general", SETTINGS_DEFAULTS.general),
+      getJsonSetting("faqs", SETTINGS_DEFAULTS.faqs),
+    ]);
+    return {
+      visual: {
+        primaryColor: visual.primaryColor || "#21448e",
+        logoUrl: visual.logoUrl || "",
+        slogan: visual.slogan || "",
+        carouselSlides: visual.carouselSlides,
+        sectionImage1: visual.sectionImage1,
+        sectionImage2: visual.sectionImage2,
+      },
+      announcements: Array.isArray(announcements) ? announcements : [],
+      general: general || {},
+      faqs: Array.isArray(faqs) ? faqs : [],
+    };
+  } catch (err) {
+    console.warn("Failed to load public settings in layout:", err);
+    return { visual: { primaryColor: "#21448e", logoUrl: "", slogan: "" }, announcements: [], general: {}, faqs: [] };
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await loadPublicSettings();
   return (
     <html
       lang="zh-TW"
@@ -75,9 +106,11 @@ export default function RootLayout({
         className="min-h-full flex flex-col bg-gray-50 text-gray-900"
       >
         <Providers>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          <SettingsProvider value={settings}>
+            <Navbar />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </SettingsProvider>
         </Providers>
       </body>
     </html>

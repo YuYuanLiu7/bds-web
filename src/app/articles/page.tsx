@@ -4,25 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calendar, Eye, ArrowLeft, ArrowRight, User, Layers, Clock } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
+import { useSettings } from '@/components/SettingsProvider';
 
 export default function ArticlesPage() {
-  const [primaryColor, setPrimaryColor] = useState('#21448e');
+  // 主色改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch site-settings
+  const primaryColor = useSettings().visual.primaryColor || '#21448e';
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Fetch site settings
-    fetch('/api/admin/site-settings')
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Failed to fetch settings');
-      })
-      .then(data => {
-        setPrimaryColor(data.primaryColor || '#21448e');
-      })
-      .catch(err => console.warn("Using default settings in Articles page:", err));
-
-    // 2. Fetch dynamic articles
+    // Fetch dynamic articles
     fetch('/api/articles')
       .then(async res => {
         if (!res.ok) throw new Error('API response not ok');

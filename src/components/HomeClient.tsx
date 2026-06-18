@@ -6,9 +6,10 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { SiteSettings } from '@/lib/site-settings';
+import type { SiteSettings } from '@/lib/site-settings';
 import { Course } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
+import { useSettings } from '@/components/SettingsProvider';
 
 interface HomeClientProps {
   settings: SiteSettings;
@@ -57,21 +58,10 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
     ? displayedCourses
     : displayedCourses.filter(c => c.category === selectedCategory);
 
-  const [maintenance, setMaintenance] = useState(false);
-  const [mMsg, setMMsg] = useState('系統升級維護中，請稍後再試。');
-
-  useEffect(() => {
-    // 維護狀態改由伺服器讀取（DB 持久化），讓所有訪客都看得到，而非僅當前瀏覽器
-    fetch('/api/settings?key=general')
-      .then(res => (res.ok ? res.json() : null))
-      .then(g => {
-        if (g && g.siteStatus === 'maintenance') {
-          setMaintenance(true);
-          if (g.maintenanceMessage) setMMsg(g.maintenanceMessage);
-        }
-      })
-      .catch(err => console.warn("Failed to load site status:", err));
-  }, []);
+  // 維護狀態改由 Context（root layout 伺服器端取一次）提供，不再每次進首頁各自 fetch
+  const { general } = useSettings();
+  const maintenance = general?.siteStatus === 'maintenance';
+  const mMsg = (general?.maintenanceMessage as string) || '系統升級維護中，請稍後再試。';
 
   const primaryColor = settings.primaryColor || '#21448e';
 

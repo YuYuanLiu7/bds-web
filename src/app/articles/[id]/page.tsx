@@ -8,6 +8,7 @@ import {
   Calendar, Eye, ArrowLeft, User, Tag, Clock, Share2, Heart,
   Lock, ShieldAlert, LogIn, ShoppingBag
 } from 'lucide-react';
+import { useSettings } from '@/components/SettingsProvider';
 
 interface ArticlePageProps {
   params: Promise<{ id: string }>;
@@ -19,7 +20,8 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
 
-  const [primaryColor, setPrimaryColor] = useState('#21448e');
+  // 主色改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch site-settings
+  const primaryColor = useSettings().visual.primaryColor || '#21448e';
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
@@ -66,18 +68,7 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
   ];
 
   useEffect(() => {
-    // 1. Fetch site settings
-    fetch('/api/admin/site-settings')
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Failed to fetch settings');
-      })
-      .then(data => {
-        setPrimaryColor(data.primaryColor || '#21448e');
-      })
-      .catch(err => console.warn("Using default settings in Article detail:", err));
-
-    // 2. Fetch specific article by ID or custom Slug
+    // Fetch specific article by ID or custom Slug
     fetch(`/api/articles?id=${id}`)
       .then(async res => {
         if (!res.ok) throw new Error('API failed');
