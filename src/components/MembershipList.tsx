@@ -244,8 +244,9 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
               <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-black text-[10px] uppercase tracking-wider">
                 <Terminal className="w-3.5 h-3.5 mr-1" /> BDS 金流測試沙盒 (Sandbox)
               </span>
-              <button 
-                onClick={() => setShowSimulateModal(false)} 
+              <button
+                onClick={() => setShowSimulateModal(false)}
+                aria-label="關閉視窗"
                 className="p-1.5 hover:bg-slate-200 rounded-full transition text-gray-400 cursor-pointer"
               >
                 <X className="w-4 h-4" />

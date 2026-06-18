@@ -78,7 +78,7 @@ export default function SignupPage() {
             )}
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="signup-name" className="block text-sm font-medium text-gray-700">
                 真實姓名
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -86,8 +86,10 @@ export default function SignupPage() {
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="signup-name"
                   type="text"
                   required
+                  autoComplete="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
@@ -97,7 +99,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700">
                 電子郵件
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -105,8 +107,10 @@ export default function SignupPage() {
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="signup-email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
@@ -116,7 +120,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700">
                 設定密碼
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -124,9 +128,11 @@ export default function SignupPage() {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="signup-password"
                   type="password"
                   required
                   minLength={6}
+                  autoComplete="new-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"

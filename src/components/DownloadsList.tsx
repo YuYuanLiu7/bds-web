@@ -207,8 +207,9 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
               <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-black text-[10px] uppercase tracking-wider">
                 {selectedProduct.type}
               </span>
-              <button 
-                onClick={() => setSelectedProduct(null)} 
+              <button
+                onClick={() => setSelectedProduct(null)}
+                aria-label="關閉視窗"
                 className="p-1 hover:bg-slate-200 rounded-full transition text-gray-400 cursor-pointer"
               >
                 <X className="w-4 h-4" />

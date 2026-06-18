@@ -24,3 +24,23 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 全域鍵盤焦點樣式：許多元件用 focus:outline-none 移除了預設焦點框，
+   這裡兜底確保鍵盤使用者 Tab 時仍看得見焦點（無障礙） */
+*:focus-visible {
+  outline: 2px solid #21448e;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 尊重使用者「減少動態效果」偏好（前庭功能敏感者） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

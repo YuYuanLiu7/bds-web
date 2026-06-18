@@ -119,14 +119,16 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
           {/* Left / Right arrow navigation controls */}
           {slides.length > 1 && (
             <>
-              <button 
+              <button
                 onClick={handlePrevSlide}
+                aria-label="上一張輪播"
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition focus:outline-none z-20 active:scale-90 cursor-pointer"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              <button 
+              <button
                 onClick={handleNextSlide}
+                aria-label="下一張輪播"
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition focus:outline-none z-20 active:scale-90 cursor-pointer"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -141,6 +143,8 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
+                  aria-label={`第 ${idx + 1} 張輪播`}
+                  aria-current={idx === currentSlide}
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                     idx === currentSlide ? 'w-6 bg-white' : 'bg-white/50 hover:bg-white/80'
                   } focus:outline-none cursor-pointer`}

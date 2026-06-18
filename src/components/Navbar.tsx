@@ -56,10 +56,11 @@ export default function Navbar() {
               <span>{announcement.content}</span>
             )}
           </div>
-          <button 
+          <button
             onClick={() => setDismissed(true)}
             className="absolute right-4 p-1 hover:bg-white/10 rounded transition cursor-pointer"
             title="關閉公告"
+            aria-label="關閉公告"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -183,9 +184,11 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Icon Toggle */}
-        <button 
+        <button
           onClick={() => setShowMobileMenu(!showMobileMenu)}
           className="md:hidden p-2 text-slate-500 hover:text-slate-800 transition focus:outline-none"
+          aria-label={showMobileMenu ? '關閉選單' : '開啟選單'}
+          aria-expanded={showMobileMenu}
         >
           {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>

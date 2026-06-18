@@ -27,22 +27,22 @@ export default function Footer() {
         <hr className="border-slate-200" />
 
         {/* Copyright & Policy links */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 font-semibold gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 font-semibold gap-3">
           <div>© {new Date().getFullYear()} BDS 版權所有，保留一切權利。</div>
           <div className="flex items-center space-x-4">
-            <Link href="/about" className="hover:underline transition text-slate-400 hover:text-slate-600">
+            <Link href="/about" className="hover:underline transition text-slate-500 hover:text-slate-700">
               關於我們
             </Link>
-            <span className="text-slate-300">•</span>
-            <Link href="/contact" className="hover:underline transition text-slate-400 hover:text-slate-600">
+            <span className="text-slate-300" aria-hidden="true">•</span>
+            <Link href="/contact" className="hover:underline transition text-slate-500 hover:text-slate-700">
               聯絡我們
             </Link>
-            <span className="text-slate-300">•</span>
-            <Link href="/privacy#terms" className="hover:underline transition text-slate-400 hover:text-slate-600">
+            <span className="text-slate-300" aria-hidden="true">•</span>
+            <Link href="/privacy#terms" className="hover:underline transition text-slate-500 hover:text-slate-700">
               使用者條款
             </Link>
-            <span className="text-slate-300">•</span>
-            <Link href="/privacy#privacy" className="hover:underline transition text-slate-400 hover:text-slate-600">
+            <span className="text-slate-300" aria-hidden="true">•</span>
+            <Link href="/privacy#privacy" className="hover:underline transition text-slate-500 hover:text-slate-700">
               隱私權政策
             </Link>
           </div>
