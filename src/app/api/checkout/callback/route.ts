@@ -192,14 +192,16 @@ export async function POST(req: Request) {
       console.log('Payment success and access granted:', merTradeNo);
       return new Response('SUCCESS');
     } else {
-      // 更新訂單為失敗
+      // 更新訂單為失敗；以 .neq('status','paid') 守衛，避免晚到/重送的非成功通知
+      // 把已付款（已開通權限）的訂單降級為 failed，造成金流狀態與授權/對帳不一致
       await supabase
         .from('orders')
-        .update({ 
+        .update({
           status: 'failed',
           updated_at: new Date().toISOString()
         })
-        .eq('id', merTradeNo);
+        .eq('id', merTradeNo)
+        .neq('status', 'paid');
     }
 
     return new Response('FAILED');

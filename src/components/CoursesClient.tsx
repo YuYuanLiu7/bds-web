@@ -15,10 +15,11 @@ interface CoursesClientProps {
   courses: CourseItem[];
 }
 
-const CATEGORIES = ['全部', '產業知識', '職涯策略', '專業技能', '讀書會', '新手村'];
-
 export default function CoursesClient({ courses }: CoursesClientProps) {
   const [activeCategory, setActiveCategory] = useState('全部');
+
+  // 由實際課程資料動態產生分類分頁（與首頁/活動頁一致），避免硬編清單與後台分類不符導致篩選恆空
+  const categories = ['全部', ...Array.from(new Set(courses.map((c) => c.category).filter(Boolean)))] as string[];
 
   // 依分類篩選；「全部」顯示所有課程
   const filtered =
@@ -30,14 +31,14 @@ export default function CoursesClient({ courses }: CoursesClientProps) {
     <>
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2.5 mb-10 select-none">
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
             className={`px-5 py-2 rounded-full text-xs font-black transition duration-200 border shadow-xs cursor-pointer ${
               cat === activeCategory
-                ? 'bg-blue-600 border-blue-600 text-white'
-                : 'bg-white/80 backdrop-blur-md text-slate-600 border-slate-200/70 hover:border-blue-400 hover:text-blue-600'
+                ? 'bg-[var(--brand)] border-[var(--brand)] text-white'
+                : 'bg-white/80 backdrop-blur-md text-slate-600 border-slate-200/70 hover:border-[var(--brand)] hover:text-[var(--brand)]'
             }`}
           >
             {cat}
