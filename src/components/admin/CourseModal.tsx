@@ -26,7 +26,7 @@ interface Chapter {
   order_index: number;
 }
 
-interface Course {
+export interface Course {
   id?: string;
   title: string;
   description: string;
@@ -124,7 +124,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     });
   };
 
-  const handleChapterChange = (index: number, field: keyof Chapter, value: any) => {
+  const handleChapterChange = (index: number, field: keyof Chapter, value: string | number) => {
     const newChapters = [...formData.chapters];
     newChapters[index] = { ...newChapters[index], [field]: value };
     setFormData({ ...formData, chapters: newChapters });
@@ -182,9 +182,9 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
       if (data.url) {
         callback(data.url);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('檔案上傳失敗：' + err.message);
+      alert('檔案上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploadingField(null);
     }

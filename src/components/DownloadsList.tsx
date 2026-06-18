@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, ArrowRight, ShieldCheck, FileText, Layout, FileSpreadsheet, Archive, PlayCircle, X, ExternalLink, Sparkles, CheckCircle2, Crown, AlertCircle } from 'lucide-react';
+import { Download, ArrowRight, FileText, Layout, FileSpreadsheet, Archive, PlayCircle, X, Sparkles, CheckCircle2, Crown } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
 interface DownloadProduct {

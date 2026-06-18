@@ -20,7 +20,8 @@ interface CourseReviewsProps {
   hasAccess: boolean;
 }
 
-export default function CourseReviews({ courseId, courseTitle, studentName, hasAccess }: CourseReviewsProps) {
+// courseTitle 與 studentName 屬於介面相容欄位（呼叫端傳入），本元件目前未直接使用
+export default function CourseReviews({ courseId, hasAccess }: CourseReviewsProps) {
   const toast = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userRating, setUserRating] = useState<number>(5);

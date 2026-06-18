@@ -35,7 +35,7 @@ export async function ensureClientImageCompatible(file: File): Promise<File> {
     });
 
     return convertedFile;
-  } catch (error) {
+  } catch {
     return file;
   }
 }

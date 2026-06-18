@@ -10,8 +10,7 @@ import {
   User,
   LogOut,
   Menu,
-  X,
-  Globe
+  X
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -37,7 +36,8 @@ export default function Navbar() {
   }
 
   const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'BDS 會員';
-  const isAdmin = (session?.user as any)?.role === 'admin';
+  // next-auth 預設 user 型別不含 role，於此以擴充型別讀取（後端已於 session callback 注入）
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'admin';
 
   return (
     <>

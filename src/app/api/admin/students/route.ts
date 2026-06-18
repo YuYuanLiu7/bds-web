@@ -4,23 +4,46 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
+// 使用者資料列型別（部分欄位視資料庫遷移狀態而定，故皆為選填）
+interface UserRow {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  phone?: string;
+  membership_plan_id?: string | null;
+  membership_expires_at?: string | null;
+  created_at?: string;
+}
+
+// 寫入 users 資料表的欄位型別（依角色與遷移狀態動態組裝）
+interface UserWriteData {
+  name?: string;
+  email?: string;
+  password_hash?: string;
+  role?: string;
+  phone?: string;
+  membership_plan_id?: string | null;
+  membership_expires_at?: string | null;
+}
+
 // 驗證管理員身分
 async function checkAdmin() {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'admin') {
+  if (!session || (session.user as { role?: string }).role !== 'admin') {
     return false;
   }
   return true;
 }
 
 // 1. GET：取得所有成員列表 (含電話、會員方案、到期日)
-export async function GET(req: Request) {
+export async function GET() {
   try {
     if (!(await checkAdmin())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let queryResult: any[] | null = null;
+    let queryResult: UserRow[] | null = null;
 
     // A. 優先嘗試查詢完整欄位 (包含電話、會員方案與過期日)
     const { data: primaryData, error } = await supabase
@@ -56,8 +79,8 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json(queryResult || []);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -94,7 +117,7 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // 構建寫入 users 的資料
-    const insertData: any = {
+    const insertData: UserWriteData = {
       name,
       email,
       password_hash: hashedPassword,
@@ -121,7 +144,7 @@ export async function POST(req: Request) {
       
       // 萬一 phone 或 membership 欄位不存在，採取保底嘗試 (只寫入最基本欄位)
       console.warn("DB insert error, retrying with absolute minimum fields...");
-      const basicInsert: any = {
+      const basicInsert: UserWriteData = {
         name,
         email,
         password_hash: hashedPassword,
@@ -159,9 +182,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(newUser);
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST admin student error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -192,7 +215,7 @@ export async function PUT(req: Request) {
     }
 
     // 構建更新資料
-    const updateData: any = {
+    const updateData: UserWriteData = {
       name,
       email,
       role,
@@ -230,7 +253,7 @@ export async function PUT(req: Request) {
       
       // 萬一 phone/membership 欄位在 DB 中有問題，採取降級更新
       console.warn("DB update error, retrying basic fields update...");
-      const basicUpdate: any = {
+      const basicUpdate: UserWriteData = {
         name,
         email,
         role
@@ -279,9 +302,9 @@ export async function PUT(req: Request) {
     }
 
     return NextResponse.json(updatedUser);
-  } catch (error: any) {
+  } catch (error) {
     console.error("PUT admin student error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -307,7 +330,7 @@ export async function DELETE(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: "成員已被刪除" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

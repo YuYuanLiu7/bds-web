@@ -3,10 +3,13 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
+// Session 使用者型別（含角色資訊）
+type SessionUser = { role?: string };
+
 // 驗證管理員身分
 async function checkAdmin() {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'admin') {
+  if (!session || (session.user as SessionUser).role !== 'admin') {
     return false;
   }
   return true;
@@ -39,7 +42,7 @@ export async function GET() {
     }
 
     return NextResponse.json(data.value);
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET students settings error:", error);
     return NextResponse.json(DEFAULT_STUDENT_SETTINGS);
   }
@@ -78,8 +81,8 @@ export async function POST(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: "學員設定已成功儲存" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST admin student settings error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

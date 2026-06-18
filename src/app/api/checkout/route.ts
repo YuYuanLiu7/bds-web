@@ -4,6 +4,14 @@ import { supabase } from '@/lib/supabase';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+// 結帳請求主體（金額一律以資料庫為準，此處僅用於指定品項與類型）
+interface CheckoutBody {
+  courseId?: string;
+  planId?: string;
+  downloadId?: string;
+  type?: 'course' | 'membership' | 'download';
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,7 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '金流尚未設定，請聯絡客服' }, { status: 500 });
     }
 
-    const body = await req.json();
+    const body: CheckoutBody = await req.json();
     const { courseId, planId, downloadId, type = 'course' } = body;
 
     // 🔒 金額一律以資料庫為準，不信任前端傳入的 amount，避免竄改價格低買
@@ -149,8 +157,8 @@ export async function POST(req: Request) {
       EncryptInfo: encryptInfo,
       HashInfo: hashInfo,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Checkout error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
   }
 }

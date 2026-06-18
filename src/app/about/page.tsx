@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { BookOpen, Users, Award, ShieldCheck } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 
+// 後台 CMS 頁面內容（/api/settings?key=pages 回傳項目）
+interface CmsPage {
+  path: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  imageUrl?: string;
+}
+
 export default function AboutPage() {
   const [pageData, setPageData] = useState({
     title: '關於我們',
@@ -17,7 +26,7 @@ export default function AboutPage() {
     fetch('/api/settings?key=pages')
       .then(res => (res.ok ? res.json() : null))
       .then(list => {
-        const item = Array.isArray(list) ? list.find((p: any) => p.path === '/about') : null;
+        const item = Array.isArray(list) ? list.find((p: CmsPage) => p.path === '/about') : null;
         if (item) {
           setPageData({
             title: item.title || '關於我們',

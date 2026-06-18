@@ -3,21 +3,37 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
+// 課程寫入欄位型別（部分欄位視資料庫遷移狀態而定，故皆為選填）
+interface CourseWriteData {
+  title?: string;
+  description?: string;
+  price?: number;
+  category?: string;
+  thumbnail_url?: string;
+  instructor?: string;
+  is_published?: boolean;
+  is_hidden?: boolean;
+  allow_comments?: boolean;
+  allow_ratings?: boolean;
+  file_url?: string | null;
+  video_url?: string | null;
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
-    const { 
-      title, 
-      description, 
-      price, 
-      category, 
-      thumbnail_url, 
-      instructor, 
+    const {
+      title,
+      description,
+      price,
+      category,
+      thumbnail_url,
+      instructor,
       is_published,
       is_hidden,
       allow_comments,
@@ -26,7 +42,7 @@ export async function POST(req: Request) {
       video_url
     } = body;
 
-    const insertData: any = { 
+    const insertData: CourseWriteData = {
       title, 
       description, 
       price: parseInt(price), 
@@ -51,16 +67,16 @@ export async function POST(req: Request) {
 
     if (error && error.message.includes('does not exist')) {
       // Graceful fallback if custom settings columns have not been migrated yet
-      const fallbackData: any = {
-        title, 
-        description, 
-        price: parseInt(price), 
-        category, 
-        thumbnail_url, 
-        is_published: is_published !== false 
+      const fallbackData: CourseWriteData = {
+        title,
+        description,
+        price: parseInt(price),
+        category,
+        thumbnail_url,
+        is_published: is_published !== false
       };
       if (instructor) fallbackData.instructor = instructor;
-      
+
       let retry = await supabase
         .from('courses')
         .insert([fallbackData])
@@ -69,13 +85,13 @@ export async function POST(req: Request) {
 
       // Second fallback: If 'instructor' column also doesn't exist, retry without it
       if (retry.error && retry.error.message.includes('does not exist')) {
-        const fallbackBareData: any = {
-          title, 
-          description, 
-          price: parseInt(price), 
-          category, 
-          thumbnail_url, 
-          is_published: is_published !== false 
+        const fallbackBareData: CourseWriteData = {
+          title,
+          description,
+          price: parseInt(price),
+          category,
+          thumbnail_url,
+          is_published: is_published !== false
         };
         retry = await supabase
           .from('courses')
@@ -90,27 +106,27 @@ export async function POST(req: Request) {
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
-    const { 
-      id, 
-      title, 
-      description, 
-      price, 
-      category, 
-      thumbnail_url, 
-      instructor, 
+    const {
+      id,
+      title,
+      description,
+      price,
+      category,
+      thumbnail_url,
+      instructor,
       is_published,
       is_hidden,
       allow_comments,
@@ -119,7 +135,7 @@ export async function PUT(req: Request) {
       video_url
     } = body;
 
-    const updateData: any = { 
+    const updateData: CourseWriteData = {
       title, 
       description, 
       price: parseInt(price), 
@@ -145,11 +161,11 @@ export async function PUT(req: Request) {
 
     if (error && error.message.includes('does not exist')) {
       // Graceful fallback if custom settings columns have not been migrated yet
-      const fallbackData: any = {
-        title, 
-        description, 
-        price: parseInt(price), 
-        category, 
+      const fallbackData: CourseWriteData = {
+        title,
+        description,
+        price: parseInt(price),
+        category,
         thumbnail_url,
         is_published: is_published !== false
       };
@@ -164,11 +180,11 @@ export async function PUT(req: Request) {
 
       // Second fallback: If 'instructor' column also doesn't exist, retry without it
       if (retry.error && retry.error.message.includes('does not exist')) {
-        const fallbackBareData: any = {
-          title, 
-          description, 
-          price: parseInt(price), 
-          category, 
+        const fallbackBareData: CourseWriteData = {
+          title,
+          description,
+          price: parseInt(price),
+          category,
           thumbnail_url,
           is_published: is_published !== false
         };
@@ -186,15 +202,15 @@ export async function PUT(req: Request) {
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -208,7 +224,7 @@ export async function DELETE(req: Request) {
 
     if (error) throw error;
     return NextResponse.json({ message: "Course deleted" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

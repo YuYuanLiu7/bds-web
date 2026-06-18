@@ -88,9 +88,9 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
       if (data.url) {
         setFormData(prev => ({ ...prev, file_url: data.url }));
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('檔案上傳失敗：' + err.message);
+      alert('檔案上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -118,9 +118,9 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
       onSuccess();
       onClose();
       router.refresh();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('儲存數位商品出錯：' + err.message);
+      alert('儲存數位商品出錯：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }
@@ -234,7 +234,7 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
                 </label>
                 <select 
                   value={formData.status}
-                  onChange={e => setFormData({...formData, status: e.target.value as any})}
+                  onChange={e => setFormData({...formData, status: e.target.value as DownloadProduct['status']})}
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition bg-white text-xs font-semibold text-slate-700"
                 >
                   <option value="published">🟢 立即公開上架</option>

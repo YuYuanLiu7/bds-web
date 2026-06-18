@@ -3,7 +3,19 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+// 登入會話使用者（補上本專案的 role 欄位）
+interface SessionUser {
+  role?: string;
+}
+
+// 數位下載商品資料列（標註本路由使用到的欄位，其餘保留彈性）
+interface DownloadRow {
+  file_url?: string;
+  price?: number;
+  [key: string]: unknown;
+}
+
+export async function GET() {
   try {
     const { data, error } = await supabase
       .from('downloads')
@@ -15,16 +27,18 @@ export async function GET(req: Request) {
 
     // 🔒 付費商品的 file_url 不可外洩給未授權者；僅管理員可取得付費檔案連結
     const session = await getServerSession(authOptions);
-    const isAdmin = !!session && (session.user as any)?.role === 'admin';
-    const sanitized = (data || []).map((d: any) => {
+    const isAdmin = !!session && (session.user as SessionUser | undefined)?.role === 'admin';
+    const sanitized = ((data || []) as DownloadRow[]).map((d) => {
       if (!isAdmin && (d.price || 0) > 0) {
-        const { file_url, ...rest } = d;
+        // 移除付費商品的 file_url，避免外洩下載連結
+        const rest = { ...d };
+        delete rest.file_url;
         return rest;
       }
       return d;
     });
     return NextResponse.json(sanitized);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

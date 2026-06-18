@@ -3,11 +3,19 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
+// 章節單元更新欄位型別（file_url 視資料庫遷移狀態而定，故為選填）
+interface ChapterUpdateData {
+  title?: string;
+  video_url?: string;
+  order_index?: number;
+  file_url?: string | null;
+}
+
 // 1. GET：取得特定課程的所有章節單元 (依順序排序)
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -27,15 +35,15 @@ export async function GET(req: Request) {
     if (error) throw error;
 
     return NextResponse.json(data || []);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -67,22 +75,22 @@ export async function POST(req: Request) {
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
     const { id, title, video_url, order_index } = body;
 
-    const updateData: any = {
+    const updateData: ChapterUpdateData = {
       title,
       video_url,
       order_index: parseInt(order_index),
@@ -101,8 +109,12 @@ export async function PUT(req: Request) {
       .single();
 
     if (error && error.message.includes('does not exist')) {
-      // Graceful fallback if file_url does not exist yet
-      const { file_url, ...safeUpdate } = updateData;
+      // Graceful fallback if file_url does not exist yet（移除 file_url 後重試）
+      const safeUpdate: ChapterUpdateData = {
+        title: updateData.title,
+        video_url: updateData.video_url,
+        order_index: updateData.order_index,
+      };
       const retry = await supabase
         .from('chapters')
         .update(safeUpdate)
@@ -115,15 +127,15 @@ export async function PUT(req: Request) {
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -137,7 +149,7 @@ export async function DELETE(req: Request) {
 
     if (error) throw error;
     return NextResponse.json({ message: "Chapter deleted" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

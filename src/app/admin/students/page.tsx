@@ -23,10 +23,55 @@ import {
   BookOpen
 } from 'lucide-react';
 
+// 成員（學員 / 講師 / 助教 / 管理員）資料型別
+interface Member {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  created_at?: string;
+  membership_plan_id?: string;
+  membership_expires_at?: string;
+}
+
+// 課程下拉選項資料型別
+interface CourseOption {
+  id: string;
+  title?: string;
+  category?: string;
+}
+
+// 會員方案下拉選項資料型別
+interface MembershipPlanOption {
+  id: string;
+  title?: string;
+  period?: string;
+}
+
+// 後台成員操作分頁類型
+type MemberTab = 'student' | 'instructor' | 'assistant' | 'admin' | 'settings';
+
+// 學員設定中電話欄位的規範模式
+type PhoneMode = 'required' | 'optional' | 'disabled';
+
+// 建立 / 更新成員時送往後端的資料結構
+interface MemberPayload {
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  id?: string;
+  password?: string;
+  membershipPlanId?: string | null;
+  membershipExpiresAt?: string | null;
+  courseIds?: string[];
+}
+
 export default function AdminStudentsPage() {
   // Tabs: 'student' | 'instructor' | 'assistant' | 'admin' | 'settings'
-  const [activeTab, setActiveTab] = useState<'student' | 'instructor' | 'assistant' | 'admin' | 'settings'>('student');
-  const [students, setStudents] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<MemberTab>('student');
+  const [students, setStudents] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -37,13 +82,13 @@ export default function AdminStudentsPage() {
   const [searchPhone, setSearchPhone] = useState('');
 
   // Dropdown options loaded dynamically
-  const [courses, setCourses] = useState<any[]>([]);
-  const [membershipPlans, setMembershipPlans] = useState<any[]>([]);
-  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [courses, setCourses] = useState<CourseOption[]>([]);
+  const [membershipPlans, setMembershipPlans] = useState<MembershipPlanOption[]>([]);
+  const [, setLoadingCourses] = useState(false);
 
   // Unified Add/Edit Member Modal State
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<any>(null);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [loadingPermissions, setLoadingPermissions] = useState(false);
   
   // Member Form State
@@ -61,7 +106,7 @@ export default function AdminStudentsPage() {
 
   // Student Settings Form State
   const [settingsLoading, setSettingsLoading] = useState(false);
-  const [phoneMode, setPhoneMode] = useState<'required' | 'optional' | 'disabled'>('optional');
+  const [phoneMode, setPhoneMode] = useState<PhoneMode>('optional');
   const [tosText, setTosText] = useState('');
   const [privacyText, setPrivacyText] = useState('');
   const [requireTosAgreement, setRequireTosAgreement] = useState(true);
@@ -202,7 +247,7 @@ export default function AdminStudentsPage() {
   };
 
   // Open member modal for Edit
-  const handleOpenEditModal = async (member: any) => {
+  const handleOpenEditModal = async (member: Member) => {
     setEditingMember(member);
     setMemberName(member.name || '');
     setMemberEmail(member.email || '');
@@ -264,7 +309,7 @@ export default function AdminStudentsPage() {
       const url = '/api/admin/students';
       const method = isEdit ? 'PUT' : 'POST';
       
-      const payload: any = {
+      const payload: MemberPayload = {
         name: memberName,
         email: memberEmail,
         phone: memberPhone || null,
@@ -308,7 +353,7 @@ export default function AdminStudentsPage() {
   };
 
   // Delete Member
-  const handleDeleteMember = async (member: any) => {
+  const handleDeleteMember = async (member: Member) => {
     if (!confirm(`確定要刪除成員「${member.name || member.email}」嗎？此動作將無法復原。`)) {
       return;
     }
@@ -363,13 +408,13 @@ export default function AdminStudentsPage() {
   };
 
   // Match Plan Title Helper
-  const getPlanTitle = (planId: string) => {
+  const getPlanTitle = (planId: string | undefined) => {
     const plan = membershipPlans.find(p => p.id === planId);
     return plan ? plan.title : '已選訂閱方案';
   };
 
   // Helper date formatter
-  const formatTaiwanDate = (dateStr: string) => {
+  const formatTaiwanDate = (dateStr: string | undefined) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return '—';
@@ -436,7 +481,7 @@ export default function AdminStudentsPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as MemberTab)}
               className={`flex items-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition cursor-pointer active:scale-95 ${
                 isActive 
                   ? 'bg-white text-indigo-600 shadow-sm border border-slate-100' 
@@ -497,7 +542,7 @@ export default function AdminStudentsPage() {
                           type="radio" 
                           name="phoneMode"
                           checked={phoneMode === mode.id}
-                          onChange={() => setPhoneMode(mode.id as any)}
+                          onChange={() => setPhoneMode(mode.id as PhoneMode)}
                           className="w-3.5 h-3.5 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                         />
                       </div>

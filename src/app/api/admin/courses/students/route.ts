@@ -3,10 +3,35 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
+// 由 user_courses 關聯帶出的使用者資料
+interface JoinedUser {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  role: string;
+  membership_plan_id?: string | null;
+  membership_expires_at?: string | null;
+  created_at?: string;
+}
+
+// 課程學員名冊單筆資料（合併單堂購買與訂閱會員）
+interface CourseStudent {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  purchased_at?: string;
+  auth_type: 'single' | 'subscription';
+  membership_plan_id?: string | null;
+  membership_expires_at?: string | null;
+}
+
 // 驗證管理員身分
 async function checkAdmin() {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'admin') {
+  if (!session || (session.user as { role?: string }).role !== 'admin') {
     return false;
   }
   return true;
@@ -45,21 +70,22 @@ export async function GET(req: Request) {
 
     if (singleError) throw singleError;
 
-    const directStudents = singleAccessData?.map(item => {
-      const user = item.users as any;
+    const directStudents: CourseStudent[] = singleAccessData?.map(item => {
+      // Supabase 關聯查詢可能回傳物件或陣列，統一取出單一使用者
+      const user = (Array.isArray(item.users) ? item.users[0] : item.users) as JoinedUser | null;
       return {
-        id: user?.id,
+        id: user?.id as string,
         name: user?.name,
         email: user?.email,
         phone: user?.phone,
         role: user?.role,
         purchased_at: item.purchased_at,
-        auth_type: 'single'
+        auth_type: 'single' as const
       };
     }).filter(s => s.id) || [];
 
     // C. 查詢「具備有效訂閱會員資格」的學員名單 (訂閱會員暢看全站所有課)
-    let subscriptionStudents: any[] = [];
+    let subscriptionStudents: CourseStudent[] = [];
     try {
       const { data: subUsers, error: subError } = await supabase
         .from('users')
@@ -79,7 +105,7 @@ export async function GET(req: Request) {
           phone: u.phone,
           role: u.role,
           purchased_at: u.created_at, // 以加入日期作為開始時間
-          auth_type: 'subscription',
+          auth_type: 'subscription' as const,
           membership_plan_id: u.membership_plan_id,
           membership_expires_at: u.membership_expires_at
         }));
@@ -89,7 +115,7 @@ export async function GET(req: Request) {
     }
 
     // D. 名冊去重合併：若學員既買了單堂又是訂閱會員，以「訂閱會員」為優先展示，因為權限涵蓋範圍更廣
-    const studentMap = new Map<string, any>();
+    const studentMap = new Map<string, CourseStudent>();
 
     // 1. 先置入直接購買者
     directStudents.forEach(s => studentMap.set(s.id, s));
@@ -123,9 +149,9 @@ export async function GET(req: Request) {
       netSales: netSales
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET course students error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -155,7 +181,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "此學員已擁有該課程之觀看權限" }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('user_courses')
       .insert([{
         user_id: userId,
@@ -167,9 +193,9 @@ export async function POST(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: "已成功為學員開通此課程觀看權限" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST course student error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -197,8 +223,8 @@ export async function DELETE(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: "已成功取消該學員之單堂課程觀看權限" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("DELETE course student error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

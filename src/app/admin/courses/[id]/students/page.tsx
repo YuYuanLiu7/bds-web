@@ -1,43 +1,97 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
-import { 
-  ArrowLeft, 
-  Users, 
-  Search, 
-  Plus, 
-  Trash2, 
-  Check, 
-  X, 
-  Mail, 
-  Phone, 
-  Award, 
-  Loader2, 
-  BookOpen, 
+import {
+  ArrowLeft,
+  Users,
+  Search,
+  Plus,
+  Trash2,
+  Check,
+  X,
+  Mail,
+  Phone,
+  Award,
+  Loader2,
+  BookOpen,
   UserPlus,
   HelpCircle,
   Video,
   Megaphone,
   DollarSign,
   Layers,
-  Calendar,
   Clock,
   Edit3
 } from 'lucide-react';
 
+// 課程基本資訊資料型別
+interface CourseInfo {
+  id?: string;
+  title?: string;
+  category?: string;
+  price?: number;
+  thumbnail_url?: string;
+}
+
+// 課程學員資料型別
+interface CourseStudent {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  auth_type?: string;
+  purchased_at?: string;
+}
+
+// 平台成員（手動授權選擇用）資料型別
+interface PlatformUser {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+}
+
+// 課程單元（章節）資料型別
+interface Chapter {
+  id: string;
+  title?: string;
+  video_url?: string;
+  order_index: number;
+}
+
+// 課程公告資料型別
+interface Announcement {
+  id: string;
+  title?: string;
+  content?: string;
+  created_at?: string;
+}
+
+// 子分頁類型
+type SubTab = 'students' | 'chapters' | 'announcements';
+
+// 儲存單元時送往後端的資料結構
+interface ChapterPayload {
+  title: string;
+  video_url: string | null;
+  order_index: number;
+  id?: string;
+  course_id?: string;
+}
+
 export default function CourseStudentsPage() {
   const params = useParams();
-  const router = useRouter();
   const courseId = params.id as string;
 
   // Course Details State
-  const [course, setCourse] = useState<any>(null);
-  const [students, setStudents] = useState<any[]>([]);
+  const [course, setCourse] = useState<CourseInfo | null>(null);
+  const [students, setStudents] = useState<CourseStudent[]>([]);
   const [netSales, setNetSales] = useState(0);
-  const [allUsers, setAllUsers] = useState<any[]>([]); // for add access modal
+  const [allUsers, setAllUsers] = useState<PlatformUser[]>([]); // for add access modal
   const [loading, setLoading] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +99,7 @@ export default function CourseStudentsPage() {
   const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   // Sub Tabs: 'students' | 'chapters' | 'announcements'
-  const [activeSubTab, setActiveSubTab] = useState<'students' | 'chapters' | 'announcements'>('students');
+  const [activeSubTab, setActiveSubTab] = useState<SubTab>('students');
 
   // Search Filter State (for Students tab)
   const [searchName, setSearchName] = useState('');
@@ -53,16 +107,16 @@ export default function CourseStudentsPage() {
   const [searchPhone, setSearchPhone] = useState('');
 
   // Course Chapters State (Syllabus tab)
-  const [chapters, setChapters] = useState<any[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loadingChapters, setLoadingChapters] = useState(false);
   const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
-  const [editingChapter, setEditingChapter] = useState<any>(null);
+  const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
   const [chapterTitle, setChapterTitle] = useState('');
   const [chapterVideoUrl, setChapterVideoUrl] = useState('');
   const [chapterOrderIndex, setChapterOrderIndex] = useState('1');
 
   // Course Announcements State (Announcements tab)
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loadingAnnouncements, setLoadingAnnouncements] = useState(false);
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
@@ -205,7 +259,7 @@ export default function CourseStudentsPage() {
   };
 
   // Handle student individual course access revocation
-  const handleRevokeAccess = async (student: any) => {
+  const handleRevokeAccess = async (student: CourseStudent) => {
     if (student.auth_type === 'subscription') {
       showToast('error', '訂閱制會員觀看權限無法在個別課程中刪除！');
       return;
@@ -242,7 +296,7 @@ export default function CourseStudentsPage() {
     setIsChapterModalOpen(true);
   };
 
-  const handleOpenEditChapter = (chap: any) => {
+  const handleOpenEditChapter = (chap: Chapter) => {
     setEditingChapter(chap);
     setChapterTitle(chap.title || '');
     setChapterVideoUrl(chap.video_url || '');
@@ -263,13 +317,13 @@ export default function CourseStudentsPage() {
       const url = '/api/admin/chapters';
       const method = isEdit ? 'PUT' : 'POST';
       
-      const payload: any = {
+      const payload: ChapterPayload = {
         title: chapterTitle,
         video_url: chapterVideoUrl || null,
         order_index: parseInt(chapterOrderIndex) || 1
       };
 
-      if (isEdit) {
+      if (editingChapter) {
         payload.id = editingChapter.id;
       } else {
         payload.course_id = courseId;
@@ -297,7 +351,7 @@ export default function CourseStudentsPage() {
     }
   };
 
-  const handleDeleteChapter = async (chap: any) => {
+  const handleDeleteChapter = async (chap: Chapter) => {
     if (!confirm(`確定要刪除單元「${chap.title}」嗎？此動作將無法復原。`)) {
       return;
     }
@@ -417,7 +471,7 @@ export default function CourseStudentsPage() {
     return filtered;
   };
 
-  const formatTaiwanDate = (dateStr: string) => {
+  const formatTaiwanDate = (dateStr: string | undefined) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     const yr = d.getFullYear();
@@ -581,7 +635,7 @@ export default function CourseStudentsPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id as any)}
+              onClick={() => setActiveSubTab(tab.id as SubTab)}
               className={`pb-3 text-xs font-extrabold flex items-center border-b-2 transition relative cursor-pointer active:scale-95 ${
                 isSelected 
                   ? 'border-indigo-600 text-indigo-600' 

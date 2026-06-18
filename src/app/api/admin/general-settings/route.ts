@@ -35,8 +35,8 @@ export async function GET() {
       WRITABLE_SETTING_KEYS.map(async (key) => [key, await getJsonSetting(key, SETTINGS_DEFAULTS[key])] as const)
     );
     return NextResponse.json(Object.fromEntries(entries));
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Failed to load settings" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to load settings" }, { status: 500 });
   }
 }
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error || "Failed to save" }, { status: 500 });
     }
     return NextResponse.json({ message: "Settings updated successfully!" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Internal server error" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }

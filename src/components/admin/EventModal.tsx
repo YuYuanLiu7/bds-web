@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { X, Save, Image as ImageIcon, Link2, Calendar, MapPin, Users, Award, Tag, Compass } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 
-interface Event {
+export interface Event {
   id?: string;
   title: string;
   description: string;
@@ -139,9 +139,9 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
       if (data.url) {
         setFormData(prev => ({ ...prev, image_url: data.url }));
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('圖片上傳失敗：' + err.message);
+      alert('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -174,9 +174,9 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
 
       onClose();
       router.refresh();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('儲存活動出錯：' + err.message);
+      alert('儲存活動出錯：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }
@@ -346,7 +346,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                   </label>
                   <select 
                     value={formData.status}
-                    onChange={e => setFormData({...formData, status: e.target.value as any})}
+                    onChange={e => setFormData({...formData, status: e.target.value as Event['status']})}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition bg-white text-xs font-semibold"
                   >
                     <option value="upcoming">即將舉行</option>

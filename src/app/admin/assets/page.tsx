@@ -19,14 +19,23 @@ import {
   List,
   ChevronLeft,
   ChevronRight,
-  Download,
   UploadCloud,
   AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
+// 素材庫單一檔案項目之資料型別
+interface MediaItem {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: string;
+  date: string;
+}
+
 export default function AdminAssetsPage() {
-  const [media, setMedia] = useState<any[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   
@@ -124,9 +133,9 @@ export default function AdminAssetsPage() {
       }
       showToast(`已成功上傳 ${files.length} 個檔案至素材庫！`);
       fetchMedia(); // Refresh list
-    } catch (err: any) {
+    } catch (err) {
       console.error("Upload file error:", err);
-      alert('上傳失敗：' + err.message);
+      alert('上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -160,9 +169,9 @@ export default function AdminAssetsPage() {
         }
         showToast(`已成功上傳 ${files.length} 個檔案至素材庫！`);
         fetchMedia(); // Refresh list
-      } catch (err: any) {
+      } catch (err) {
         console.error("Upload drop error:", err);
-        alert('上傳失敗：' + err.message);
+        alert('上傳失敗：' + (err instanceof Error ? err.message : String(err)));
       } finally {
         setUploading(false);
       }
@@ -170,7 +179,7 @@ export default function AdminAssetsPage() {
   };
 
   // Delete handler
-  const handleDelete = async (item: any) => {
+  const handleDelete = async (item: MediaItem) => {
     if (confirm(`確定要永久刪除素材「${item.name}」嗎？這將會從雲端/伺服器中永久移除此檔案，使用此連結之網頁可能將失效。`)) {
       try {
         const res = await fetch(`/api/admin/media?name=${encodeURIComponent(item.name)}`, {
@@ -217,7 +226,7 @@ export default function AdminAssetsPage() {
             } else {
               failCount++;
             }
-          } catch (e) {
+          } catch {
             failCount++;
           }
         });
@@ -237,7 +246,7 @@ export default function AdminAssetsPage() {
   };
 
   // Copy link to clipboard
-  const handleCopyLink = (item: any) => {
+  const handleCopyLink = (item: MediaItem) => {
     let fullUrl = item.url;
     if (fullUrl.startsWith('/')) {
       fullUrl = window.location.origin + fullUrl;

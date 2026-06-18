@@ -2,6 +2,14 @@ import { sendContactEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+// 聯絡我們表單請求主體
+interface ContactBody {
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+}
+
 // 聯絡我們表單：將訪客訊息寄送至客服信箱（使用 Resend）
 export async function POST(req: Request) {
   try {
@@ -10,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "送出過於頻繁，請稍後再試" }, { status: 429 });
     }
 
-    const { name, email, subject, message } = await req.json();
+    const { name, email, subject, message }: ContactBody = await req.json();
 
     // 基本欄位驗證
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -41,7 +49,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ message: "聯絡訊息已送出" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "送出失敗" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "送出失敗" }, { status: 500 });
   }
 }

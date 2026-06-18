@@ -14,6 +14,30 @@ interface ArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
+// 文章內容（前端使用到的欄位）
+interface Article {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  views: number;
+  category: string;
+  summary: string;
+  content: string;
+  imageUrl: string;
+  visibility?: string;
+  required_course_ids?: string;
+  is_pinned?: boolean;
+  locked?: boolean;
+  lockType?: string;
+}
+
+// 課程精簡資訊（用於付費鎖卡片顯示）
+interface CourseSummary {
+  id: string;
+  title: string;
+}
+
 export default function ArticleDetailPage({ params }: ArticlePageProps) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -22,13 +46,14 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
 
   // 主色改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch site-settings
   const primaryColor = useSettings().visual.primaryColor || '#21448e';
-  const [article, setArticle] = useState<any>(null);
+  const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
-  
+
   // Advanced course visibility settings
-  const [purchasedCourseIds, setPurchasedCourseIds] = useState<string[]>([]);
-  const [allCourses, setAllCourses] = useState<any[]>([]);
+  // 僅需呼叫 setter 以保留 fetch 副作用；目前頁面不直接讀取此清單值
+  const [, setPurchasedCourseIds] = useState<string[]>([]);
+  const [allCourses, setAllCourses] = useState<CourseSummary[]>([]);
 
   // Failsafe Mock Articles Fallback
   const MOCK_ARTICLES = [

@@ -2,11 +2,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
+import type { Session } from "next-auth";
 import fs from 'fs';
 import path from 'path';
 
 // Helper to check admin role
-async function checkAdmin(session: any) {
+async function checkAdmin(session: Session | null) {
   if (!session?.user?.email) return false;
   const { data, error } = await supabase
     .from('users')
@@ -45,7 +46,8 @@ export async function GET() {
             if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(fileExt)) type = 'image';
             else if (['mp4', 'mov', 'webm', 'ogg'].includes(fileExt)) type = 'video';
 
-            const bytes = (file as any).metadata?.size || 0;
+            const metadata = file.metadata as { size?: number } | null | undefined;
+            const bytes = metadata?.size || 0;
             const sizeStr = bytes > 1024 * 1024
               ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
               : `${(bytes / 1024).toFixed(1)} KB`;
@@ -101,9 +103,9 @@ export async function GET() {
 
     return NextResponse.json({ files: [], source: 'none' });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("API GET media error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -145,8 +147,8 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("API DELETE media error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

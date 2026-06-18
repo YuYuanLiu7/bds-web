@@ -9,10 +9,11 @@ export async function GET() {
   try {
     const settings = await getSiteSettingsServer();
     return NextResponse.json(settings);
-  } catch (error: any) {
+  } catch (error) {
     console.error("API GET site-settings error:", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Failed to load site settings: " + error.message },
+      { error: "Failed to load site settings: " + message },
       { status: 500 }
     );
   }
@@ -53,10 +54,11 @@ export async function POST(req: Request) {
     } else {
       return NextResponse.json({ error: result.error || "Failed to update settings" }, { status: 500 });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("API POST site-settings error:", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Internal server error: " + error.message },
+      { error: "Internal server error: " + message },
       { status: 500 }
     );
   }

@@ -5,13 +5,19 @@ import Link from 'next/link';
 import { ArrowLeft, HelpCircle, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/components/SettingsProvider';
 
+// 常見問答項目（q：問題，a：解答）
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
 export default function HelpFAQPage() {
   // 主色與 FAQ 改由 Context（root layout 伺服器端取一次）提供，不再各自 fetch
   const { visual, faqs: ctxFaqs } = useSettings();
   const primaryColor = visual.primaryColor || '#21448e';
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const [faqs, setFaqs] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<FaqItem[]>([]);
 
   useEffect(() => {
     setFaqs(Array.isArray(ctxFaqs) && ctxFaqs.length > 0 ? ctxFaqs : DEFAULT_FAQS);

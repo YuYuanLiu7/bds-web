@@ -7,6 +7,24 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 0;
 
+// 登入會話使用者（補上本專案的 id 與 role 欄位）
+interface SessionUser {
+  id?: string;
+  role?: string;
+  name?: string | null;
+  email?: string | null;
+}
+
+// 資料庫 course_reviews 資料列
+interface ReviewRow {
+  id: string;
+  course_id: string;
+  student_name: string | null;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+}
+
 // 將 timestamp 格式化為前端顯示用的 "YYYY-MM-DD HH:mm"
 function fmt(ts: string): string {
   const d = new Date(ts);
@@ -31,7 +49,7 @@ export async function GET(req: Request) {
 
     if (error) throw error;
 
-    const reviews = (data || []).map((r: any) => ({
+    const reviews = ((data || []) as ReviewRow[]).map((r) => ({
       id: r.id,
       courseId: r.course_id,
       studentName: r.student_name,
@@ -40,8 +58,8 @@ export async function GET(req: Request) {
       date: fmt(r.created_at),
     }));
     return NextResponse.json(reviews);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -49,7 +67,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = (session?.user as any)?.id;
+    const sessionUser = session?.user as SessionUser | undefined;
+    const userId = sessionUser?.id;
     if (!userId) {
       return NextResponse.json({ error: "請先登入" }, { status: 401 });
     }
@@ -59,7 +78,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "缺少課程或評價內容" }, { status: 400 });
     }
 
-    const isAdmin = (session?.user as any)?.role === 'admin';
+    const isAdmin = sessionUser?.role === 'admin';
     const hasAccess =
       isAdmin ||
       (await checkCourseAccess(userId, courseId)) ||
@@ -69,7 +88,7 @@ export async function POST(req: Request) {
     }
 
     const safeRating = Math.min(5, Math.max(1, parseInt(rating) || 5));
-    const studentName = (session?.user as any)?.name || session?.user?.email?.split('@')[0] || '匿名學員';
+    const studentName = sessionUser?.name || sessionUser?.email?.split('@')[0] || '匿名學員';
 
     const { data, error } = await supabase
       .from('course_reviews')
@@ -85,15 +104,16 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
+    const review = data as ReviewRow;
     return NextResponse.json({
-      id: data.id,
-      courseId: data.course_id,
-      studentName: data.student_name,
-      rating: data.rating,
-      comment: data.comment,
-      date: fmt(data.created_at),
+      id: review.id,
+      courseId: review.course_id,
+      studentName: review.student_name,
+      rating: review.rating,
+      comment: review.comment,
+      date: fmt(review.created_at),
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

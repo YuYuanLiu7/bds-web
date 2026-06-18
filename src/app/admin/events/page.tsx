@@ -1,31 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  Search, 
-  Plus, 
-  MapPin, 
-  Users, 
-  Edit3, 
-  Trash2, 
-  Copy, 
-  Check, 
-  ArrowLeft,
+import {
+  Calendar,
+  Search,
+  Plus,
+  MapPin,
+  Users,
+  Edit3,
+  Trash2,
+  Copy,
+  Check,
   Filter,
-  Layers,
-  Compass,
   AlertCircle
 } from 'lucide-react';
-import EventModal from '@/components/admin/EventModal';
+import EventModal, { Event } from '@/components/admin/EventModal';
 
 export default function AdminEventsPage() {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Filter States
@@ -64,7 +61,7 @@ export default function AdminEventsPage() {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (event: any) => {
+  const handleEdit = (event: Event) => {
     setEditingEvent(event);
     setIsModalOpen(true);
   };
@@ -78,10 +75,10 @@ export default function AdminEventsPage() {
       });
 
       if (!res.ok) throw new Error('刪除失敗');
-      
+
       fetchEvents();
-    } catch (err: any) {
-      alert('刪除失敗：' + err.message);
+    } catch (err) {
+      alert('刪除失敗：' + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -278,7 +275,7 @@ export default function AdminEventsPage() {
 
                             {/* Copy ID Button */}
                             <button
-                              onClick={() => handleCopyId(event.id)}
+                              onClick={() => handleCopyId(event.id!)}
                               title="複製活動 ID"
                               className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer relative"
                             >
@@ -291,7 +288,7 @@ export default function AdminEventsPage() {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDelete(event.id, event.title)}
+                              onClick={() => handleDelete(event.id!, event.title)}
                               title="刪除活動"
                               className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition cursor-pointer"
                             >

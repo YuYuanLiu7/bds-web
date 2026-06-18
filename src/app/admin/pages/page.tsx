@@ -4,7 +4,21 @@ import { useState, useEffect } from 'react';
 import { FileCode, Plus, ExternalLink, Trash2, X, Pencil, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
-const DEFAULT_PAGES = [
+// 頁面管理資料結構
+interface PageItem {
+  id: string;
+  name: string;
+  path: string;
+  type: string;
+  status: 'published' | 'draft';
+  lastUpdated: string;
+  title: string;
+  subtitle: string;
+  content: string;
+  imageUrl: string;
+}
+
+const DEFAULT_PAGES: PageItem[] = [
   { 
     id: '1', 
     name: '首頁 (首頁核心展示)', 
@@ -68,12 +82,12 @@ const DEFAULT_PAGES = [
 ];
 
 export default function AdminPagesPage() {
-  const [pages, setPages] = useState<any[]>([]);
+  const [pages, setPages] = useState<PageItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPage, setEditingPage] = useState<any>(null);
+  const [editingPage, setEditingPage] = useState<PageItem | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -95,7 +109,7 @@ export default function AdminPagesPage() {
   }, []);
 
   // 更新並寫入資料庫（透過管理員設定 API）
-  const updatePagesState = async (newPages: any[]) => {
+  const updatePagesState = async (newPages: PageItem[]) => {
     setPages(newPages);
     try {
       const res = await fetch('/api/admin/general-settings', {
@@ -132,7 +146,7 @@ export default function AdminPagesPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (page: any) => {
+  const handleOpenEditModal = (page: PageItem) => {
     setEditingPage(page);
     setFormData({
       name: page.name || '',

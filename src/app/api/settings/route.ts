@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const value = await getJsonSetting(key, SETTINGS_DEFAULTS[key]);
     return NextResponse.json(value);
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Failed to load settings" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to load settings" }, { status: 500 });
   }
 }

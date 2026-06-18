@@ -3,10 +3,15 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+// 章節單元排序所需的最小欄位
+interface ChapterOrder {
+  order_index: number;
+}
+
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || (session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -55,7 +60,7 @@ export async function GET(req: Request) {
 
       return {
         ...course,
-        chapters: (course.chapters || []).sort((a: any, b: any) => a.order_index - b.order_index),
+        chapters: (course.chapters || []).sort((a: ChapterOrder, b: ChapterOrder) => a.order_index - b.order_index),
         studentCount: directStudentCount,
         directStudentCount,
         netSales
@@ -63,8 +68,8 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json(enrichedCourses);
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET courses_full error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

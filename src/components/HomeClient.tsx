@@ -11,13 +11,21 @@ import { Course } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
 import { useSettings } from '@/components/SettingsProvider';
 
+// 僅取用到的 session 欄位；目前首頁未直接使用 session，保留以維持呼叫端介面相容
+interface SessionLike {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
+}
+
 interface HomeClientProps {
   settings: SiteSettings;
   courses: Course[];
-  session: any;
+  session: SessionLike | null;
 }
 
-export default function HomeClient({ settings, courses, session }: HomeClientProps) {
+export default function HomeClient({ settings, courses }: HomeClientProps) {
   // Carousel states
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = settings.carouselSlides || [];

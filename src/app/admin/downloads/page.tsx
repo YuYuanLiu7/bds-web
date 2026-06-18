@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Search, Plus, Edit3, Trash2, Copy, Check, MoreVertical, FileText, ShoppingBag, Activity, Filter } from 'lucide-react';
+import { Download, Search, Plus, Edit3, Trash2, Copy, Check, ShoppingBag, Activity, Filter } from 'lucide-react';
 import DownloadModal from '@/components/admin/DownloadModal';
 
 interface DownloadProduct {
@@ -97,7 +97,7 @@ export default function AdminDownloadsPage() {
       if (!res.ok) throw new Error('刪除失敗');
 
       setDownloads(prev => prev.filter(item => item.id !== id));
-    } catch (err) {
+    } catch {
       alert('刪除失敗');
     }
   };

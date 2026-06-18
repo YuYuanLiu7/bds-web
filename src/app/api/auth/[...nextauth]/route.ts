@@ -1,8 +1,20 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, User } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { rateLimit } from "@/lib/rate-limit";
+
+// 擴充 NextAuth 既有型別，補上本專案使用到的 id 與 role 欄位，
+// 取代原本散落的 `as any`，維持登入流程行為不變
+interface AppUser extends Omit<User, "id"> {
+  id?: string;
+  role?: string;
+}
+interface AppToken extends JWT {
+  id?: string;
+  role?: string;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -56,15 +68,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role;
-        token.id = (user as any).id;
+        const appUser = user as AppUser;
+        const appToken = token as AppToken;
+        appToken.role = appUser.role;
+        appToken.id = appUser.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
+        const appToken = token as AppToken;
+        const sessionUser = session.user as AppUser;
+        sessionUser.role = appToken.role;
+        sessionUser.id = appToken.id;
       }
       return session;
     }

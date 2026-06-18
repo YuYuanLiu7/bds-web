@@ -51,7 +51,7 @@ const SEED_PLANS = [
   }
 ];
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const { data, error } = await supabase
       .from('membership_plans')
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

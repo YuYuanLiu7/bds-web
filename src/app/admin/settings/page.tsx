@@ -14,10 +14,29 @@ import {
   Check, 
   Plus, 
   Trash2, 
-  Pencil, 
-  Link2, 
-  Settings 
+  Pencil,
+  Settings
 } from 'lucide-react';
+
+// 首頁輪播投影片資料結構
+interface CarouselSlide {
+  id?: string;
+  imageUrl: string;
+  link: string;
+}
+
+// 常見問題 (FAQ) 資料結構
+interface Faq {
+  q: string;
+  a: string;
+}
+
+// 系統公告資料結構
+interface Announcement {
+  content: string;
+  url: string;
+  status: string;
+}
 
 export default function AdminSettingsPage() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -32,7 +51,7 @@ export default function AdminSettingsPage() {
   // 2. Front Visual (from API site-settings)
   const [logoUrl, setLogoUrl] = useState('');
   const [slogan, setSlogan] = useState('');
-  const [slides, setSlides] = useState<any[]>([]);
+  const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [secImage1, setSecImage1] = useState({ imageUrl: '', link: '' });
   const [secImage2, setSecImage2] = useState({ imageUrl: '', link: '' });
   const [primaryColor, setPrimaryColor] = useState('#21448e');
@@ -44,12 +63,12 @@ export default function AdminSettingsPage() {
   const [maintenanceMessage, setMaintenanceMessage] = useState('');
 
   // 4. FAQs
-  const [faqs, setFaqs] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<Faq[]>([]);
   const [editingFaqIndex, setEditingFaqIndex] = useState<number | null>(null);
   const [faqForm, setFaqForm] = useState({ q: '', a: '' });
 
   // 5. Announcements
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [editingAnnouncementIndex, setEditingAnnouncementIndex] = useState<number | null>(null);
   const [announcementForm, setAnnouncementForm] = useState({ content: '', url: '', status: 'published' });
 
@@ -60,9 +79,31 @@ export default function AdminSettingsPage() {
 
   // 7. PayUni Gateways
   const [merId, setMerId] = useState('');
-  const [hashKey, setHashKey] = useState('');
-  const [hashIv, setHashIv] = useState('');
+  // HashKey / HashIV 一律以伺服器環境變數為準，前台僅顯示空值占位，不在此編輯
+  const hashKey = '';
+  const hashIv = '';
   const [payuniMode, setPayuniMode] = useState('sandbox');
+
+  // 載入前台視覺設定（宣告於下方 useEffect 之前，供其引用）
+  const fetchVisualSettings = async () => {
+    setIsVisualLoading(true);
+    try {
+      const res = await fetch('/api/admin/site-settings');
+      if (res.ok) {
+        const data = await res.json();
+        setLogoUrl(data.logoUrl || '');
+        setSlogan(data.slogan || '');
+        setSlides(data.carouselSlides || []);
+        setSecImage1(data.sectionImage1 || { imageUrl: '', link: '' });
+        setSecImage2(data.sectionImage2 || { imageUrl: '', link: '' });
+        setPrimaryColor(data.primaryColor || '#21448e');
+      }
+    } catch (err) {
+      console.error("Failed to fetch visual settings:", err);
+    } finally {
+      setIsVisualLoading(false);
+    }
+  };
 
   // Load settings from DB (general/faqs/announcements/notifications) + API (visual)
   useEffect(() => {
@@ -103,7 +144,7 @@ export default function AdminSettingsPage() {
   }, []);
 
   // 共用：將某個設定區塊寫入資料庫
-  const saveSetting = async (key: string, value: any): Promise<boolean> => {
+  const saveSetting = async (key: string, value: unknown): Promise<boolean> => {
     try {
       const res = await fetch('/api/admin/general-settings', {
         method: 'POST',
@@ -114,26 +155,6 @@ export default function AdminSettingsPage() {
     } catch (err) {
       console.error(`Failed to save setting '${key}':`, err);
       return false;
-    }
-  };
-
-  const fetchVisualSettings = async () => {
-    setIsVisualLoading(true);
-    try {
-      const res = await fetch('/api/admin/site-settings');
-      if (res.ok) {
-        const data = await res.json();
-        setLogoUrl(data.logoUrl || '');
-        setSlogan(data.slogan || '');
-        setSlides(data.carouselSlides || []);
-        setSecImage1(data.sectionImage1 || { imageUrl: '', link: '' });
-        setSecImage2(data.sectionImage2 || { imageUrl: '', link: '' });
-        setPrimaryColor(data.primaryColor || '#21448e');
-      }
-    } catch (err) {
-      console.error("Failed to fetch visual settings:", err);
-    } finally {
-      setIsVisualLoading(false);
     }
   };
 
@@ -308,7 +329,7 @@ export default function AdminSettingsPage() {
     setUploadingField(fieldId);
     const data = new FormData();
     const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
+    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
     data.append('file', file, safeName);
 
     try {
@@ -352,7 +373,7 @@ export default function AdminSettingsPage() {
     setUploadingField(`slide-${idx}`);
     const data = new FormData();
     const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
+    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
     data.append('file', file, safeName);
 
     try {

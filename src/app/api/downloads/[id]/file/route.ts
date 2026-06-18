@@ -3,6 +3,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
+// 登入會話使用者（補上本專案的 id 與 role 欄位）
+interface SessionUser {
+  id?: string;
+  role?: string;
+}
+
 // 安全下載端點：只有「管理員」「已購買者」或「免費商品」才會拿到 file_url。
 // 付費商品的 file_url 不放在公開列表回應中，必須經此端點逐筆驗證權限後才取得，
 // 避免在 HTML/DOM 或列表 API 中外洩付費下載連結。
@@ -28,11 +34,11 @@ export async function GET(
 
     const isFree = (download.price || 0) <= 0;
     const session = await getServerSession(authOptions);
-    const isAdmin = !!session && (session.user as any)?.role === 'admin';
+    const isAdmin = !!session && (session.user as SessionUser | undefined)?.role === 'admin';
 
     // 付費商品需驗證擁有權（管理員除外）
     if (!isFree && !isAdmin) {
-      const userId = (session?.user as any)?.id;
+      const userId = (session?.user as SessionUser | undefined)?.id;
       if (!userId) {
         return NextResponse.json({ error: "請先登入" }, { status: 401 });
       }
@@ -52,7 +58,7 @@ export async function GET(
     }
 
     return NextResponse.json({ file_url: download.file_url });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "下載連結取得失敗" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "下載連結取得失敗" }, { status: 500 });
   }
 }

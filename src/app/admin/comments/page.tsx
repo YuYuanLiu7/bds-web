@@ -3,8 +3,21 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Search, Trash2, Check, BookOpen, Clock, Filter, CornerDownRight, User } from 'lucide-react';
 
+// 後台留言資料結構
+interface Comment {
+  id: string;
+  student?: string;
+  text?: string;
+  status?: string;
+  course?: string;
+  chapter?: string;
+  date?: string;
+  reply?: string;
+  replyDate?: string;
+}
+
 export default function AdminCommentsPage() {
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
 
   // 從伺服器載入所有留言（持久化於資料庫）
   const loadComments = () => {

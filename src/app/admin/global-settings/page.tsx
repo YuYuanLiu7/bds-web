@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sliders, Save, SlidersHorizontal, Globe, Mail, Settings, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Sliders, Save, Globe, Mail } from 'lucide-react';
 
 export default function AdminGlobalSettingsPage() {
   const [success, setSuccess] = useState(false);

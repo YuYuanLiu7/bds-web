@@ -110,8 +110,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
               chapterTitle={currentChapter.title}
               studentName={user.name || user.email}
               allowComments={course.allow_comments !== false}
-              chapterFileUrl={(currentChapter as any).file_url || ''}
-              courseFileUrl={(course as any).file_url || ''}
+              chapterFileUrl={(currentChapter as { file_url?: string }).file_url || ''}
+              courseFileUrl={(course as { file_url?: string }).file_url || ''}
             />
           </div>
         </div>

@@ -1,9 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Mail, MessageSquare, Send, CheckCircle, ImageIcon } from 'lucide-react';
+import Link from 'next/link';
+import { Mail, MessageSquare, Send, CheckCircle } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import { useToast } from '@/components/Toast';
+
+// 後台 CMS 頁面內容（/api/settings?key=pages 回傳項目）
+interface CmsPage {
+  path: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  imageUrl?: string;
+}
 
 export default function ContactPage() {
   const toast = useToast();
@@ -29,7 +39,7 @@ export default function ContactPage() {
     fetch('/api/settings?key=pages')
       .then(res => (res.ok ? res.json() : null))
       .then(list => {
-        const item = Array.isArray(list) ? list.find((p: any) => p.path === '/contact') : null;
+        const item = Array.isArray(list) ? list.find((p: CmsPage) => p.path === '/contact') : null;
         if (item) {
           setPageData({
             title: item.title || '有任何問題？我們隨時為您解答',
@@ -112,9 +122,9 @@ export default function ContactPage() {
             <div>
               <h3 className="font-extrabold text-slate-800 text-sm">常見問答 FAQ</h3>
               <p className="text-slate-400 text-xs mt-1 font-semibold">快速尋求關於課程開通、退費、觀看權限解答</p>
-              <a href="/help" className="text-sky-600 font-bold text-xs hover:underline mt-2 block">
+              <Link href="/help" className="text-sky-600 font-bold text-xs hover:underline mt-2 block">
                 前往常見問答 ↗
-              </a>
+              </Link>
             </div>
           </div>
 

@@ -109,8 +109,8 @@ export async function updateSiteSettingsServer(newSettings: SiteSettings): Promi
       lastError = error.message;
       console.warn("Supabase upsert failed:", error.message);
     }
-  } catch (err: any) {
-    lastError = err.message || String(err);
+  } catch (err) {
+    lastError = err instanceof Error ? err.message : String(err);
     console.error("Supabase upsert error:", err);
   }
 
@@ -119,7 +119,7 @@ export async function updateSiteSettingsServer(newSettings: SiteSettings): Promi
     const jsonPath = getLocalJsonPath();
     fs.writeFileSync(jsonPath, JSON.stringify(newSettings, null, 2), 'utf8');
     fileSuccess = true;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Local JSON write error:", err);
   }
 
@@ -136,8 +136,49 @@ export async function updateSiteSettingsServer(newSettings: SiteSettings): Promi
  * 讓後台修改能持久化到資料庫，前台 / 跨裝置皆可讀到（不再只存在某台瀏覽器的 localStorage）。
  */
 
+// 各設定 key 的型別（保留以字串索引存取的彈性，同時為常用 key 提供具體型別）
+interface GeneralSetting {
+  siteName?: string;
+  siteDesc?: string;
+  contactEmail?: string;
+  communityUrl?: string;
+  siteStatus?: string;
+  maintenanceMessage?: string;
+  [key: string]: unknown;
+}
+interface FaqItem {
+  q: string;
+  a: string;
+}
+interface AnnouncementItem {
+  content: string;
+  url?: string;
+  status?: string;
+}
+interface PageItem {
+  id: string;
+  name: string;
+  path: string;
+  type: string;
+  status: string;
+  lastUpdated?: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  imageUrl?: string;
+}
+interface SettingsDefaults {
+  general: GeneralSetting;
+  faqs: FaqItem[];
+  announcements: AnnouncementItem[];
+  notifications: Record<string, unknown>;
+  global: Record<string, unknown>;
+  pages: PageItem[];
+  [key: string]: unknown;
+}
+
 // 各設定 key 的預設值（資料庫尚未有資料時的保底）
-export const SETTINGS_DEFAULTS: Record<string, any> = {
+export const SETTINGS_DEFAULTS: SettingsDefaults = {
   general: {
     siteName: 'BDS By Doing So',
     siteDesc: '橋接理論與實踐，深耕硬體、半導體與醫材產業。',
@@ -211,7 +252,7 @@ export const PUBLIC_SETTING_KEYS = ['general', 'faqs', 'announcements', 'pages']
 // 後台可寫入的所有 key
 export const WRITABLE_SETTING_KEYS = Object.keys(SETTINGS_DEFAULTS);
 
-export async function getJsonSetting<T = any>(key: string, fallback: T): Promise<T> {
+export async function getJsonSetting<T = unknown>(key: string, fallback: T): Promise<T> {
   try {
     const { data, error } = await supabase
       .from('site_settings')
@@ -228,7 +269,7 @@ export async function getJsonSetting<T = any>(key: string, fallback: T): Promise
   return fallback;
 }
 
-export async function setJsonSetting(key: string, value: any): Promise<{ success: boolean; error?: string }> {
+export async function setJsonSetting(key: string, value: unknown): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await supabase
       .from('site_settings')
@@ -238,7 +279,7 @@ export async function setJsonSetting(key: string, value: any): Promise<{ success
       return { success: false, error: error.message };
     }
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err?.message || String(err) };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

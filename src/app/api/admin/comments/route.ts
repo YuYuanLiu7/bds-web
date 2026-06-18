@@ -12,7 +12,20 @@ function fmt(ts: string | null): string | null {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-function toClient(c: any) {
+// 資料庫 course_comments 資料列型別
+interface CommentRow {
+  id: string | number;
+  student_name: string | null;
+  course_title: string | null;
+  chapter_title: string | null;
+  text: string | null;
+  created_at: string | null;
+  status: string | null;
+  reply: string | null;
+  reply_date: string | null;
+}
+
+function toClient(c: CommentRow) {
   return {
     id: c.id,
     student: c.student_name,
@@ -56,8 +69,8 @@ export async function GET() {
     if (error) throw error;
 
     return NextResponse.json((data || []).map(toClient));
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -70,7 +83,7 @@ export async function PUT(req: Request) {
     const { id, action, reply } = await req.json();
     if (!id) return NextResponse.json({ error: "缺少留言 id" }, { status: 400 });
 
-    let update: any;
+    let update: { status: string; reply?: string; reply_date?: string };
     if (action === 'approve') {
       update = { status: 'approved' };
     } else if (action === 'reply') {
@@ -90,8 +103,8 @@ export async function PUT(req: Request) {
     if (error) throw error;
 
     return NextResponse.json(toClient(data));
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -109,7 +122,7 @@ export async function DELETE(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ message: "已刪除" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

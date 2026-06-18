@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Code, Save, Plus, Copy, Check, Terminal, Shield, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Code, Copy, Check, Terminal, Shield } from 'lucide-react';
 
 export default function AdminDeveloperPage() {
   // 尚未串接後端金鑰產生 API，故暫無可用的正式金鑰

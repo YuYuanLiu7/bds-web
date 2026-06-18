@@ -5,10 +5,9 @@ import { useToast } from '@/components/Toast';
 import {
   FileText, 
   Download, 
-  MessageSquare, 
-  Send, 
-  User, 
-  CornerDownRight, 
+  MessageSquare,
+  Send,
+  CornerDownRight,
   Clock,
   ShieldCheck,
   AlertCircle

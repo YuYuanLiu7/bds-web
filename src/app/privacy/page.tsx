@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, FileText } from 'lucide-react';
 
+// 後台 CMS 頁面內容（/api/settings?key=pages 回傳項目）
+interface CmsPage {
+  path: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  imageUrl?: string;
+}
+
 export default function PrivacyPage() {
   const [pageData, setPageData] = useState({
     title: '服務條款與隱私權政策',
@@ -15,7 +24,7 @@ export default function PrivacyPage() {
     fetch('/api/settings?key=pages')
       .then(res => (res.ok ? res.json() : null))
       .then(list => {
-        const item = Array.isArray(list) ? list.find((p: any) => p.path === '/privacy') : null;
+        const item = Array.isArray(list) ? list.find((p: CmsPage) => p.path === '/privacy') : null;
         if (item) {
           setPageData({
             title: item.title || '服務條款與隱私權政策',

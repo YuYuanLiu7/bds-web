@@ -10,8 +10,9 @@ export async function GET() {
   try {
     const courses = await getPublishedCourses();
     return NextResponse.json(courses);
-  } catch (error: any) {
-    console.error("Public API GET courses error:", error?.message);
-    return NextResponse.json({ error: error?.message || "Failed to fetch courses" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Public API GET courses error:", message);
+    return NextResponse.json({ error: message || "Failed to fetch courses" }, { status: 500 });
   }
 }

@@ -1,12 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Receipt, DollarSign, Clock, CheckCircle, XCircle, ArrowLeft, Search, Download } from 'lucide-react';
+import { Receipt, Search, Download } from 'lucide-react';
 import Link from 'next/link';
 
+// 財務訂單列表所使用之資料型別
+interface OrderUser {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
+interface FinanceOrder {
+  id: string;
+  created_at: string;
+  amount?: number;
+  payment_type?: string;
+  status?: string;
+  users?: OrderUser;
+}
+
 export default function AdminFinancePage() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<FinanceOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<FinanceOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

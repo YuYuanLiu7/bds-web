@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 // 驗證管理員身分
 async function checkAdmin() {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'admin') {
+  if (!session || (session.user as { role?: string }).role !== 'admin') {
     return false;
   }
   return true;
@@ -38,9 +38,9 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json(data || []);
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET course announcement error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -72,9 +72,9 @@ export async function POST(req: Request) {
     if (error) throw error;
 
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST course announcement error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -100,8 +100,8 @@ export async function DELETE(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: "公告已成功刪除" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("DELETE course announcement error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

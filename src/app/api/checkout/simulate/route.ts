@@ -4,6 +4,14 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import { sendPurchaseSuccessEmail } from "@/lib/email";
 
+// 模擬付款請求主體
+interface SimulateBody {
+  planId?: string;
+  planName?: string;
+  price?: string | number;
+  period?: string;
+}
+
 export async function POST(req: Request) {
   try {
     // 🔒 模擬付款端點僅供開發/測試環境，正式環境必須關閉，否則任何登入者可免費開通會員
@@ -16,7 +24,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { planId, planName, price, period } = await req.json();
+    const { planId, planName, price, period }: SimulateBody = await req.json();
+    // 與原行為一致：將 price 以 10 進位解析為整數金額（無法解析則為 0）
+    const amount = parseInt(String(price)) || 0;
 
     // 1. 依據 Email 尋找使用者 ID
     const { data: user, error: userError } = await supabase
@@ -37,7 +47,7 @@ export async function POST(req: Request) {
         id: merTradeNo,
         user_id: user.id,
         membership_plan_id: planId,
-        amount: parseInt(price) || 0,
+        amount,
         status: 'paid',
         payment_type: 'SIMULATED_TEST',
         updated_at: new Date().toISOString()
@@ -76,7 +86,7 @@ export async function POST(req: Request) {
         email: session.user.email,
         name: session.user.name || '學員',
         itemName: `訂閱會員 - ${planName}`,
-        amount: parseInt(price) || 0,
+        amount,
         tradeNo: merTradeNo
       });
     } catch (emailErr) {
@@ -88,8 +98,8 @@ export async function POST(req: Request) {
       merTradeNo,
       message: `🎉 會員方案「${planName}」已成功模擬開通！到期日：${expiresAt ? new Date(expiresAt).toLocaleDateString() : '永久'}`
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Simulation endpoint error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

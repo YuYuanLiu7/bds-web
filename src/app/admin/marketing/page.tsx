@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { Tag, Search, Plus, Ticket } from 'lucide-react';
 
+// 於模組載入時取一次時間戳作為「今天」基準（避免在 render 期間呼叫 Date.now 造成非純粹渲染）
+const PAGE_LOAD_TS = Date.now();
+
 export default function AdminMarketingPage() {
   const [coupons] = useState([
     { id: '1', name: 'BDS 新生見面禮', code: 'BDSNEW500', discount: '折價 NT$ 500', limit: '無限次數', used: 45, status: 'active', end: '無期限' },
@@ -18,7 +21,7 @@ export default function AdminMarketingPage() {
     // 到期日為實際日期且早於今日時，視為已過期
     if (coupon.end && coupon.end !== '無期限') {
       const endDate = new Date(coupon.end);
-      if (!isNaN(endDate.getTime()) && endDate.getTime() < Date.now()) {
+      if (!isNaN(endDate.getTime()) && endDate.getTime() < PAGE_LOAD_TS) {
         return { label: '已過期', className: 'bg-slate-100 text-slate-500' };
       }
     }

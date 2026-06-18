@@ -1,20 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Receipt, 
-  User, 
-  Mail, 
-  Phone, 
-  CreditCard, 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  BookOpen, 
-  Award, 
+import {
+  ArrowLeft,
+  Receipt,
+  User,
+  Mail,
+  Phone,
+  CreditCard,
+  Clock,
+  Award,
   Loader2,
   FileCheck,
   HelpCircle,
@@ -22,12 +19,43 @@ import {
 } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 
+// 訂單明細所使用之資料型別
+interface OrderUser {
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+}
+
+interface OrderCourse {
+  thumbnail_url?: string;
+  title?: string;
+  price?: number;
+}
+
+interface OrderMembershipPlan {
+  period?: string;
+  title?: string;
+  description?: string;
+}
+
+interface OrderDetail {
+  id: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+  amount?: number;
+  payment_type?: string;
+  users?: OrderUser;
+  courses?: OrderCourse;
+  membershipPlan?: OrderMembershipPlan;
+}
+
 export default function OrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const orderId = params.id as string;
 
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +85,7 @@ export default function OrderDetailPage() {
     }
   }, [orderId]);
 
-  const formatTaiwanDate = (dateStr: string) => {
+  const formatTaiwanDate = (dateStr: string | undefined) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     const yr = d.getFullYear();

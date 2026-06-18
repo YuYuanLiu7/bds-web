@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Award, Search, Plus, Users, Shield, Edit3, Trash2, CheckCircle, HelpCircle, Activity, Sparkles, Check, X, AlertCircle, DollarSign } from 'lucide-react';
-import Link from 'next/link';
+import { Award, Search, Plus, Users, Edit3, Trash2, CheckCircle, Sparkles, X, AlertCircle, DollarSign } from 'lucide-react';
 
 interface MembershipPlan {
   id: string;
@@ -208,8 +207,8 @@ export default function AdminMembershipPage() {
         const errData = await res.json();
         setFormError(errData.error || '儲存失敗，請重試');
       }
-    } catch (error: any) {
-      setFormError(error.message || '儲存發生錯誤');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : '儲存發生錯誤');
     } finally {
       setFormSubmitLoading(false);
     }
@@ -557,7 +556,7 @@ export default function AdminMembershipPage() {
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">上架狀態 *</label>
                 <select 
                   value={formData.status}
-                  onChange={e => setFormData({...formData, status: e.target.value as any})}
+                  onChange={e => setFormData({...formData, status: e.target.value as 'active' | 'draft'})}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-600 focus:bg-white transition cursor-pointer"
                 >
                   <option value="active">已啟動上架</option>

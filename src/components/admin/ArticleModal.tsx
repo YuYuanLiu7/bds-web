@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  X, Save, Image as ImageIcon, Link2, Calendar, User, Eye, Tag, FileText, CheckCircle2,
-  Bold, Heading2, Heading3, Palette, Link as LinkIcon, Sparkles,
+import {
+  X, Save, Image as ImageIcon, Calendar, User, Eye, Tag, FileText, CheckCircle2,
+  Bold, Link as LinkIcon,
   Globe, Lock, BookOpen, Pin, ChevronDown, ChevronUp,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Outdent, Indent, Quote, Code, Table, Video,
-  Type, Italic, Underline, Strikethrough, Send, FilePlus, Edit3
+  Italic, Underline, Strikethrough, Send, FilePlus, Edit3
 } from 'lucide-react';
 
 interface Article {
@@ -30,8 +30,14 @@ interface Article {
   required_course_ids?: string;
 }
 
+// 課程選項（用於限定特定課程學員解鎖文章時的勾選清單）
+interface CourseOption {
+  id: string;
+  title: string;
+}
+
 interface ArticleModalProps {
-  article?: Article | null;
+  article?: Partial<Article> | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -104,7 +110,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
       const cleanTag = value.replace(/[<>]/g, '').toUpperCase();
       try {
         document.execCommand(command, false, cleanTag);
-      } catch (e) {
+      } catch {
         document.execCommand(command, false, value);
       }
     } else {
@@ -165,7 +171,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
     setUploading(true);
     const uploadData = new FormData();
     const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
+    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
     uploadData.append('file', file, safeName);
 
     try {
@@ -180,9 +186,9 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
       if (data.url) {
         execCmd('insertImage', data.url);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('圖片上傳失敗：' + err.message);
+      alert('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
       if (editorImageInputRef.current) {
@@ -191,7 +197,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
     }
   };
 
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<CourseOption[]>([]);
   const [activePanel, setActivePanel] = useState<string>('publish');
 
   const [formData, setFormData] = useState<Article>({
@@ -255,13 +261,18 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
         .catch(err => console.warn('無法載入課程清單：', err));
 
       if (article) {
+        // article 為 Partial<Article>，逐欄位帶入並補預設值，確保符合 Article 型別（必填欄位不為 undefined）
         setFormData({
-          ...article,
+          id: article.id,
+          title: article.title || '',
           author: article.author || 'BDS 編輯部',
+          views: article.views ?? 0,
+          category: article.category || '商務開發',
+          status: article.status || 'published',
           summary: article.summary || '',
           content: article.content || '',
           image_url: article.image_url || '',
-          date: formatForInput(article.date),
+          date: formatForInput(article.date || new Date().toISOString()),
           slug: article.slug || '',
           tags: article.tags || '',
           seo_title: article.seo_title || '',
@@ -329,7 +340,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
     setUploading(true);
     const uploadData = new FormData();
     const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
+    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
     uploadData.append('file', file, safeName);
 
     try {
@@ -344,9 +355,9 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
       if (data.url) {
         setFormData(prev => ({ ...prev, image_url: data.url }));
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('圖片上傳失敗：' + err.message);
+      alert('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -378,9 +389,9 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
 
       onClose();
       router.refresh();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert('儲存文章出錯：' + err.message);
+      alert('儲存文章出錯：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }
@@ -1032,7 +1043,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                         </label>
                         <select 
                           value={formData.status}
-                          onChange={e => setFormData({...formData, status: e.target.value as any})}
+                          onChange={e => setFormData({...formData, status: e.target.value as Article['status']})}
                           className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition bg-white text-xs font-semibold text-slate-700"
                         >
                           <option value="published">🟢 立即公開發布</option>
@@ -1182,7 +1193,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                         </label>
                         <select 
                           value={formData.visibility || 'public'}
-                          onChange={e => setFormData({...formData, visibility: e.target.value as any})}
+                          onChange={e => setFormData({...formData, visibility: e.target.value as Article['visibility']})}
                           className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition bg-white text-xs font-semibold text-slate-700"
                         >
                           <option value="public">🔓 所有人免費公開閱讀</option>

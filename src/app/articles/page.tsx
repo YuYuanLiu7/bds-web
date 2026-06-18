@@ -2,14 +2,39 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, Eye, ArrowLeft, ArrowRight, User, Layers, Clock } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, ArrowRight, User, Clock } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import { useSettings } from '@/components/SettingsProvider';
+
+// 列表卡片使用到的文章欄位
+interface ArticleListItem {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  views: number;
+  category: string;
+  summary: string;
+  imageUrl: string;
+}
+
+// API 回傳的原始文章資料（snake_case 與 camelCase 混用，皆為選填）
+interface ArticleApiItem {
+  id: string;
+  title: string;
+  author?: string;
+  date?: string;
+  views?: number;
+  category?: string;
+  summary?: string;
+  image_url?: string;
+  imageUrl?: string;
+}
 
 export default function ArticlesPage() {
   // 主色改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch site-settings
   const primaryColor = useSettings().visual.primaryColor || '#21448e';
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<ArticleListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +44,7 @@ export default function ArticlesPage() {
         if (!res.ok) throw new Error('API response not ok');
         const data = await res.json();
         if (Array.isArray(data)) {
-          const mapped = data.map((e: any) => ({
+          const mapped = data.map((e: ArticleApiItem) => ({
             id: e.id,
             title: e.title,
             author: e.author || 'BDS 編輯部',

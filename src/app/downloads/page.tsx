@@ -13,6 +13,19 @@ export const metadata = {
   description: "即裝即用的專業履歷模板、生意開發策略白皮書與經典面試手冊。",
 };
 
+// 數位下載商品資料列（資料庫 / Mock 共用形狀）
+interface DownloadRow {
+  id: string;
+  title: string;
+  price: number;
+  type: string;
+  description: string;
+  downloads_count: number;
+  status: 'published' | 'draft';
+  file_url?: string;
+  created_at?: string;
+}
+
 // Seed/Mock fallback data in case database is empty or not yet migrated
 const MOCK_DOWNLOADS = [
   { 
@@ -52,9 +65,11 @@ export default async function DownloadsPage() {
   const primaryColor = settings.primaryColor || '#21448e';
 
   // Get current user session to check admin status
+  // next-auth 預設 user 型別不含 role/id，於此以擴充型別讀取（後端已於 session callback 注入）
   const session = await getServerSession(authOptions);
-  const isAdmin = session?.user && (session.user as any).role === 'admin';
-  const userId = (session?.user as any)?.id;
+  const sessionUser = session?.user as { role?: string; id?: string } | undefined;
+  const isAdmin = !!sessionUser && sessionUser.role === 'admin';
+  const userId = sessionUser?.id;
 
   // 查詢目前使用者已購買的數位下載商品（供前台判斷顯示「立即下載」或「立即購買」）
   let ownedIds: string[] = [];
@@ -64,13 +79,13 @@ export default async function DownloadsPage() {
         .from('user_downloads')
         .select('download_id')
         .eq('user_id', userId);
-      ownedIds = (owned || []).map((o: any) => o.download_id);
+      ownedIds = (owned || []).map((o: { download_id: string }) => o.download_id);
     } catch (err) {
       console.warn('Failed to query user downloads ownership:', err);
     }
   }
 
-  let downloads = [];
+  let downloads: DownloadRow[] = [];
   try {
     const { data, error } = await supabase
       .from('downloads')
@@ -79,7 +94,7 @@ export default async function DownloadsPage() {
       .order('created_at', { ascending: false });
 
     if (!error && data && data.length > 0) {
-      downloads = data;
+      downloads = data as DownloadRow[];
     } else {
       downloads = MOCK_DOWNLOADS;
     }
@@ -90,9 +105,11 @@ export default async function DownloadsPage() {
 
   // 🔒 非管理員不可取得付費商品的 file_url（避免在 HTML/DOM 中外洩付費下載連結）
   if (!isAdmin) {
-    downloads = downloads.map((d: any) => {
+    downloads = downloads.map((d: DownloadRow) => {
       if ((d.price || 0) > 0) {
-        const { file_url, ...rest } = d;
+        // 移除付費商品的 file_url，避免在 HTML/DOM 中外洩下載連結
+        const rest = { ...d };
+        delete rest.file_url;
         return rest;
       }
       return d;

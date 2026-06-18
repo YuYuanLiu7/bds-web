@@ -2,14 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, Star, BookOpen, GraduationCap, ChevronDown, Users, DollarSign, Filter, Search } from "lucide-react";
+import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, BookOpen, GraduationCap, Users, DollarSign, Filter, Search } from "lucide-react";
 import SafeImage from '@/components/SafeImage';
-import CourseModal from "@/components/admin/CourseModal";
+import CourseModal, { Course } from "@/components/admin/CourseModal";
+
+// 課程列表頁額外攜帶之統計欄位（後端 courses_full 回傳）
+interface AdminCourse extends Course {
+  id: string;
+  netSales?: number;
+  studentCount?: number;
+  instructor_avatar?: string | null;
+}
 
 export default function AdminCoursesPage() {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,7 +70,7 @@ export default function AdminCoursesPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [activeMenuId]);
 
-  const handleEdit = (course: any) => {
+  const handleEdit = (course: AdminCourse) => {
     setEditingCourse(course);
     setIsModalOpen(true);
     setActiveMenuId(null);

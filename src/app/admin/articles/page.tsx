@@ -17,13 +17,25 @@ import {
 } from 'lucide-react';
 import ArticleModal from '@/components/admin/ArticleModal';
 
+// 後台文章列表資料結構
+interface ArticleItem {
+  id: string;
+  title?: string;
+  summary?: string;
+  author?: string;
+  category?: string;
+  status?: 'published' | 'draft';
+  date?: string;
+  views?: number;
+}
+
 export default function AdminArticlesPage() {
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<ArticleItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingArticle, setEditingArticle] = useState<any>(null);
+  const [editingArticle, setEditingArticle] = useState<ArticleItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Filter States
@@ -62,7 +74,7 @@ export default function AdminArticlesPage() {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (article: any) => {
+  const handleEdit = (article: ArticleItem) => {
     setEditingArticle(article);
     setIsModalOpen(true);
   };
@@ -81,8 +93,8 @@ export default function AdminArticlesPage() {
       }
 
       fetchArticles();
-    } catch (err: any) {
-      alert('刪除失敗：' + err.message);
+    } catch (err) {
+      alert('刪除失敗：' + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -252,7 +264,7 @@ export default function AdminArticlesPage() {
                         <td className="px-6 py-4 space-y-1.5 text-slate-400 font-semibold text-xs leading-relaxed select-none">
                           <div className="flex items-center">
                             <Calendar className="w-3.5 h-3.5 mr-1 text-slate-300 flex-shrink-0" />
-                            <span>{formatTaiwanDate(article.date)}</span>
+                            <span>{formatTaiwanDate(article.date ?? '')}</span>
                           </div>
                           <div className="flex items-center">
                             <Eye className="w-3.5 h-3.5 mr-1 text-slate-300 flex-shrink-0" />
@@ -290,7 +302,7 @@ export default function AdminArticlesPage() {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDelete(article.id, article.title)}
+                              onClick={() => handleDelete(article.id, article.title ?? '')}
                               title="刪除文章"
                               className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition cursor-pointer"
                             >

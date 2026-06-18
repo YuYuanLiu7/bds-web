@@ -1,6 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
+// Supabase 錯誤（可能帶有 code 欄位）
+interface SupabaseLikeError {
+  message?: string;
+  code?: string;
+}
+
 export async function GET() {
   try {
     const { data, error } = await supabase
@@ -14,10 +20,11 @@ export async function GET() {
     }
 
     return NextResponse.json(data || []);
-  } catch (error: any) {
-    console.error("Public API GET events error:", error.message);
+  } catch (error) {
+    const err = error as SupabaseLikeError;
+    console.error("Public API GET events error:", err?.message);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch events", code: error.code },
+      { error: err?.message || "Failed to fetch events", code: err?.code },
       { status: 500 }
     );
   }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Sparkles, CreditCard, X, ShieldCheck, AlertCircle, Terminal } from 'lucide-react';
+import { Check, Sparkles, X, ShieldCheck, Terminal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
 
@@ -16,10 +16,18 @@ interface MembershipPlan {
   status: 'active' | 'draft';
 }
 
+// 僅取用到的 session 欄位（登入判斷用），不依賴完整 next-auth 型別
+interface SessionLike {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
+}
+
 interface MembershipListProps {
   plans: MembershipPlan[];
   primaryColor: string;
-  session: any;
+  session: SessionLike | null;
   currentUserPlanId: string | null;
 }
 
@@ -123,8 +131,8 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
       } else {
         toast.error(`模擬支付失敗：${data.error}`);
       }
-    } catch (error: any) {
-      toast.error(`模擬支付發生錯誤：${error.message}`);
+    } catch (error) {
+      toast.error(`模擬支付發生錯誤：${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setSimulateLoading(false);
     }

@@ -13,11 +13,46 @@ import {
   Search, 
   Layers, 
   Wrench, 
-  BookOpen, 
+  BookOpen,
   Coffee,
-  Sparkles, 
-  Clock 
+  Clock
 } from 'lucide-react';
+
+// 前端卡片使用到的活動欄位（已正規化）
+interface EventItem {
+  id: string;
+  title: string;
+  desc: string;
+  imageUrl: string;
+  price: string;
+  date: string;
+  location: string;
+  attendees: number;
+  status: string;
+  type: string;
+  category: string;
+  registration_url: string;
+}
+
+// API 回傳的原始活動資料（snake_case 與 camelCase 混用，皆為選填）
+interface EventApiItem {
+  id: string;
+  title: string;
+  description?: string;
+  desc?: string;
+  image_url?: string;
+  imageUrl?: string;
+  price_display?: string;
+  price?: number | string;
+  date?: string;
+  location?: string;
+  attendees?: number;
+  status?: string;
+  type?: string;
+  category?: string;
+  registration_url?: string;
+  registrationUrl?: string;
+}
 
 export default function EventsPage() {
   // 主色改由 Context（root layout 伺服器端取一次）提供，不再每頁各自 fetch site-settings
@@ -26,7 +61,7 @@ export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [searchQuery, setSearchQuery] = useState('');
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   // 載入中旗標：避免資料未到位前先閃出「尚無活動」空狀態
   const [loading, setLoading] = useState(true);
 
@@ -38,13 +73,13 @@ export default function EventsPage() {
         const data = await res.json();
         if (Array.isArray(data)) {
           // Map database snake_case fields to frontend camelCase expectations
-          const mapped = data.map((e: any) => ({
+          const mapped = data.map((e: EventApiItem) => ({
             id: e.id,
             title: e.title,
             desc: e.description || e.desc || '',
             imageUrl: e.image_url || e.imageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
-            price: e.price_display || (typeof e.price === 'number' ? (e.price === 0 ? '免費活動' : `NT$ ${e.price.toLocaleString()}`) : e.price),
-            date: e.date,
+            price: e.price_display || (typeof e.price === 'number' ? (e.price === 0 ? '免費活動' : `NT$ ${e.price.toLocaleString()}`) : (e.price ?? '')),
+            date: e.date ?? '',
             location: e.location || '',
             attendees: e.attendees || 0,
             status: e.status || 'upcoming',

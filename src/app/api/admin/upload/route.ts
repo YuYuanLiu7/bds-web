@@ -77,8 +77,9 @@ export async function POST(req: Request) {
       { status: 500 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("API POST upload error:", error);
-    return NextResponse.json({ error: "File upload failed: " + error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: "File upload failed: " + message }, { status: 500 });
   }
 }
