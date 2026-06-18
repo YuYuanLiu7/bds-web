@@ -5,11 +5,31 @@
 
 ---
 
+## ⚡ 快速設定（一鍵腳本，建議優先用）
+
+填好 `.env.local` 後，於專案根目錄執行：
+
+```bash
+# 驗證環境變數、檢查資料表、自動建立 uploads bucket
+npm run setup
+
+# 進階：另用 SUPABASE_DB_URL 自動跑完所有 SQL 遷移（含 RLS，冪等可重跑）
+npm run setup -- --migrate
+
+# 一併建立管理員帳號（密碼至少 6 位，會自動雜湊）
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=你的密碼 ADMIN_NAME=站長 npm run setup -- --migrate --admin
+```
+
+腳本會逐項回報 ✓／⚠／✗。下方第 1～2 區若用腳本完成，可直接打勾；金流真卡實測等仍須人工。
+
+---
+
 ## 1. 資料庫（Supabase）
+> 💡 上述 `npm run setup -- --migrate --admin` 可一次完成本區全部項目；以下為手動對照。
 - [ ] 建立 Supabase 專案，於 SQL Editor 執行 `db/init.sql`（冪等，可重跑）
 - [ ] 執行 `db/enable_rls.sql`（**最後**執行，對所有資料表開啟 RLS）
-- [ ] 確認 Storage 有 `uploads` bucket（首次上傳會自動建立，亦可手動建）
-- [ ] 建立**管理員帳號**：先註冊一個帳號，再到 `users` 表把該列 `role` 改為 `admin`
+- [ ] 確認 Storage 有 `uploads` bucket（`npm run setup` 會自動建立，亦可手動建）
+- [ ] 建立**管理員帳號**：用腳本 `--admin`，或先註冊一個帳號再到 `users` 表把 `role` 改為 `admin`
 
 ## 2. 環境變數（以 `.env.example` 為準，全部填齊）
 - [ ] `NEXTAUTH_URL` = 正式網域、`NEXTAUTH_SECRET` = 隨機字串（`openssl rand -base64 32`）
@@ -56,3 +76,6 @@
 - **真實金流**：上線前的 PayUni 真卡實測（§3）是唯一無法在開發階段預先驗證的項目，務必執行。
 
 > ✅ 全部打勾 = 可正式對外營運／交付客戶。
+>
+> 📋 本清單是給**你（賣方／部署者）**用的。交付給客戶驗收時，請改給對方
+> [`CUSTOMER-ACCEPTANCE.md`](./CUSTOMER-ACCEPTANCE.md)（純點擊、約 30 分鐘、不含技術設定）。

@@ -32,18 +32,33 @@ PAYUNI_HASH_KEY=YOUR_PAYUNI_HASH_KEY
 PAYUNI_HASH_IV=YOUR_PAYUNI_HASH_IV
 ```
 
-### 3. 資料庫初始化
-請將 `db/schema.sql` 中的內容複製到您的 PostgreSQL 資料庫（如 Supabase SQL Editor）中執行。
+> 完整環境變數清單以 [`.env.example`](./.env.example) 為準（Supabase / PayUni / Resend / Bunny / NextAuth）。
+
+### 3. 一鍵初始化（建議）
+填好 `.env.local` 後，於根目錄執行：
+```bash
+npm run setup                 # 驗證環境變數、檢查資料表、建立 uploads bucket
+npm run setup -- --migrate    # 另用 SUPABASE_DB_URL 自動跑完所有 SQL 遷移（含 RLS）
+```
+或手動於 Supabase SQL Editor 依序貼上 `db/*.sql`（最後跑 `db/enable_rls.sql`）。
 
 ### 4. 啟動開發伺服器
 ```bash
 npm run dev
 ```
 
+## 📚 文件總覽
+- [`PRODUCT-INTRO.md`](./PRODUCT-INTRO.md) — 對客戶的技術與安全介紹
+- [`SALES-ONEPAGER.md`](./SALES-ONEPAGER.md) — 一頁賣點摘要（報價／簡報用）
+- [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) — 賣方上線前最終檢查單
+- [`CUSTOMER-ACCEPTANCE.md`](./CUSTOMER-ACCEPTANCE.md) — 客戶 30 分鐘驗收清單
+- [`GO-LIVE-TEST.md`](./GO-LIVE-TEST.md) — 逐項上線測試（含金流真卡）
+- [`DEPLOYMENT.md`](./DEPLOYMENT.md)、[`SETUP-GUIDE.md`](./SETUP-GUIDE.md) — 部署與新手設定
+
 ## 遷移步驟 (Migration Guide)
-1. **影片遷移**: 將原 Teachify 上的影片下載並上傳至 YouTube (設為不公開) 或 Vimeo，並取得嵌入碼。
-2. **課程資料**: 將課程標題、描述、價格等填入資料庫的 `courses` 表格中。
-3. **金流切換**: 當測試無誤後，請將 `.env.local` 中的 PayUni 資訊更換為正式帳號的 MerID, HashKey 與 HashIV，並將 `src/components/BuyButton.tsx` 中的 URL 改為正式環境。
+1. **影片遷移**: 將影片上傳至 **Bunny.net Stream Library**，開啟 Embed Token 驗證，於後台課程章節填入影片網址或 GUID（影片以限時簽章網址保護，防盜看）。
+2. **課程資料**: 於後台「課程」管理新增課程與章節（標題、描述、價格、分類、封面）。
+3. **金流切換**: 測試無誤後，將 `.env.local` 的 PayUni 改為正式 MerID / HashKey / HashIV，並把 `NEXT_PUBLIC_PAYUNI_UPP_URL` 設為正式端點 `https://api.payuni.com.tw/api/upp`（端點由環境變數決定，**無需改程式碼**）。
 
 ## 維運成本預估
 - **主機 (Vercel)**: 0 元 (個人方案免費額度充足)
