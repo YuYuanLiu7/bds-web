@@ -2,6 +2,7 @@
 
 這份是給「第一次架設」的人。**照著一步步做即可**。
 標 🛠️ 的步驟需要一點技術（或請工程師協助 10–20 分鐘），其餘照點即可。
+標 🖼️ 處建議放一張截圖（括號已描述該畫面長相，方便對照與補圖）。
 全程約 1–2 小時。架好之後，日常只需用後台 `/admin` 點選操作（見最後一節）。
 
 > 名詞：**環境變數**＝填在平台「設定」裡的一串設定值（像帳號密碼）。本專案所有要填的值都列在 `.env.example`。
@@ -38,6 +39,7 @@
    - **service_role** 金鑰（標示 secret，⚠️ 機密）
 4. 左側 **Storage → New bucket**，名稱打 `uploads`，勾選 **Public**，建立。（之後後台上傳圖片會用到）
 5. 🛠️ **Project Settings → Database → Connection string → URI**，複製那串連線字串（把 `[YOUR-PASSWORD]` 換成步驟 1 設的資料庫密碼）。**這串等下做備份要用**。
+   🖼️（Database 設定頁：Connection string 區塊、URI 分頁，那串 `postgresql://...` 即是）
 
 ---
 
@@ -108,6 +110,7 @@
    複製印出來的那一長串。
 
 **C. 到 GitHub 設定 Secrets**
+🖼️（GitHub repo 的 Settings → Secrets and variables → Actions 頁：右上「New repository secret」按鈕、Name 與 Secret 兩個欄位）
 GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**，新增：
 - `SUPABASE_DB_URL`：步驟 2-5 的資料庫連線字串
 - `RCLONE_CONFIG_BASE64`：上面複製的那串 base64
