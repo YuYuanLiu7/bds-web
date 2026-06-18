@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 import { 
   Gauge, 
@@ -22,7 +22,9 @@ import {
   Grid,
   Code,
   ChevronDown,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -34,6 +36,11 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
   const pathname = usePathname();
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  // 手機版抽屜開關；切換頁面時自動關閉
+  const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const menuGroups = [
     {
@@ -89,7 +96,39 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
   };
 
   return (
-    <aside className="w-64 bg-white flex flex-col h-screen border-r border-slate-100 select-none z-30">
+    <>
+      {/* 手機版漢堡鈕：對齊頂部 header（桌機隱藏） */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        aria-label="開啟選單"
+        className="lg:hidden fixed top-3 left-3 z-50 w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 transition active:scale-95"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* 手機版遮罩 */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+          className="lg:hidden fixed inset-0 bg-black/40 z-40 animate-in fade-in duration-150"
+        />
+      )}
+
+    <aside
+      className={`w-64 bg-white flex flex-col h-screen border-r border-slate-100 select-none
+        fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-out
+        lg:static lg:translate-x-0 lg:z-30
+        ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}
+    >
+      {/* 手機版關閉鈕 */}
+      <button
+        onClick={() => setMobileOpen(false)}
+        aria-label="關閉選單"
+        className="lg:hidden absolute top-3.5 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+      >
+        <X className="w-5 h-5" />
+      </button>
       {/* Brand Header / Workspace Switcher */}
       <div className="relative">
         <div 
@@ -221,5 +260,6 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
         )}
       </div>
     </aside>
+    </>
   );
 }

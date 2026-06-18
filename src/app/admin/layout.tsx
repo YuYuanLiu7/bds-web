@@ -40,7 +40,7 @@ export default async function AdminLayout({
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Teachify-style Top Header */}
-        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 z-20 flex-shrink-0 select-none">
+        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between pl-16 pr-4 lg:px-8 z-20 flex-shrink-0 select-none">
           {/* Breadcrumbs */}
           <div className="flex items-center space-x-2 text-sm">
             <span className="text-slate-400 font-medium">管理後台</span>
@@ -49,14 +49,14 @@ export default async function AdminLayout({
           </div>
           
           {/* Header Actions */}
-          <div className="flex items-center space-x-6 text-sm">
-            <Link href="/admin/rewards" className="text-slate-500 hover:text-slate-900 font-medium transition">
+          <div className="flex items-center space-x-4 lg:space-x-6 text-sm">
+            <Link href="/admin/rewards" className="hidden lg:inline text-slate-500 hover:text-slate-900 font-medium transition">
               推薦獎勵
             </Link>
-            <Link href="/admin/help" className="text-slate-500 hover:text-slate-900 font-medium transition">
+            <Link href="/admin/help" className="hidden lg:inline text-slate-500 hover:text-slate-900 font-medium transition">
               幫助中心
             </Link>
-            <Link href="/admin/news" className="text-slate-500 hover:text-slate-900 font-medium transition">
+            <Link href="/admin/news" className="hidden lg:inline text-slate-500 hover:text-slate-900 font-medium transition">
               產品新訊
             </Link>
             
