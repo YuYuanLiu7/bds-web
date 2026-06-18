@@ -149,7 +149,8 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center shadow-xs cursor-pointer active:scale-95"
+                  disabled={!userComment.trim()}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center shadow-xs cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"
                 >
                   發佈評價
                 </button>

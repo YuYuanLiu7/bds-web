@@ -289,8 +289,8 @@ export default function AdminPagesPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <table className="w-full text-left border-collapse table-fixed">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left border-collapse table-fixed">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 h-12">
                   <th className="px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-4/12">頁面名稱</th>

@@ -300,8 +300,8 @@ export default function AdminMembershipPage() {
             {loading && <span className="text-indigo-600 font-bold animate-pulse text-[10px]">資料同步中...</span>}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <table className="w-full text-left border-collapse">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 h-12 select-none">
                   <th className="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider w-[40%]">方案名稱 & 權益</th>

@@ -181,7 +181,9 @@ export default function LearnExtraDetails({
                 />
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center cursor-pointer active:scale-95"
+                  disabled={!newComment.trim()}
+                  aria-label="送出留言"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
