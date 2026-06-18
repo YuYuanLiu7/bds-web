@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Star, CheckCircle, User, Clock } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 interface Review {
   id: string;
@@ -20,6 +21,7 @@ interface CourseReviewsProps {
 }
 
 export default function CourseReviews({ courseId, courseTitle, studentName, hasAccess }: CourseReviewsProps) {
+  const toast = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userRating, setUserRating] = useState<number>(5);
   const [userComment, setUserComment] = useState<string>('');
@@ -52,7 +54,7 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || '評價發佈失敗，請稍後再試。');
+        toast.error(data.error || '評價發佈失敗，請稍後再試。');
         return;
       }
       setReviews([data, ...reviews]);
@@ -61,7 +63,7 @@ export default function CourseReviews({ courseId, courseTitle, studentName, hasA
       setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
       console.error('Submit review error:', err);
-      alert('連線錯誤，評價發佈失敗。');
+      toast.error('連線錯誤，評價發佈失敗。');
     }
   };
 

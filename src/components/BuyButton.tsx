@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from '@/components/Toast';
 
 interface BuyButtonProps {
   courseId: string;
@@ -10,6 +11,7 @@ interface BuyButtonProps {
 
 export default function BuyButton({ courseId, courseName, amount }: BuyButtonProps) {
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleBuy = async () => {
     setLoading(true);
@@ -24,7 +26,7 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
 
       // 檢查後端是否回傳錯誤（如未登入/找不到課程/金流未設定），避免把錯誤物件當付款參數送出
       if (!response.ok) {
-        alert(params.error || '結帳失敗，請稍後再試。');
+        toast.error(params.error || '結帳失敗，請稍後再試。');
         setLoading(false);
         return;
       }
@@ -47,7 +49,7 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
       form.submit();
     } catch (error) {
       console.error('Checkout failed:', error);
-      alert('結帳失敗，請稍後再試。');
+      toast.error('結帳失敗，請稍後再試。');
     } finally {
       setLoading(false);
     }

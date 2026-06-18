@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, Send, CheckCircle, ImageIcon } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
+import { useToast } from '@/components/Toast';
 
 export default function ContactPage() {
+  const toast = useToast();
   const [pageData, setPageData] = useState({
     title: '有任何問題？我們隨時為您解答',
     subtitle: '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
@@ -56,11 +58,11 @@ export default function ContactPage() {
         setSubmitted(true);
         setFormData({ name: '', email: '', subject: '課程諮詢', message: '' });
       } else {
-        alert(data.error || '送出失敗，請稍後再試。');
+        toast.error(data.error || '送出失敗，請稍後再試。');
       }
     } catch (err) {
       console.error('Contact submit error:', err);
-      alert('連線錯誤，請稍後再試或直接來信 bydoingso@gmail.com');
+      toast.error('連線錯誤，請稍後再試或直接來信 bydoingso@gmail.com');
     } finally {
       setLoading(false);
     }

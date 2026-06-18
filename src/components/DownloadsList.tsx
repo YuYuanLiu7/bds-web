@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Download, ArrowRight, ShieldCheck, FileText, Layout, FileSpreadsheet, Archive, PlayCircle, X, ExternalLink, Sparkles, CheckCircle2, Crown, AlertCircle } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 interface DownloadProduct {
   id: string;
@@ -23,6 +24,7 @@ interface DownloadsListProps {
 }
 
 export default function DownloadsList({ downloads, primaryColor, isAdmin = false, ownedIds = [], isLoggedIn = false }: DownloadsListProps) {
+  const toast = useToast();
   const [selectedProduct, setSelectedProduct] = useState<DownloadProduct | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -69,7 +71,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
       const data = await res.json();
 
       if (!res.ok || !data.file_url) {
-        alert(data.error || '此資源尚未配置下載檔案連結，請稍後再試或聯絡客服。');
+        toast.error(data.error || '此資源尚未配置下載檔案連結，請稍後再試或聯絡客服。');
         return;
       }
 
@@ -80,7 +82,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
       }, 1200);
     } catch (err) {
       console.error('Download error:', err);
-      alert('下載連結取得失敗，請稍後再試。');
+      toast.error('下載連結取得失敗，請稍後再試。');
     } finally {
       setProcessing(false);
     }
@@ -103,7 +105,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
       const params = await response.json();
 
       if (!response.ok) {
-        alert(params.error || '結帳失敗，請稍後再試。');
+        toast.error(params.error || '結帳失敗，請稍後再試。');
         return;
       }
 
@@ -122,7 +124,7 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
       form.submit();
     } catch (err) {
       console.error('Checkout failed:', err);
-      alert('結帳失敗，請稍後再試。');
+      toast.error('結帳失敗，請稍後再試。');
       setProcessing(false);
     }
   };

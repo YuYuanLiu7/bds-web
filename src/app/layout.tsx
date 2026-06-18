@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
 import { SettingsProvider, type PublicSettings } from "@/components/SettingsProvider";
+import { ToastProvider } from "@/components/Toast";
 import { getSiteSettingsServer, getJsonSetting, SETTINGS_DEFAULTS } from "@/lib/site-settings";
 
 const geistSans = Geist({
@@ -107,9 +108,11 @@ export default async function RootLayout({
       >
         <Providers>
           <SettingsProvider value={settings}>
-            <Navbar />
-            <main className="flex-grow">{children}</main>
-            <Footer />
+            <ToastProvider>
+              <Navbar />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </ToastProvider>
           </SettingsProvider>
         </Providers>
       </body>

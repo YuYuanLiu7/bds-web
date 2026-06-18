@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
+import { useToast } from '@/components/Toast';
+import {
   FileText, 
   Download, 
   MessageSquare, 
@@ -46,6 +47,7 @@ export default function LearnExtraDetails({
   chapterFileUrl,
   courseFileUrl
 }: LearnExtraDetailsProps) {
+  const toast = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -75,7 +77,7 @@ export default function LearnExtraDetails({
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || '留言送出失敗，請稍後再試。');
+        toast.error(data.error || '留言送出失敗，請稍後再試。');
         return;
       }
       setComments([data, ...comments]);
@@ -84,7 +86,7 @@ export default function LearnExtraDetails({
       setTimeout(() => setShowSuccessToast(false), 4000);
     } catch (err) {
       console.error('Submit comment error:', err);
-      alert('連線錯誤，留言送出失敗。');
+      toast.error('連線錯誤，留言送出失敗。');
     }
   };
 

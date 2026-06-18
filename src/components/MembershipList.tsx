@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check, Sparkles, CreditCard, X, ShieldCheck, AlertCircle, Terminal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 interface MembershipPlan {
   id: string;
@@ -24,6 +25,7 @@ interface MembershipListProps {
 
 export default function MembershipList({ plans, primaryColor, session, currentUserPlanId }: MembershipListProps) {
   const router = useRouter();
+  const toast = useToast();
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
 
   // 測試金流模擬器狀態
@@ -34,7 +36,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
   const handleSubscribe = async (plan: MembershipPlan) => {
     // 1. 檢查使用者登入狀態
     if (!session || !session.user) {
-      alert('🔒 請先登入會員以訂閱此方案！');
+      toast.info('請先登入會員以訂閱此方案');
       router.push(`/login?callbackUrl=/membership`);
       return;
     }
@@ -91,7 +93,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
       form.submit();
     } catch (error) {
       console.error('Membership checkout failed:', error);
-      alert('❌ 結帳服務暫時無法使用，請稍後再試或聯絡客服。');
+      toast.error('結帳服務暫時無法使用，請稍後再試或聯絡客服');
     } finally {
       setLoadingPlanId(null);
     }
@@ -114,15 +116,15 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
 
       const data = await response.json();
       if (response.ok && data.success) {
-        alert(data.message || '🎉 方案模擬支付成功！');
+        toast.success(data.message || '方案模擬支付成功！');
         setShowSimulateModal(false);
         // 刷新頁面，讓 React Server Component 重新讀取最新的訂閱狀態
         window.location.reload();
       } else {
-        alert(`❌ 模擬支付失敗：${data.error}`);
+        toast.error(`模擬支付失敗：${data.error}`);
       }
     } catch (error: any) {
-      alert(`❌ 模擬支付發生錯誤：${error.message}`);
+      toast.error(`模擬支付發生錯誤：${error.message}`);
     } finally {
       setSimulateLoading(false);
     }
@@ -130,7 +132,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
 
   // 模擬付款失敗
   const executeFailedPayment = () => {
-    alert('❌ 模擬交易失敗（錯誤碼: E0048，卡片餘額不足或授權遭拒）。已取消訂閱。');
+    toast.error('模擬交易失敗（錯誤碼: E0048，卡片餘額不足或授權遭拒）。已取消訂閱。');
     setShowSimulateModal(false);
   };
 
