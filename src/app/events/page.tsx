@@ -193,7 +193,7 @@ export default function EventsPage() {
           <div className="lg:col-span-1 space-y-4 select-none">
             <div className="bg-white/90 backdrop-blur-md p-5 rounded-2xl border border-slate-200/70 shadow-sm space-y-4">
               <h3 className="font-black text-slate-800 text-xs pb-3 border-b border-slate-50 uppercase tracking-wider flex items-center">
-                <span className="w-1.5 h-4 bg-[#21448e] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
+                <span className="w-1.5 h-4 bg-[var(--brand)] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
                 活動分類
               </h3>
 
@@ -332,9 +332,9 @@ export default function EventsPage() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between select-none">
                           <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">{event.category}</span>
-                          <span className="text-[9px] text-[#21448e] font-black px-2 py-0.5 rounded bg-[#21448e]/5" style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}>{event.type}</span>
+                          <span className="text-[9px] text-[var(--brand)] font-black px-2 py-0.5 rounded bg-[var(--brand)]/5" style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}>{event.type}</span>
                         </div>
-                        <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[#21448e] transition duration-200 line-clamp-2">
+                        <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[var(--brand)] transition duration-200 line-clamp-2">
                           {event.title}
                         </h3>
                         <p className="text-xs text-slate-400 font-medium leading-relaxed line-clamp-2">

@@ -75,7 +75,7 @@ export default function HelpFAQPage() {
         
         <div className="flex items-center justify-between border-b border-slate-100 pb-4 select-none mb-8">
           <h2 className="text-lg font-black text-slate-800 flex items-center">
-            <span className="w-1.5 h-5 bg-[#21448e] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
+            <span className="w-1.5 h-5 bg-[var(--brand)] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
             解決您的所有疑問 ({faqs.length})
           </h2>
           <span className="text-xs text-slate-400 font-bold">常見技術與售後問題</span>

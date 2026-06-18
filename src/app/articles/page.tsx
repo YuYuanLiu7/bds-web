@@ -77,7 +77,7 @@ export default function ArticlesPage() {
       <div className="max-w-[1200px] mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4 select-none">
           <h2 className="text-lg font-black text-slate-800 flex items-center">
-            <span className="w-1.5 h-5 bg-[#21448e] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
+            <span className="w-1.5 h-5 bg-[var(--brand)] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
             最新文章 ({articles.length})
           </h2>
           <span className="text-xs text-slate-400 font-bold">每週固定更新</span>
@@ -113,7 +113,7 @@ export default function ArticlesPage() {
                 {/* Body */}
                 <div className="p-6 flex-1 flex flex-col justify-between text-left space-y-4">
                   <div className="space-y-2">
-                    <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[#21448e] transition duration-200 line-clamp-2">
+                    <h3 className="text-base font-black text-slate-800 leading-snug group-hover:text-[var(--brand)] transition duration-200 line-clamp-2">
                       <Link href={`/articles/${article.id}`} className="hover:underline">
                         {article.title}
                       </Link>
@@ -145,7 +145,7 @@ export default function ArticlesPage() {
                     {/* Read More */}
                     <Link 
                       href={`/articles/${article.id}`}
-                      className="text-xs font-black text-[#21448e] flex items-center justify-end select-none group-hover:underline cursor-pointer" 
+                      className="text-xs font-black text-[var(--brand)] flex items-center justify-end select-none group-hover:underline cursor-pointer" 
                       style={{ color: primaryColor }}
                     >
                       閱讀全文 <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />

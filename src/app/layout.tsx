@@ -101,6 +101,8 @@ export default async function RootLayout({
       lang="zh-TW"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // 將後台設定的主色注入為全站 CSS 變數，使所有 var(--brand) 元素跟隨後台主色
+      style={{ ["--brand" as string]: settings.visual.primaryColor || "#21448e" } as React.CSSProperties}
     >
       <body
         suppressHydrationWarning

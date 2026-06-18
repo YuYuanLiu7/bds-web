@@ -79,7 +79,7 @@ export default function Navbar() {
                 className="h-10 md:h-12 w-auto object-contain"
               />
             ) : (
-              <span className="text-xl md:text-2xl font-black tracking-wider text-[#21448e]">BDS</span>
+              <span className="text-xl md:text-2xl font-black tracking-wider text-[var(--brand)]">BDS</span>
             )}
           </Link>
           <div className="hidden lg:block h-4 w-px bg-slate-200"></div>

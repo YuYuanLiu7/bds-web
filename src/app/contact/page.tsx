@@ -118,7 +118,7 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#21448e] to-indigo-800 p-6 rounded-2xl shadow-md text-white space-y-2 relative overflow-hidden aspect-video max-h-[140px] flex flex-col justify-end">
+          <div className="bg-gradient-to-br from-[var(--brand)] to-indigo-800 p-6 rounded-2xl shadow-md text-white space-y-2 relative overflow-hidden aspect-video max-h-[140px] flex flex-col justify-end">
             <SafeImage
               src={pageData.imageUrl}
               alt="BDS 聯絡我們橫幅"

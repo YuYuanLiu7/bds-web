@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* 全站品牌主色：預設值；實際值於 root layout 由後台「主色設定」注入到 <html style>，
+     因此調整後台主色即可一處生效於所有使用 var(--brand) 的元素 */
+  --brand: #21448e;
 }
 
 @theme inline {
@@ -12,10 +15,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 本站僅設計淺色主題；明確維持淺色，避免 OS 深色模式使用者看到背景變黑、
+   未指定顏色處對比異常（如淺色文字落在白底上而看不清） */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
   }
 }
 
@@ -28,7 +33,7 @@ body {
 /* 全域鍵盤焦點樣式：許多元件用 focus:outline-none 移除了預設焦點框，
    這裡兜底確保鍵盤使用者 Tab 時仍看得見焦點（無障礙） */
 *:focus-visible {
-  outline: 2px solid #21448e;
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
   border-radius: 4px;
 }

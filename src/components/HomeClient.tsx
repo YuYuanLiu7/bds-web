@@ -175,7 +175,7 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
         {/* Categories Tab Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-12 border-b border-slate-100 pb-5 gap-4">
           <h2 className="text-2xl font-black text-slate-800 flex items-center select-none">
-            <span className="w-1.5 h-6 bg-[#21448e] rounded-full mr-2.5"></span>
+            <span className="w-1.5 h-6 bg-[var(--brand)] rounded-full mr-2.5"></span>
             所有課程
           </h2>
           
@@ -225,7 +225,7 @@ export default function HomeClient({ settings, courses, session }: HomeClientPro
                   <div className="space-y-1.5">
                     <Link 
                       href={`/courses/${course.id}`}
-                      className="block font-black text-slate-800 hover:text-[#21448e] transition leading-snug line-clamp-2"
+                      className="block font-black text-slate-800 hover:text-[var(--brand)] transition leading-snug line-clamp-2"
                     >
                       {course.title}
                     </Link>

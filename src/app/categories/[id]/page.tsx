@@ -83,7 +83,7 @@ export default async function CategoryPage({ params }: PageProps) {
       <div className="max-w-[1200px] mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4 select-none">
           <h2 className="text-lg font-black text-slate-800 flex items-center">
-            <span className="w-1.5 h-5 bg-[#21448e] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
+            <span className="w-1.5 h-5 bg-[var(--brand)] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
             精選課程 ({filteredCourses.length})
           </h2>
           <span className="text-xs text-slate-400 font-bold">由 BDS 編輯團隊嚴選</span>
@@ -113,7 +113,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   <div className="space-y-1.5">
                     <Link 
                       href={`/courses/${course.id}`}
-                      className="block font-black text-slate-800 hover:text-[#21448e] transition leading-snug line-clamp-2"
+                      className="block font-black text-slate-800 hover:text-[var(--brand)] transition leading-snug line-clamp-2"
                     >
                       {course.title}
                     </Link>

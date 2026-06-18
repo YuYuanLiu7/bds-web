@@ -133,7 +133,7 @@ export default async function DownloadsPage() {
       <div className="max-w-[1200px] mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4 select-none">
           <h2 className="text-lg font-black text-slate-800 flex items-center">
-            <span className="w-1.5 h-5 bg-[#21448e] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
+            <span className="w-1.5 h-5 bg-[var(--brand)] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
             可選購數位資源 ({downloads.length})
           </h2>
           <span className="text-xs text-slate-400 font-bold">付款後即可永久下載使用</span>
