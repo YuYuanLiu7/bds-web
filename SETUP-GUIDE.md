@@ -1,0 +1,147 @@
+# BDS 線上課程系統｜新手從零到上線（照順序做）
+
+這份是給「第一次架設」的人。**照著一步步做即可**。
+標 🛠️ 的步驟需要一點技術（或請工程師協助 10–20 分鐘），其餘照點即可。
+全程約 1–2 小時。架好之後，日常只需用後台 `/admin` 點選操作（見最後一節）。
+
+> 名詞：**環境變數**＝填在平台「設定」裡的一串設定值（像帳號密碼）。本專案所有要填的值都列在 `.env.example`。
+
+---
+
+## 步驟 0：先註冊這些免費帳號
+- [GitHub](https://github.com)（放程式碼、跑自動備份）
+- [Supabase](https://supabase.com)（資料庫＝會員/訂單/課程）
+- [Netlify](https://netlify.com)（網站代管）
+- [Bunny.net](https://bunny.net)（影片串流＋防盜）
+- [Resend](https://resend.com)（系統寄信）
+- [PayUni 統一金流](https://www.payuni.com.tw)（刷卡收款，需商家審核）
+- Google 帳號（備份存到你的 Google Drive）
+
+---
+
+## 步驟 1：把程式碼放到你的 GitHub
+1. 在 GitHub 右上角 **＋ → New repository**，建一個私有 repo（例如 `bds-web`）。
+2. 把本專案推上去（若已經在 GitHub 就跳過）。
+
+---
+
+## 步驟 2：建立資料庫（Supabase）
+1. Supabase → **New project** → 取名、選區域、**設定並記下資料庫密碼**（很重要，等下備份要用）。
+2. 左側 **SQL Editor → New query**，把專案 `db/` 資料夾裡的檔案**依序**整份貼上、各按 **Run**：
+   1. `db/init.sql`
+   2. `db/add_performance_indexes.sql`
+   3. `db/add_rate_limiting.sql`
+   4. `db/enable_rls.sql` ← **最後執行（開啟資料保護）**
+3. 左側 **Project Settings（齒輪）→ API**，複製三個值備用：
+   - **Project URL**（像 `https://xxxx.supabase.co`）
+   - **anon public** 金鑰
+   - **service_role** 金鑰（標示 secret，⚠️ 機密）
+4. 左側 **Storage → New bucket**，名稱打 `uploads`，勾選 **Public**，建立。（之後後台上傳圖片會用到）
+5. 🛠️ **Project Settings → Database → Connection string → URI**，複製那串連線字串（把 `[YOUR-PASSWORD]` 換成步驟 1 設的資料庫密碼）。**這串等下做備份要用**。
+
+---
+
+## 步驟 3：設定影片（Bunny.net）
+1. Bunny → **Stream** → 建一個 Video Library → 把課程影片上傳進去。
+2. 進該 Library 的 **Security**，開啟 **Embed View Token Authentication**（這就是防盜開關）。
+3. 在該 Library 的 **API / Details** 找到：
+   - **Library ID**（一串數字）
+   - **Token Authentication Key**（⚠️ 機密）
+4. 之後在後台課程章節的「影片網址」貼該影片的 **embed 網址或影片 GUID** 即可，系統會自動簽發短效防盜網址。
+
+---
+
+## 步驟 4：設定金流（PayUni）
+1. 到 PayUni 申請商家帳號（需身分/營業審核，可能要幾個工作天）。
+2. 先拿 **測試（Sandbox）** 的：商店代號 **MerID**、**HashKey**、**HashIV**。
+3. PayUni 後台把 **Notify URL / Return URL** 設為：`https://你的網域/api/webhook/payuni`（網域等步驟 6 部署後會有）。
+
+---
+
+## 步驟 5：設定寄信（Resend）
+1. Resend → **API Keys → Create**，複製 API Key。
+2. （建議）**Domains** 驗證你的網域，之後寄件人用 `no-reply@你的網域`。未驗證前可先用 `onboarding@resend.dev` 測試。
+
+---
+
+## 步驟 6：部署到 Netlify（含填環境變數）
+1. Netlify → **Add new site → Import from GitHub** → 選你的 repo。
+2. 進 **Site configuration → Environment variables**，照 `.env.example` 把以下全部加進去：
+   - `NEXTAUTH_URL`：先填 Netlify 給的網址，之後綁自己網域再改
+   - `NEXTAUTH_SECRET`：一段隨機字串。產生方法（擇一）：
+     - 終端機跑：`node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+     - 或上 https://generate-secret.vercel.app/32 複製
+   - `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`、`SUPABASE_SERVICE_ROLE_KEY`（步驟 2）
+   - `PAYUNI_MERID`、`PAYUNI_HASH_KEY`、`PAYUNI_HASH_IV`、`NEXT_PUBLIC_PAYUNI_UPP_URL`（測試先填 sandbox 端點）、`NEXT_PUBLIC_PAYUNI_MERID`（步驟 4）
+   - `BUNNY_STREAM_LIBRARY_ID`、`BUNNY_TOKEN_AUTH_KEY`（步驟 3）
+   - `RESEND_API_KEY`、`RESEND_FROM_EMAIL`、`CONTACT_TO_EMAIL`（步驟 5）
+3. 按 **Deploy**。完成後會得到一個網址。
+4. （之後）到 Netlify **Domain settings** 綁定你的 `bds.fu-notes.com` 子網域，並把 `NEXTAUTH_URL` 改成它、重新部署。
+
+---
+
+## 步驟 7：建立你的管理員帳號
+1. 開網站 → `/signup` 註冊一個帳號。
+2. 回 Supabase **SQL Editor**，執行（把信箱換成你註冊的）：
+   ```sql
+   UPDATE users SET role = 'admin' WHERE email = '你的信箱';
+   ```
+3. 重新登入 → 右上角會出現「管理後台」→ 進入 `/admin`。
+
+---
+
+## 步驟 8：設定每日自動備份到 Google Drive 🛠️
+> 這是整份指南**最技術**的一步。做不來可先跳過——系統已內建「每日備份成 GitHub 檔案（artifact，保留 90 天）」零設定就有；之後再補 Google Drive 即可。但你要的是 Google Drive，照下面做：
+
+**A. 在你電腦設定 rclone（連到你的 Google Drive）**
+1. 到 https://rclone.org/downloads 下載 rclone（Windows 版解壓即用）。
+2. 開終端機（PowerShell）切到 rclone 資料夾，執行：`rclone config`
+3. 依序輸入：`n`（新增）→ 名稱打 `gdrive` → storage 選 `drive`（Google Drive）→ client_id / client_secret 直接 Enter 跳過 → scope 選 `1`（完整存取）→ 其餘 Enter → 問 `Use auto config?` 輸入 `y`（會跳出瀏覽器登入並授權你的 Google）→ team drive 選 `n` → 最後 `y` 確認。
+4. 測試：`rclone lsd gdrive:`（能列出你的 Google Drive 資料夾就成功）。
+
+**B. 取得 rclone 設定檔並轉成 base64**
+1. 查設定檔位置：`rclone config file`（通常在 `C:\Users\你\AppData\Roaming\rclone\rclone.conf`）。
+2. 在 PowerShell 把它轉成 base64（一行）：
+   ```powershell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\rclone\rclone.conf"))
+   ```
+   複製印出來的那一長串。
+
+**C. 到 GitHub 設定 Secrets**
+GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**，新增：
+- `SUPABASE_DB_URL`：步驟 2-5 的資料庫連線字串
+- `RCLONE_CONFIG_BASE64`：上面複製的那串 base64
+- `RCLONE_REMOTE`：`gdrive`
+
+**D. 測試**
+GitHub repo → **Actions → 每日資料庫備份 → Run workflow**。執行成功後，你的 Google Drive 會出現 `BDS-Backups/` 資料夾與一個 `.sql.gz` 備份檔。之後每天凌晨會自動備份。
+
+---
+
+## 步驟 9：設定保活（防 Supabase 休眠）
+GitHub **Settings → Secrets** 再加：
+- `SUPABASE_URL`：你的 Supabase Project URL
+- `SUPABASE_ANON_KEY`：anon public 金鑰
+
+到 **Actions → Supabase 保活 → Run workflow** 測一次（回應 200 即可）。之後每 3 天自動跑。
+
+---
+
+## 步驟 10：上線前實測
+打開 `GO-LIVE-TEST.md`，照那份清單逐項打勾（PayUni 測試交易、Bunny 測試影片、核心流程、備份/保活）。全部通過後：
+- PayUni 換成**正式**金鑰與正式端點。
+- 後台「設定」把站名、Logo、主色、聯絡信箱、FAQ、公告改成你的品牌。
+- 移除測試用的測試課程/訂單。
+
+---
+
+## 上線後的日常營運（這部分超簡單，任何人都會）
+登入後到 `/admin`：
+- **課程/章節**：新增課程、貼影片網址、上傳教材
+- **文章 / 活動 / 數位下載 / 會員方案**：上架管理
+- **成員**：管理學員、手動開通課程
+- **財務**：看訂單與營收、匯出 CSV
+- **留言**：審核/回覆學員提問
+- **頁面管理 / 設定**：改關於我們、聯絡我們、站名、Logo、公告等
+
+> 卡關時：技術性步驟（步驟 2、6、8）可請工程師協助一次性設定；設定好之後，新增課程與內容你自己來就行。

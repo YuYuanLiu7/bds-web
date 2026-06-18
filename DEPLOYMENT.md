@@ -25,10 +25,13 @@
 1. 建立 Supabase 專案，記下專案 URL 與 API 金鑰（Project Settings → API）：
    - `anon` public 金鑰
    - `service_role` secret 金鑰
+> 第一次架設、非技術背景者：請改看 **`SETUP-GUIDE.md`（新手從零到上線）**，每一步都有點擊路徑。本檔為技術摘要。
+
 2. 開啟 **SQL Editor**，依序貼上執行下列 SQL（皆冪等、可重複執行）：
    - `db/init.sql`：建立所有資料表與初始示範資料（使用者、課程、章節、訂單、文章、活動、下載、會員方案、評價、留言、設定…）
    - `db/add_performance_indexes.sql`：效能索引（規模化重要）
    - `db/add_rate_limiting.sql`：速率限制表與函式（登入/註冊/表單防濫用）
+   - `db/enable_rls.sql`：**最後執行**，開啟所有資料表的 RLS（搭配伺服器端 service_role，對外鎖死）
 3. **建立檔案儲存空間（Storage）**：後台上傳圖片需要。系統會在第一次上傳時自動建立名為 `uploads` 的公開 bucket；若想手動建立，到 Supabase **Storage → New bucket**，命名 `uploads` 並勾選 **Public**。
    > 在 Netlify/Vercel 這類無狀態平台，上傳一定要走 Supabase Storage（不能存主機本機）。
 4. **啟用 Row Level Security（RLS）以保護資料**：本平台所有資料存取都在伺服器端、以 `service_role` 金鑰進行，因此可（且建議）對所有資料表開啟 RLS，阻擋任何人用 public 金鑰直接連線存取。
@@ -114,7 +117,7 @@ npx tsc --noEmit   # 型別檢查
 ---
 
 ## 9. 上線前檢查清單
-- [ ] Supabase 已執行 `db/init.sql`、`db/add_performance_indexes.sql`、`db/add_rate_limiting.sql` 且已開啟 RLS
+- [ ] Supabase 已執行 `db/init.sql`、`db/add_performance_indexes.sql`、`db/add_rate_limiting.sql`、`db/enable_rls.sql`（RLS 已開啟）
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` 已設定（伺服器端讀寫正常）
 - [ ] Supabase Storage 有 `uploads`（Public）bucket，後台上傳圖片正常
 - [ ] 已建立管理員帳號並能登入 `/admin`
