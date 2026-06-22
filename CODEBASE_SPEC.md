@@ -6,8 +6,8 @@
 
 ## 1. 專案概述與目標
 * **專案背景**：將 BDS 學習平台自原有的 Teachify 平台遷移至完全獨立開發的 Next.js 平台。
-* **核心價值**：利用免費或低成本的雲端伺服器工具（Vercel Hobby 免費版、Supabase Database 免費額度、Resend 每月 3,000 封免費發信額度），將平台維運成本從**每年約新台幣 50,000 元**大幅降低至**每年 1,000 元以下**（僅需支付網域費用）。
-* **技術架構**：Next.js 15+ (App Router) + TypeScript + PostgreSQL (Supabase) + PayUni (統一金流) + NextAuth.js + Tailwind CSS。
+* **核心價值**：利用免費或低成本的雲端伺服器工具（Netlify 免費版（允許商用）、Supabase Database 免費額度、Resend 每月 3,000 封免費發信額度、Bunny.net 影片串接），將平台維運成本從**每年約新台幣 50,000 元**大幅降低至**每年 1,000 元以下**（僅需支付網域費用）。
+* **技術架構**：Next.js 16 (App Router) + React 19 + TypeScript + PostgreSQL (Supabase, 啟用 RLS) + PayUni (統一金流) + Bunny.net (影片) + Resend (寄信) + NextAuth.js + Tailwind CSS v4。
 
 ---
 
@@ -82,7 +82,7 @@
 │   ├── components/                    # 封裝好的前端 React 組件
 │   │   ├── BuyButton.tsx              # 課程購買按鈕（發送 API 並自動 POST 隱藏表單至 PayUni）
 │   │   ├── HomeClient.tsx             # 首頁交互式外觀（包含輪播圖、課程牆與介紹）
-│   │   ├── LearnExtraDetails.tsx      # 播放器側邊欄分頁（講義下載、LocalStorage 問答區）
+│   │   ├── LearnExtraDetails.tsx      # 播放器側邊欄分頁（講義下載、資料庫問答區）
 │   │   ├── MembershipList.tsx         # 訂閱會員方案列表（整合真實金流與模擬器）
 │   │   ├── DownloadsList.tsx          # 數位下載專屬列表，封裝選購細節與下載鏈接驗證
 │   │   ├── Navbar.tsx                 # 頂部導覽列，整合登入狀態與後台入口
@@ -257,13 +257,12 @@
     * 支持 YouTube (自動轉為 `embed`)、Vimeo、Bunny.net Stream，以及 MP4/MOV/WebM 直鏈影片的 HTML5 原生播放器渲染。
   * **側邊欄章節導覽**：列出該課程的所有單元，點擊直接無縫切換單元網址。
   * **講義與附件下載**：播放器下方提供課程層級與章節單元層級的講義/附件下載按鈕。
-  * **問答討論區 (LocalStorage 同步)**：
-    * 允許學員即時提問，留言資料儲存於瀏覽器 `localStorage`（Key: `bds_course_comments`）。
-    * 使用網頁 `storage` 事件監聽，當管理員在另一分頁審核通過或回覆時，學員播放頁面會自動、無重新整理更新留言內容。
-    * 學員只能看到「已審核通過 (Approved)」的留言，以及「自己建立、審核中 (Pending)」的留言。
+  * **問答討論區（資料庫持久化）**：
+    * 允許學員即時提問，留言資料儲存於資料庫 `course_comments` 表，經 `/api/comments` 存取（送出後待管理員審核，核准才公開）。
+    * 學員只能看到「已審核通過 (Approved)」的留言，以及「自己建立、審核中 (Pending)」的留言（由後端依登入者過濾）。
 * **驗證重點**：
   * 嚴格測試**越權存取**：如果直接修改網址中的 `courseId` 與 `chapterId`，未購買學員是否會被 API 與伺服器路由阻擋在外。
-  * 檢查 LocalStorage 留言中，是否有防止 Cross-Site Scripting (XSS) 的防範，避免使用者輸入惡意 HTML/JS 執行。
+  * 檢查留言內容是否有防止 Cross-Site Scripting (XSS) 的防範，避免使用者輸入惡意 HTML/JS 執行。
 
 ### 4.5 會員方案訂閱頁 (`/membership`)
 * **頁面定位**：付費會員（月繳、年繳、終身）購買與權限開通。
@@ -322,7 +321,7 @@
 ### 4.10 動態自訂静態頁面 (`/about`、`/contact`、`/privacy`、`/help`)
 * **頁面定位**：關於我們、聯絡諮詢、服務政策、FAQ 幫助中心。
 * **核心功能**：
-  * 這些頁面實作為 Client-side 渲染，皆會從 `localStorage` 的 `bds_pages_content` 與 `bds_faqs` 中拉取最新的內容。
+  * 這些頁面內容與 FAQ 儲存於資料庫 `site_settings`（key：`pages`、`faqs`），前台經 `/api/settings` 公開讀取，後台經 `/api/admin/general-settings` 寫入，跨裝置/使用者皆一致。
   * **聯絡我們表單**：提供留言表單，填寫姓名、Email、主旨、內容後，在前端進行防呆驗證並模擬 API 送出，成功後顯示送出收訖提示。
   * **FAQ 中心展開**：常見問題頁面點選可動態滑出手風琴 (Accordion) 收合答案。
 
@@ -365,13 +364,13 @@
 
 ### 5.7 課堂留言審核 (`/admin/comments`)
 * **核心功能**：
-  * 整合讀取 localStorage 的 `bds_course_comments`。
-  * 審核管理員可一鍵將留言變更為已通過 (`approved`)；亦可點擊 Reply 寫入管理員回覆，推播至 localStorage 中更新，使得前台學員在播放頁面能同步看到回覆。
+  * 整合讀取資料庫 `course_comments` 表（經 `/api/admin/comments`）。
+  * 審核管理員可一鍵將留言變更為已通過 (`approved`)；亦可點擊 Reply 寫入管理員回覆並存回資料庫，使得前台學員在播放頁面能同步看到回覆。
 
 ### 5.8 靜態自訂頁面編輯器 (`/admin/pages`)
 * **核心功能**：
   * **網頁文案自訂**：管理員在此可一鍵編改首頁 `/`、課程列表 `/courses`、關於我們 `/about`、隱私權 `/privacy` 與聯絡我們 `/contact` 的網頁主標題、副標題、內容文字及大 Banner 底圖。
-  * 更新完成後，會直接回寫 localStorage 的 `bds_pages_content`，前台所有對應的靜態介紹頁面將會立刻同步變更呈現內容，不需重新發佈部署。
+  * 更新完成後，會直接回寫資料庫 `site_settings` 的 `pages`，前台所有對應的介紹頁面將會立刻同步變更呈現內容，不需重新發佈部署。
 
 ### 5.9 素材庫管理 (`/admin/assets`)
 * **核心功能**：
@@ -381,7 +380,7 @@
 ### 5.10 行銷中心 (`/admin/marketing`)、第三方整合 (`/admin/integrations`) 與開發者工具 (`/admin/developer`)
 * **行銷中心**：管理平台折扣券與自訂折抵活動。
 * **第三方整合**：管理 Resend 密鑰，填寫 Google Analytics (GA4)、Facebook Pixel、LINE Login 等 Tracking code，平台會自動將其注入前端 Layout。
-* **開發者工具**：提供一鍵重設系統（初始化 localStorage 為預設設定）、快速導入 Mock 測試資料種子 (Seed Data)、清除快取與系統運行狀態/環境變數檢測。
+* **開發者工具**：提供系統運行狀態/環境變數檢測等維運輔助功能。
 
 ---
 
@@ -420,21 +419,28 @@
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=您的隨機密鑰字串 (建議使用 openssl rand -base64 32 產生)
 
-# Supabase 資料庫連線字串與前端 ANON 金鑰
-DATABASE_URL=postgresql://postgres:[密碼]@[主機位址]:5432/postgres
+# Supabase（啟用 RLS 後，伺服器端一律以 service_role 金鑰存取）
 NEXT_PUBLIC_SUPABASE_URL=https://您的專案ID.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1Ni...
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...     # 僅伺服器可見，勿加 NEXT_PUBLIC_ 前綴、勿外洩
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1Ni...   # 公開 anon 金鑰（向後相容用）
+# DATABASE_URL / SUPABASE_DB_URL：僅 `npm run setup -- --migrate` 與每日備份排程需要
 
 # PayUni 統一金流測試金鑰（預設為沙盒環境）
 PAYUNI_MERID=MS12345678                    # PayUni 商戶號
 PAYUNI_HASH_KEY=your_payuni_hash_key      # PayUni HashKey
 PAYUNI_HASH_IV=your_payuni_hash_iv        # PayUni HashIV
+NEXT_PUBLIC_PAYUNI_UPP_URL=https://sandbox-api.payuni.com.tw/api/upp  # 正式改 api.payuni.com.tw
 
 # Resend 發信設定
 RESEND_API_KEY=re_your_api_key             # Resend API 金鑰
 RESEND_FROM_EMAIL=no-reply@yourdomain.com  # 發信者信箱
 RESEND_TEST_RECIPIENT=test@gmail.com       # 沙盒模式測試重導向信箱
+
+# Bunny.net 影片（伺服器端簽章防盜看）
+BUNNY_STREAM_LIBRARY_ID=您的影片庫ID
+BUNNY_TOKEN_AUTH_KEY=您的 Token 驗證金鑰
 ```
+> 完整且最新的環境變數清單一律以根目錄 [`.env.example`](./.env.example) 為準。
 
 ---
 
@@ -448,7 +454,7 @@ RESEND_TEST_RECIPIENT=test@gmail.com       # 沙盒模式測試重導向信箱
    * 登入 Resend 設定頁面，將網域（如 `bydoingso.com`）的 DNS 設定（SPF, DKIM, DMARC）綁定完成。
    * 修改信件設定中的 `RESEND_FROM_EMAIL`（例如改為 `no-reply@bydoingso.com`），並清空 `RESEND_TEST_RECIPIENT`，以確保購買通知信會發送給真實的購課學員。
 3. **連線池設定**：
-   * 在生產環境中（例如 Vercel），由於伺服器為 Serverless 運作，容易產生瞬時大量資料庫連線。建議將 `DATABASE_URL` 連線埠改為 Supabase 的 Connection Pooler 連線埠（通常為 `6543` 埠），以避免資料庫因連線數過載而拒絕連線。
+   * 在生產環境中（例如 Netlify），由於伺服器為 Serverless 運作，容易產生瞬時大量資料庫連線。建議將連線字串改為 Supabase 的 Connection Pooler 連線埠（通常為 `6543` 埠），以避免資料庫因連線數過載而拒絕連線。
 
 ---
 

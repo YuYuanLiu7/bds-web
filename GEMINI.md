@@ -6,14 +6,15 @@
 - 營運模式：權限全交由 AI 主動推動模式。
 
 ## 技術架構 (Current Stack)
-- **框架**: Next.js 15 (App Router) + TypeScript.
+- **框架**: Next.js 16 (App Router) + React 19 + TypeScript.
 - **金流系統**: **PayUni (唯一指定)**。
   - 已移除 ECPay。
   - 核心邏輯位於 `src/lib/payuni.ts`。
   - 結帳 API: `src/app/api/checkout/route.ts`。
   - 回傳接收 API: `src/app/api/checkout/callback/route.ts`。
-- **資料庫**: PostgreSQL / Supabase (Schema 位於 `db/schema.sql`)。
-- **部署平台**: Vercel。
+- **資料庫**: PostgreSQL / Supabase（啟用 RLS，伺服器以 service_role 存取；SQL 於 `db/*.sql`）。
+- **影片**: Bunny.net Stream（限時簽章防盜看）。**寄信**: Resend。
+- **部署平台**: Netlify（免費方案，允許商用）。
 
 ## 目前進度
 - [x] 專案初始化與 UI 基礎架構。
@@ -25,10 +26,15 @@
 - [x] 實作結帳流程中的訂單紀錄與權限開通邏輯。
 - [x] 實作課程學習頁面 (Player)，支援影片嵌入與權限檢查。
 
+## 目前進度（補充）
+- [x] 後台管理介面（課程/章節/文章/活動/下載/會員/訂單/留言審核/設定）完整實作。
+- [x] 評價/留言/頁面內容由 localStorage 全面遷移至資料庫。
+- [x] 安全強化：RLS、service_role 架構、金流防竄改/防重送、付費牆後端強制、速率限制。
+- [x] 一輪 UX 改造、ESLint 全面清零、完整稽核通過。
+
 ## 下一步待辦 (Next Steps)
-1. **正式環境設定**: 需要使用者在 `.env.local` 填入真實的 PayUni 密鑰與 Supabase DATABASE_URL/SUPABASE_URL。
-2. **後台管理介面**: 實作簡單的課程與章節管理功能 (Admin only)。
-3. **使用者 Profile**: 實作「我的課程」頁面，方便學員快速找回已購買課程。
+1. **正式上線設定**：見 `LAUNCH-CHECKLIST.md` 與 `SETUP-GUIDE.md`，重點為 PayUni 真卡實測。
+2. 交付客戶時提供 `CUSTOMER-ACCEPTANCE.md`（30 分鐘驗收）。
 
 ## 使用者偏好與特殊規範
 - 使用者要求「權限全給你」模式，AI 應主動發現問題並修復。
