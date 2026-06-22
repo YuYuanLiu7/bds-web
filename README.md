@@ -15,6 +15,10 @@
 
 ## 快速開始 (Quick Start)
 
+> ⚠️ **此快速開始僅供工程師在本機開發預覽**（`localhost`，關掉就沒了）。
+> 要**實際部署上線、能收錢營運**（含 Netlify 部署、Bunny 影片、PayUni 金流、Resend 寄信、
+> 綁網域、每日備份），請改看 [`SETUP-GUIDE.md`](./SETUP-GUIDE.md) 的完整 10 步驟。
+
 ### 1. 安裝依賴
 ```bash
 npm install
