@@ -2,13 +2,13 @@
 
 逐項做完打勾，全部通過即可正式對外。**先用測試環境/測試帳號做，確認無誤再切正式。**
 
----
+> 📋 **本檔是「逐項實際測試」的操作手冊**；「環境是否都設好了」的盤點請見
+> [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md)。建議流程：先用 `LAUNCH-CHECKLIST` 把設定備齊，
+> 再用本檔逐項測試是否真的能跑。
 
 ## 0. 前置確認
-- [ ] Supabase 已執行 `db/init.sql`、`db/add_performance_indexes.sql`、`db/add_rate_limiting.sql`、`db/enable_rls.sql`（RLS 已開啟）
-- [ ] `.env.local`（或部署平台環境變數）已填：Supabase（含 `SUPABASE_SERVICE_ROLE_KEY`）、PayUni、Resend、Bunny、`NEXTAUTH_URL`/`NEXTAUTH_SECRET`
-- [ ] Supabase Storage 有 `uploads`（Public）bucket
-- [ ] 已建立一個管理員帳號（`UPDATE users SET role='admin' WHERE email=...`）
+- [ ] 已完成 [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) 第 1～2 區（資料庫遷移＋RLS、Storage bucket、
+  管理員帳號、環境變數齊全）。最快做法：`npm run setup -- --migrate --admin`。
 
 ---
 
