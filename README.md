@@ -3,12 +3,15 @@
 本專案旨在協助從 Teachify 平台遷移至完全客製化的 Next.js 平台，以大幅降低維運成本（預計每年可節省約 50,000 元台幣）。
 
 ## 技術棧 (Tech Stack)
-- **前端/API**: Next.js 15 (App Router)
-- **樣式**: Tailwind CSS
-- **身份驗證**: NextAuth.js
-- **資料庫**: PostgreSQL (建議搭配 Supabase)
+- **前端/API**: Next.js 16 (App Router) + React 19
+- **語言**: TypeScript
+- **樣式**: Tailwind CSS v4
+- **身份驗證**: NextAuth.js（Credentials，JWT 帶 role/id）
+- **資料庫**: PostgreSQL（Supabase，啟用 RLS）
 - **金流**: 統一金流 (PayUni)
-- **部署**: Vercel
+- **影片**: Bunny.net Stream（限時簽章防盜看）
+- **寄信**: Resend
+- **部署**: Netlify（免費方案，允許商用）
 
 ## 快速開始 (Quick Start)
 
@@ -23,8 +26,9 @@ npm install
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=您的隨機密鑰
 
-# Supabase (資料庫串接)
-DATABASE_URL=您的資料庫連結
+# Supabase (資料庫串接；伺服器端以 service_role 金鑰存取)
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=您的 service_role 金鑰（勿加 NEXT_PUBLIC_ 前綴、勿外洩）
 
 # PayUni (統一金流 - 預設為測試環境)
 PAYUNI_MERID=MS12345678
@@ -60,11 +64,9 @@ npm run dev
 2. **課程資料**: 於後台「課程」管理新增課程與章節（標題、描述、價格、分類、封面）。
 3. **金流切換**: 測試無誤後，將 `.env.local` 的 PayUni 改為正式 MerID / HashKey / HashIV，並把 `NEXT_PUBLIC_PAYUNI_UPP_URL` 設為正式端點 `https://api.payuni.com.tw/api/upp`（端點由環境變數決定，**無需改程式碼**）。
 
-## 維運成本預估
-- **主機 (Vercel)**: 0 元 (個人方案免費額度充足)
-- **資料庫 (Supabase)**: 0 元 (免費額度充足)
+## 維運成本預估（數百～數千會員規模）
+- **主機 (Netlify)**: 0 元（免費方案，允許商用）
+- **資料庫 (Supabase)**: 0 元（免費額度充足）
+- **寄信 (Resend) / 影片 (Bunny.net)**: 0 元（免費額度內）
 - **網域**: 約 500-800 元 / 年
-- **總計**: < 1,000 元 / 年 (對比原先 50,000 元 / 年)
-
----
-由 Gemini CLI 協助開發。
+- **總計**: < 1,000 元 / 年（對比原先約 50,000 元 / 年）
