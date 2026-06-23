@@ -52,17 +52,19 @@
 ## 步驟 3：設定影片（Bunny.net）
 1. Bunny → **Stream** → 建一個 Video Library → 把課程影片上傳進去。
 2. 進該 Library 的 **Security**，開啟 **Embed View Token Authentication**（這就是防盜開關）。
-3. 在該 Library 的 **API / Details** 找到：
-   - **Library ID**（一串數字）
-   - **Token Authentication Key**（⚠️ 機密）
+3. 在該 Library 找到兩個值：
+   - **Library ID**（一串數字）— 在該 Library 的 **API** 分頁。
+   - **Token Authentication Key**（⚠️ 機密）— 在 **Security** 分頁（即上一步開啟防盜開關處）。
 4. 之後在後台課程章節的「影片網址」貼該影片的 **embed 網址或影片 GUID** 即可，系統會自動簽發短效防盜網址。
 
 ---
 
 ## 步驟 4：設定金流（PayUni）
 1. 到 PayUni 申請商家帳號（需身分/營業審核，可能要幾個工作天）。
-2. 先拿 **測試（Sandbox）** 的：商店代號 **MerID**、**HashKey**、**HashIV**。
-3. PayUni 後台把 **Notify URL / Return URL** 設為：`https://你的網域/api/webhook/payuni`（網域等步驟 6 部署後會有）。
+2. 取得金鑰：PayUni 後台 → **會員 → 商店清單 → 選擇 SHOP 開頭的商店 → 串接設定 → 《API 串接金鑰》**，
+   複製 **商店代號 MerID**、**HashKey**、**HashIV**（測試階段先用 Sandbox 那組）。
+3. 本系統會在送出付款時自動帶上回呼網址（`/api/webhook/payuni`）；若你的 PayUni 後台另有
+   **Notify URL / Return URL** 欄位，一併填 `https://你的網域/api/webhook/payuni`（網域等步驟 6 部署後才有）。
 
 ---
 
@@ -73,8 +75,11 @@
 ---
 
 ## 步驟 6：部署到 Netlify（含填環境變數）
-1. Netlify → **Add new site → Import from GitHub** → 選你的 repo。
-2. 進 **Site configuration → Environment variables**，照 `.env.example` 把以下全部加進去：
+> ⚠️ Netlify 已把「Site（網站）」改稱「**Project（專案）**」。若你看到的是「Site settings」等舊字眼，
+> 對應的就是下方的「Project configuration」，概念相同。
+1. Netlify → **Add new project → Import an existing project** → 選 **GitHub** → 你的 repo。
+2. 進 **Project configuration → Environment variables**，照 `.env.example` 把以下全部加進去
+   （可用「Import from a .env file」貼上整份更快）：
    - `NEXTAUTH_URL`：先填 Netlify 給的網址，之後綁自己網域再改
    - `NEXTAUTH_SECRET`：一段隨機字串。產生方法（擇一）：
      - 終端機跑：`node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
@@ -84,7 +89,7 @@
    - `BUNNY_STREAM_LIBRARY_ID`、`BUNNY_TOKEN_AUTH_KEY`（步驟 3）
    - `RESEND_API_KEY`、`RESEND_FROM_EMAIL`、`CONTACT_TO_EMAIL`（步驟 5）
 3. 按 **Deploy**。完成後會得到一個網址。
-4. （之後）到 Netlify **Domain settings** 綁定你的 `bds.fu-notes.com` 子網域，並把 `NEXTAUTH_URL` 改成它、重新部署。
+4. （之後）到 Netlify **Project configuration → Domain management** 綁定你的 `bds.fu-notes.com` 子網域，並把 `NEXTAUTH_URL` 改成它、重新部署。
 
 ---
 
