@@ -27,19 +27,25 @@
 ---
 
 ## 步驟 2：建立資料庫（Supabase）
+
+> ⚠️ Supabase 介面常改版、欄位名稱會變。**最穩的做法是用儀表板頂部的「Connect」按鈕**——
+> 它把「網址、金鑰、連線字串」都放在同一個視窗，不必到處找。若你看到的名稱與下方略有不同，
+> 認「概念」而非死記名稱（找「給瀏覽器用的公開金鑰」與「給伺服器用的機密金鑰」即可）。
+
 1. Supabase → **New project** → 取名、選區域、**設定並記下資料庫密碼**（很重要，等下備份要用）。
 2. 左側 **SQL Editor → New query**，把專案 `db/` 資料夾裡的檔案**依序**整份貼上、各按 **Run**：
    1. `db/init.sql`
    2. `db/add_performance_indexes.sql`
    3. `db/add_rate_limiting.sql`
    4. `db/enable_rls.sql` ← **最後執行（開啟資料保護）**
-3. 左側 **Project Settings（齒輪）→ API**，複製三個值備用：
-   - **Project URL**（像 `https://xxxx.supabase.co`）
-   - **anon public** 金鑰
-   - **service_role** 金鑰（標示 secret，⚠️ 機密）
-4. 左側 **Storage → New bucket**，名稱打 `uploads`，勾選 **Public**，建立。（之後後台上傳圖片會用到）
-5. 🛠️ **Project Settings → Database → Connection string → URI**，複製那串連線字串（把 `[YOUR-PASSWORD]` 換成步驟 1 設的資料庫密碼）。**這串等下做備份要用**。
-   🖼️（Database 設定頁：Connection string 區塊、URI 分頁，那串 `postgresql://...` 即是）
+   > 💡 更快：本地跑 `npm run setup -- --migrate` 可一鍵自動跑完上面所有 SQL（需先有連線字串，見第 5 點）。
+3. **取得網址與金鑰**——點儀表板頂部的 **Connect** 按鈕（或左側 **齒輪 Settings → API Keys**）：
+   - **Project URL / `NEXT_PUBLIC_SUPABASE_URL`**（像 `https://xxxx.supabase.co`）— 在 Connect 視窗的 App Frameworks 分頁可直接看到。
+   - **公開金鑰**（給瀏覽器）：新版叫 **Publishable key**；舊版叫 **anon public**。→ 填入 `NEXT_PUBLIC_SUPABASE_ANON_KEY`。
+   - **機密金鑰**（給伺服器，⚠️ 絕不外洩）：新版叫 **Secret key**（`sb_secret_...`）；舊版叫 **service_role**（在 **Legacy API Keys** 分頁）。→ 兩者擇一填入 `SUPABASE_SERVICE_ROLE_KEY` 皆可。
+4. 左側 **Storage → New bucket**，名稱打 `uploads`，勾選 **Public**，建立。（之後後台上傳圖片會用到；或由 `npm run setup` 自動建立）
+5. 🛠️ **取得資料庫連線字串**（備份與 `--migrate` 會用到）：點 **Connect** 按鈕 → **ORMs / Connection string** 區，複製 **URI**（`postgresql://...`），把其中 `[YOUR-PASSWORD]` 換成步驟 1 設的資料庫密碼。
+   （舊路徑 Settings → Database → Connection string 仍可能存在，但 Connect 視窗最穩定。）
 
 ---
 
