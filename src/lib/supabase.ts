@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+// 為了在沒有設定環境變數的情況下（例如本地 npm run build 或 CI/CD 環境中）也能編譯成功，
+// 如果環境變數為空，我們會使用佔位網址與金鑰，避免 Supabase SDK 拋出 initialization 錯誤。
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
 
 // 本專案的 supabase client 僅在「伺服器端」使用（API routes 與 server component），
 // 身分驗證交由 NextAuth + 各 API 的權限檢查處理。
@@ -10,7 +12,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  '';
+  'placeholder-key-for-build-stage';
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
