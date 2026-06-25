@@ -80,11 +80,7 @@ export async function POST(req: Request) {
       MerID,
       HashKey,
       HashIV,
-      ReturnURL: type === 'membership'
-        ? `${process.env.NEXTAUTH_URL}/membership`
-        : type === 'download'
-          ? `${process.env.NEXTAUTH_URL}/downloads`
-          : `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
+      ReturnURL: `${process.env.NEXTAUTH_URL}/api/checkout/return`,
       NotifyURL: `${process.env.NEXTAUTH_URL}/api/webhook/payuni`,
     };
 
