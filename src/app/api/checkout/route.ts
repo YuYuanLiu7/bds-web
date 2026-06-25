@@ -25,6 +25,11 @@ export async function POST(req: Request) {
     const MerID = process.env.PAYUNI_MERID;
     const HashKey = process.env.PAYUNI_HASH_KEY;
     const HashIV = process.env.PAYUNI_HASH_IV;
+    
+    console.log(`[DEBUG PayUni Env] MerID: ${MerID}`);
+    console.log(`[DEBUG PayUni Env] HashKey length: ${HashKey?.length}, starts with: ${HashKey?.substring(0, 4)}`);
+    console.log(`[DEBUG PayUni Env] HashIV length: ${HashIV?.length}, starts with: ${HashIV?.substring(0, 4)}`);
+
     if (!MerID || !HashKey || !HashIV) {
       console.error('PayUni env not configured (PAYUNI_MERID/HASH_KEY/HASH_IV)');
       return NextResponse.json({ error: '金流尚未設定，請聯絡客服' }, { status: 500 });
@@ -150,6 +155,10 @@ export async function POST(req: Request) {
 
     const encryptInfo = tool.encrypt(encryptParams);
     const hashInfo = tool.generateHash(encryptInfo);
+
+    console.log(`[DEBUG PayUni Payload] Amount: ${amount}, MerTradeNo: ${merTradeNo}`);
+    console.log(`[DEBUG PayUni Payload] EncryptInfo: ${encryptInfo.substring(0, 15)}...${encryptInfo.substring(encryptInfo.length - 15)}`);
+    console.log(`[DEBUG PayUni Payload] HashInfo: ${hashInfo}`);
 
     return NextResponse.json({
       MerID: PAYUNI_CONFIG.MerID,
