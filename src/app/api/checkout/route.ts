@@ -153,11 +153,16 @@ export async function POST(req: Request) {
       Version: '2.0',
     };
 
+    const usp = new URLSearchParams();
+    for (const [k, v] of Object.entries(encryptParams)) usp.append(k, String(v));
+    const plainText = usp.toString();
+    console.log(`[DEBUG PayUni PlainText] ${plainText}`);
+
     const encryptInfo = tool.encrypt(encryptParams);
     const hashInfo = tool.generateHash(encryptInfo);
 
     console.log(`[DEBUG PayUni Payload] Amount: ${amount}, MerTradeNo: ${merTradeNo}`);
-    console.log(`[DEBUG PayUni Payload] EncryptInfo: ${encryptInfo.substring(0, 15)}...${encryptInfo.substring(encryptInfo.length - 15)}`);
+    console.log(`[DEBUG PayUni Payload] EncryptInfo: ${encryptInfo}`);
     console.log(`[DEBUG PayUni Payload] HashInfo: ${hashInfo}`);
 
     return NextResponse.json({

@@ -24,38 +24,43 @@ export class PayuniTool {
     const cipher = crypto.createCipheriv(this.algorithm, this.hashKey, this.hashIV) as crypto.CipherGCM;
     
     // 加密為二進位 Buffer
-    const ciphertext = Buffer.concat([
+    const ciphertextBuffer = Buffer.concat([
       cipher.update(plainText),
       cipher.final()
     ]);
     
-    // 取得 GCM 驗證標籤並轉成 Base64
+    // 1. PHP openssl_encrypt default output (options=0) is Base64 encoded ciphertext
+    const ciphertextBase64 = ciphertextBuffer.toString('base64');
+    
+    // 2. Auth Tag is also Base64 encoded
     const tag = cipher.getAuthTag();
     const tagBase64 = tag.toString('base64');
     
-    // 拼接成二進位：密文 + ':::' + tagBase64
-    const finalBuffer = Buffer.concat([
-      ciphertext,
-      Buffer.from(':::'),
-      Buffer.from(tagBase64, 'utf8')
-    ]);
+    // 3. Concatenate Base64 strings with delimiter ':::'
+    const concatenated = ciphertextBase64 + ':::' + tagBase64;
 
-    return finalBuffer.toString('hex').toUpperCase();
+    // 4. PHP bin2hex converts each character of this ASCII string to hex
+    return Buffer.from(concatenated, 'utf8').toString('hex').toUpperCase();
   }
 
   /**
    * 解密：處理 PayUni 回傳的 EncryptInfo（同樣為 query string 格式）
    */
   decrypt(encryptInfo: string): Record<string, string> {
+    // 1. Convert hex to ASCII buffer (since the raw concatenated string was ASCII encoded to hex)
     const bin = Buffer.from(encryptInfo, 'hex');
     const delimiterIndex = bin.indexOf(':::');
     if (delimiterIndex === -1) {
       throw new Error('Delimiter ::: not found in encrypted string');
     }
     
-    const ciphertext = bin.subarray(0, delimiterIndex);
-    const tagBase64 = bin.subarray(delimiterIndex + 3).toString('utf8');
-    const tag = Buffer.from(tagBase64, 'base64');
+    // 2. Extract Base64 ciphertext and Base64 tag from the buffer
+    const ciphertextBase64Str = bin.subarray(0, delimiterIndex).toString('utf8');
+    const tagBase64Str = bin.subarray(delimiterIndex + 3).toString('utf8');
+    
+    // 3. Convert Base64 strings to binary buffers
+    const ciphertext = Buffer.from(ciphertextBase64Str, 'base64');
+    const tag = Buffer.from(tagBase64Str, 'base64');
 
     const decipher = crypto.createDecipheriv(this.algorithm, this.hashKey, this.hashIV) as crypto.DecipherGCM;
     decipher.setAuthTag(tag);
