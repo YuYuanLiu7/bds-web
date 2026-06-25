@@ -7,7 +7,7 @@
 > 再用本檔逐項測試是否真的能跑。
 
 ## 0. 前置確認
-- [ ] 已完成 [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) 第 1～2 區（資料庫遷移＋RLS、Storage bucket、
+- [ ] 已完成 [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) 第 1～2 區（資料庫建置＋RLS、Storage bucket、
   管理員帳號、環境變數齊全）。最快做法：`npm run setup -- --migrate --admin`。
 
 ---
