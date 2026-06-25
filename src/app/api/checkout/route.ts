@@ -76,12 +76,13 @@ export async function POST(req: Request) {
       prodDesc = `Purchase ${course.title}`;
     }
 
+    const cleanBaseUrl = (process.env.NEXTAUTH_URL || '').replace(/\/$/, '');
     const PAYUNI_CONFIG = {
       MerID,
       HashKey,
       HashIV,
-      ReturnURL: `${process.env.NEXTAUTH_URL}/api/checkout/return`,
-      NotifyURL: `${process.env.NEXTAUTH_URL}/api/webhook/payuni`,
+      ReturnURL: `${cleanBaseUrl}/api/checkout/return`,
+      NotifyURL: `${cleanBaseUrl}/api/webhook/payuni`,
     };
 
     const tool = new PayuniTool(PAYUNI_CONFIG.HashKey, PAYUNI_CONFIG.HashIV);

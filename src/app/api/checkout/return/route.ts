@@ -13,7 +13,8 @@ export async function POST(req: Request) {
     const HashIV = process.env.PAYUNI_HASH_IV;
     
     // 預設跳轉頁面
-    const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+    const rawBaseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+    const baseUrl = rawBaseUrl.replace(/\/$/, '');
     let fallbackRedirect = `${baseUrl}/courses`;
 
     if (!HashKey || !HashIV || !encryptInfo) {
@@ -60,12 +61,14 @@ export async function POST(req: Request) {
     return NextResponse.redirect(fallbackRedirect, 303);
   } catch (error) {
     console.error('[PayUni Return] Error handling return POST redirect:', error);
-    const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+    const rawBaseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+    const baseUrl = rawBaseUrl.replace(/\/$/, '');
     return NextResponse.redirect(`${baseUrl}/courses`, 303);
   }
 }
 
 export async function GET(req: Request) {
-  const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+  const rawBaseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+  const baseUrl = rawBaseUrl.replace(/\/$/, '');
   return NextResponse.redirect(`${baseUrl}/courses`, 303);
 }
