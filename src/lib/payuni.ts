@@ -13,7 +13,8 @@ export class PayuniTool {
   /**
    * 加密：將參數物件轉為 EncryptInfo
    * PayUni UPP 規格要求先將參數序列化為 URL query string（等同 PHP http_build_query），
-   * 再進行 AES-256-GCM 加密並附加 Auth Tag（非 JSON）。
+   * 再進行 AES-256-GCM 加密，並將加密後的二進位資料、分割符號 ::: 與 Base64 編碼的 Auth Tag 拼接，
+   * 最後整體轉為十六進位 (Hex) 字串傳送。
    */
   encrypt(params: Record<string, string | number>): string {
     const usp = new URLSearchParams();
@@ -21,30 +22,48 @@ export class PayuniTool {
     const plainText = usp.toString();
 
     const cipher = crypto.createCipheriv(this.algorithm, this.hashKey, this.hashIV) as crypto.CipherGCM;
-    let encrypted = cipher.update(plainText, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    
+    // 加密為二進位 Buffer
+    const ciphertext = Buffer.concat([
+      cipher.update(plainText),
+      cipher.final()
+    ]);
+    
+    // 取得 GCM 驗證標籤並轉成 Base64
+    const tag = cipher.getAuthTag();
+    const tagBase64 = tag.toString('base64');
+    
+    // 拼接成二進位：密文 + ':::' + tagBase64
+    const finalBuffer = Buffer.concat([
+      ciphertext,
+      Buffer.from(':::'),
+      Buffer.from(tagBase64, 'utf8')
+    ]);
 
-    // 取得 GCM 的驗證標籤 (Auth Tag) 並附加在最後
-    const authTag = cipher.getAuthTag().toString('hex');
-    return (encrypted + authTag).toUpperCase();
+    return finalBuffer.toString('hex').toUpperCase();
   }
 
   /**
    * 解密：處理 PayUni 回傳的 EncryptInfo（同樣為 query string 格式）
    */
   decrypt(encryptInfo: string): Record<string, string> {
-    // PayUni 的加密字串最後 32 位元 (16 bytes) 是 Auth Tag
-    const tagLength = 32;
-    const encryptedData = encryptInfo.slice(0, -tagLength);
-    const authTag = encryptInfo.slice(-tagLength);
+    const bin = Buffer.from(encryptInfo, 'hex');
+    const delimiterIndex = bin.indexOf(':::');
+    if (delimiterIndex === -1) {
+      throw new Error('Delimiter ::: not found in encrypted string');
+    }
+    
+    const ciphertext = bin.subarray(0, delimiterIndex);
+    const tagBase64 = bin.subarray(delimiterIndex + 3).toString('utf8');
+    const tag = Buffer.from(tagBase64, 'base64');
 
     const decipher = crypto.createDecipheriv(this.algorithm, this.hashKey, this.hashIV) as crypto.DecipherGCM;
-    decipher.setAuthTag(Buffer.from(authTag, 'hex'));
+    decipher.setAuthTag(tag);
 
-    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    let decrypted = decipher.update(ciphertext);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
 
-    return Object.fromEntries(new URLSearchParams(decrypted));
+    return Object.fromEntries(new URLSearchParams(decrypted.toString('utf8')));
   }
 
   /**
