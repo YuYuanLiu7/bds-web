@@ -37,11 +37,6 @@
 - [ ] `BUNNY_STREAM_LIBRARY_ID`、`BUNNY_TOKEN_AUTH_KEY` 已設定（皆無 NEXT_PUBLIC_ 前綴）
 - [ ] 後台課程章節「影片網址」填該影片的 embed 網址或 GUID
 - [ ] 用**有購課權限**的學員進入該單元 → 影片正常播放
-- [ ] **防盜驗證**：
-  - [ ] 在播放頁面看原始碼，影片網址帶有 `?token=...&expires=...`（短效）
-  - [ ] 直接把不帶 token 的 Bunny 原始 embed 網址貼到無痕視窗 → 應**無法播放**（被 Token Auth 擋）
-  - [ ] 等 6 小時後（或把 expires 改過期）原 token 網址失效
-- [ ] 若 Bunny 端回報驗章失敗 → 依 `src/lib/bunny.ts` 註解調整 token 串接順序後再測
 
 ---
 
