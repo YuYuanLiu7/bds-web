@@ -37,7 +37,8 @@
    1. `db/init.sql`
    2. `db/add_performance_indexes.sql`
    3. `db/add_rate_limiting.sql`
-   4. `db/enable_rls.sql` ← **最後執行（開啟資料保護）**
+   4. `db/add_auth_flows.sql` ← **信箱驗證與密碼重設資料表**
+   5. `db/enable_rls.sql` ← **最後執行（開啟資料保護）**
    > 💡 更快：本地跑 `npm run setup -- --migrate` 可一鍵自動跑完上面所有 SQL（需先有連線字串，見第 5 點）。
 3. **取得網址與金鑰**——點儀表板頂部的 **Connect** 按鈕（或左側 **齒輪 Settings → API Keys**）：
    - **Project URL / `NEXT_PUBLIC_SUPABASE_URL`**（像 `https://xxxx.supabase.co`）— 在 Connect 視窗的 App Frameworks 分頁可直接看到。
