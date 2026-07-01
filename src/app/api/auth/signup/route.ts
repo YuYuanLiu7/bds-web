@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
+import crypto from 'crypto';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -47,7 +49,8 @@ export async function POST(req: Request) {
           email, 
           name, 
           password_hash: hashedPassword,
-          role: 'user' 
+          role: 'user',
+          is_verified: false // 新使用者預設為未驗證
         }
       ])
       .select()
@@ -58,7 +61,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '註冊失敗，請稍後再試' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: '註冊成功', user: { id: newUser.id, email: newUser.email, name: newUser.name } });
+    // 4. 產生 Email 驗證 Token (效期 24 小時)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    const { error: tokenError } = await supabase
+      .from('verification_tokens')
+      .insert([
+        { email, token, expires_at: expiresAt }
+      ]);
+
+    if (tokenError) {
+      console.error('Create verification token error:', tokenError);
+      // 這裡不中斷註冊，但記錄錯誤
+    } else {
+      // 寄送驗證信
+      await sendVerificationEmail({ email, name, token });
+    }
+
+    return NextResponse.json({ 
+      message: '註冊成功，請檢查您的電子郵件以驗證並啟用您的帳戶。', 
+      requiresVerification: true,
+      user: { id: newUser.id, email: newUser.email, name: newUser.name } 
+    });
   } catch (error) {
     console.error('Signup API error:', error);
     return NextResponse.json({ error: '伺服器錯誤' }, { status: 500 });

@@ -53,6 +53,12 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // 檢查 Email 是否已驗證（若資料表未更新，undefined 將自動放行）
+        if (user.is_verified === false) {
+          console.log("Email not verified for user:", credentials.email);
+          throw new Error("EMAIL_NOT_VERIFIED");
+        }
+
         return {
           id: user.id,
           name: user.name,
