@@ -171,14 +171,6 @@ export default function AdminPagesPage() {
     let file = e.target.files?.[0];
     if (!file) return;
 
-    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
-    const MAX_SIZE = 4.5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      alert(`該圖片大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮圖片後再上傳（這也有助於加快網頁載入速度）。`);
-      e.target.value = '';
-      return;
-    }
-
     // Convert HEIC image to JPEG if selected
     const isHEIC = 
       file.type === 'image/heic' || 
@@ -192,6 +184,14 @@ export default function AdminPagesPage() {
       } catch (err) {
         console.error('HEIC image conversion warning:', err);
       }
+    }
+
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`該圖片大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮圖片後再上傳（這也有助於加快網頁載入速度）。`);
+      e.target.value = '';
+      return;
     }
 
     setUploading(true);
