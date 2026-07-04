@@ -27,6 +27,8 @@ interface ArticleItem {
   status?: 'published' | 'draft';
   date?: string;
   views?: number;
+  visibility?: 'public' | 'members' | 'course_purchasers';
+  required_course_ids?: string;
 }
 
 export default function AdminArticlesPage() {
@@ -120,6 +122,30 @@ export default function AdminArticlesPage() {
       return `${yr}/${mo}/${dy} ${hr}:${min}`;
     } catch {
       return dateStr;
+    }
+  };
+
+  const getVisibilityBadge = (visibility?: string) => {
+    switch (visibility) {
+      case 'members':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 font-black text-[9px]">
+            會員限定
+          </span>
+        );
+      case 'course_purchasers':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 font-black text-[9px]">
+            指定學員
+          </span>
+        );
+      case 'public':
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 font-black text-[9px]">
+            所有人公開
+          </span>
+        );
     }
   };
 
@@ -232,6 +258,7 @@ export default function AdminArticlesPage() {
                                 草稿
                               </span>
                             )}
+                            {getVisibilityBadge(article.visibility)}
                             <span className="inline-flex px-1.5 py-0.5 rounded bg-slate-50 border border-slate-100 text-slate-400 font-bold text-[9px] select-none">
                               {article.category}
                             </span>
