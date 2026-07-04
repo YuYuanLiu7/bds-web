@@ -70,6 +70,14 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`該檔案大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮檔案或限制大小後再上傳。若有更大檔案的需求，請手動將檔案上傳至您的 Google 雲端硬碟或 Dropbox 等空間，並在此貼上分享網址。`);
+      e.target.value = '';
+      return;
+    }
+
     setUploading(true);
     const uploadData = new FormData();
     const fileExt = file.name.split('.').pop() || 'png';
@@ -263,7 +271,7 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
               <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
                 <span className="flex items-center">
                   <Settings className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  數位商品檔案連結 (可上傳本機檔案)
+                  數位商品檔案連結 <span className="text-[9px] font-semibold text-slate-400/80 normal-case ml-1.5">(限制 4.5MB 以下)</span>
                 </span>
                 <label className="text-[9px] text-indigo-600 hover:text-indigo-800 font-black cursor-pointer select-none">
                   {uploading ? '上傳中...' : '📸 上傳數位資源'}

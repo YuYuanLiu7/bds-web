@@ -311,6 +311,14 @@ export default function AdminSettingsPage() {
     let file = e.target.files?.[0];
     if (!file) return;
 
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`該圖片大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮圖片後再上傳（這也有助於加快網頁載入速度）。`);
+      e.target.value = '';
+      return;
+    }
+
     // Convert HEIC image to JPEG if selected
     const isHEIC = 
       file.type === 'image/heic' || 
@@ -354,6 +362,14 @@ export default function AdminSettingsPage() {
   const handleSlideUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     let file = e.target.files?.[0];
     if (!file) return;
+
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`該圖片大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮圖片後再上傳（這也有助於加快網頁載入速度）。`);
+      e.target.value = '';
+      return;
+    }
 
     // Convert HEIC image to JPEG if selected
     const isHEIC = 
@@ -610,7 +626,7 @@ export default function AdminSettingsPage() {
                       <div className="text-[9px] font-bold text-indigo-600 uppercase">投影片廣告 #{sIdx + 1}</div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[9px] text-slate-400">上傳投影片圖片</label>
+                          <label className="text-[9px] text-slate-400 font-semibold">上傳投影片圖片 <span className="text-slate-400/80">(限制 4.5MB)</span></label>
                           <div className="aspect-[21/9] w-full rounded border overflow-hidden bg-slate-50 relative flex items-center justify-center">
                             {slide.imageUrl ? <img src={slide.imageUrl} alt="首頁輪播圖片預覽" className="w-full h-full object-cover" onError={(e)=>{const t=e.currentTarget; if(!t.src.endsWith('/images/course-placeholder.svg')) t.src='/images/course-placeholder.svg';}} /> : <ImageIcon className="w-6 h-6 text-slate-300" />}
                             {uploadingField === `slide-${sIdx}` && <div className="absolute inset-0 bg-black/60 text-xs text-white flex items-center justify-center">上傳中...</div>}

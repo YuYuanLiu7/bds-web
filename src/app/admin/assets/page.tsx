@@ -87,6 +87,12 @@ export default function AdminAssetsPage() {
 
   // Upload file logic
   const uploadFile = async (file: File) => {
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      throw new Error(`檔案「${file.name}」大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請選取更小檔案，或將大檔案存於雲端後使用連結分享。`);
+    }
+
     const formData = new FormData();
     const fileExt = file.name.split('.').pop() || 'png';
     const safeName = `upload-${Date.now()}.${fileExt}`;
@@ -98,8 +104,14 @@ export default function AdminAssetsPage() {
     });
 
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || '上傳失敗');
+      let errText = '';
+      try {
+        const err = await res.json();
+        errText = err.error || '上傳失敗';
+      } catch {
+        errText = `伺服器連線或大小限制錯誤 (狀態碼: ${res.status})`;
+      }
+      throw new Error(errText);
     }
   };
 
@@ -405,7 +417,7 @@ export default function AdminAssetsPage() {
         <UploadCloud className={`w-10 h-10 ${dragActive ? 'text-indigo-600 animate-bounce' : 'text-slate-400'}`} />
         <div>
           <span className="font-bold text-xs">將檔案拖曳至此處</span>
-          <span className="text-[11px] text-slate-400 block mt-0.5">支援多檔案上傳，單一檔案上限為 5GB</span>
+          <span className="text-[11px] text-slate-400 block mt-0.5">支援多檔案上傳，單一檔案上限為 4.5MB (大檔案請以外部連結分享)</span>
         </div>
       </div>
 

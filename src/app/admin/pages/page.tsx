@@ -171,6 +171,14 @@ export default function AdminPagesPage() {
     let file = e.target.files?.[0];
     if (!file) return;
 
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`該圖片大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮圖片後再上傳（這也有助於加快網頁載入速度）。`);
+      e.target.value = '';
+      return;
+    }
+
     // Convert HEIC image to JPEG if selected
     const isHEIC = 
       file.type === 'image/heic' || 
@@ -497,7 +505,7 @@ export default function AdminPagesPage() {
 
                 {/* Page Cover Upload */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">頁面主視覺 / 封面圖片</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">頁面主視覺 / 封面圖片 <span className="text-[9px] font-semibold text-slate-400/80 normal-case ml-1.5">(限制 4.5MB 以下)</span></label>
                   <div className="flex items-center space-x-3 bg-white p-3 rounded-xl border border-slate-200/80">
                     <div className="w-16 h-12 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
                       {formData.imageUrl ? (

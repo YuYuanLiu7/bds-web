@@ -144,6 +144,14 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     let file = e.target.files?.[0];
     if (!file) return;
 
+    // 限制 4.5MB 避免 Netlify gateway 6MB 限制與提升載入效能
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`該檔案大小為 ${(file.size / 1024 / 1024).toFixed(1)}MB，已超過系統限制 4.5MB。請壓縮圖片或限制檔案大小後再上傳（這也有助於加快網頁載入或檔案下載的速度）。`);
+      e.target.value = '';
+      return;
+    }
+
     // Convert HEIC image to JPEG if selected
     const isHEIC = 
       file.type === 'image/heic' || 
@@ -318,7 +326,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
               {/* Course-wide Attachment File Upload */}
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider flex items-center justify-between">
-                  <span>課程教材檔案 (下載資源)</span>
+                  <span>課程教材檔案 (下載資源) <span className="text-[10px] font-semibold text-gray-400 normal-case ml-1.5">(限制 4.5MB 以下)</span></span>
                   {uploadingField === 'course_file' && <span className="text-[10px] text-blue-600 font-bold flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> 上傳中...</span>}
                 </label>
                 <div className="flex gap-2">
@@ -393,7 +401,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-700">點擊上傳課程封面圖片</p>
-                        <p className="text-[10px] text-gray-400 mt-1 font-semibold">支援 PNG, JPG, WEBP，建議尺寸 1280x800 px</p>
+                        <p className="text-[10px] text-gray-400 mt-1 font-semibold">支援 PNG, JPG, WEBP (限制 4.5MB 以下，建議尺寸 1280x800 px)</p>
                       </div>
                     </div>
                   )}
