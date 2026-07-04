@@ -180,7 +180,14 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
         body: uploadData
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text.slice(0, 150) || `伺服器回應錯誤碼: ${res.status}`);
+      }
       if (!res.ok) throw new Error(data.error || '上傳失敗');
 
       if (data.url) {
@@ -349,7 +356,14 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
         body: uploadData
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text.slice(0, 150) || `伺服器回應錯誤碼: ${res.status}`);
+      }
       if (!res.ok) throw new Error(data.error || '上傳失敗');
 
       if (data.url) {
