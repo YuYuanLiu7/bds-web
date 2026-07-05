@@ -41,6 +41,8 @@ function LoginContent() {
             </Link>
           </div>
         );
+      } else if (result.error.includes('RATE_LIMIT_EXCEEDED') || result.error === 'RATE_LIMIT_EXCEEDED') {
+        setError('嘗試登入次數過多。為保障帳戶安全，請於 10 分鐘後再試。');
       } else {
         setError('登入失敗，請檢查您的帳號密碼。');
       }

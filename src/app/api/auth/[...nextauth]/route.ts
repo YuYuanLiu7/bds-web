@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
         // 速率限制：同一帳號每 10 分鐘最多 8 次登入嘗試，防止密碼暴力破解
         if (!(await rateLimit(`login:${credentials.email.toLowerCase()}`, 8, 600))) {
           console.warn("Login rate limit exceeded for:", credentials.email);
-          return null;
+          throw new Error("RATE_LIMIT_EXCEEDED");
         }
 
         // 從資料庫找使用者
