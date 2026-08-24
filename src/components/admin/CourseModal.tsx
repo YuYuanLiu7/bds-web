@@ -167,6 +167,22 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 必填欄位驗證（儲存鈕位於 form 之外，HTML5 required 不生效，改由此處明確把關）
+    if (!formData.title.trim()) {
+      toast.error('請輸入課程名稱');
+      return;
+    }
+    if (!Number.isFinite(formData.price) || formData.price < 0) {
+      toast.error('請輸入有效的售價（0 或以上的數字）');
+      return;
+    }
+    const emptyChapterIndex = formData.chapters.findIndex(ch => !ch.title.trim());
+    if (emptyChapterIndex !== -1) {
+      toast.error(`第 ${emptyChapterIndex + 1} 個章節的名稱不可空白`);
+      return;
+    }
+
     setLoading(true);
 
     try {

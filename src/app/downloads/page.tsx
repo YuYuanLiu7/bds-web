@@ -27,40 +27,6 @@ interface DownloadRow {
   created_at?: string;
 }
 
-// Seed/Mock fallback data in case database is empty or not yet migrated
-const MOCK_DOWNLOADS = [
-  { 
-    id: '1', 
-    title: 'BDS 獨家：半導體高階業務求職信與履歷模板', 
-    downloads_count: 125, 
-    price: 499, 
-    type: 'PDF 文件',
-    description: '針對半導體設備、IC 通路、代工廠業務職缺量身打造的英文履歷與動機信模板，助您脫穎而出。',
-    status: 'published' as const,
-    file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-  },
-  { 
-    id: '2', 
-    title: '硬體產業 ODM 生意開發策略白皮書 (2026 最新版)', 
-    downloads_count: 86, 
-    price: 1200, 
-    type: 'PDF/PPT 簡報',
-    description: '深度解析電子製造與 ODM 大廠商務拓展核心方法論，包含客戶導入、RFQ 報價與銷售談判策略。',
-    status: 'published' as const,
-    file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-  },
-  { 
-    id: '3', 
-    title: '外商商務開發面試經典 50 問與模擬解題手冊', 
-    downloads_count: 234, 
-    price: 699, 
-    type: 'PDF 電子書',
-    description: '由資深外商 BD 總監編寫，涵蓋 50 個經典面試提問、Star 原則回答公式與商務思維模擬解密。',
-    status: 'published' as const,
-    file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-  }
-];
-
 export default async function DownloadsPage() {
   const settings = await getSiteSettingsServer();
   const primaryColor = settings.primaryColor || '#21448e';
@@ -85,12 +51,11 @@ export default async function DownloadsPage() {
 
     if (!error && data && data.length > 0) {
       downloads = data as DownloadRow[];
-    } else {
-      downloads = MOCK_DOWNLOADS;
     }
+    // 查無資料時維持空陣列，由 DownloadsList 呈現誠實的空狀態，不使用假商品後援
   } catch (err) {
-    console.warn('Failed to query downloads from database, using fallback mock data:', err);
-    downloads = MOCK_DOWNLOADS;
+    console.error('查詢數位下載商品失敗：', err);
+    downloads = [];
   }
 
   // 🔒 非管理員不可取得付費商品的 file_url（避免在 HTML/DOM 中外洩付費下載連結）
@@ -147,8 +112,14 @@ export default async function DownloadsPage() {
         </div>
 
         {/* Dynamic Interactive Downloads List */}
-        <DownloadsList downloads={downloads} primaryColor={primaryColor} isAdmin={!!isAdmin} ownedIds={ownedIds} isLoggedIn={!!session} />
-        
+        {downloads.length > 0 ? (
+          <DownloadsList downloads={downloads} primaryColor={primaryColor} isAdmin={!!isAdmin} ownedIds={ownedIds} isLoggedIn={!!session} />
+        ) : (
+          <div className="py-20 text-center text-slate-400 italic font-semibold select-none bg-slate-50/50 border border-dashed border-slate-200 rounded-3xl">
+            目前尚無數位資源上架，敬請期待！
+          </div>
+        )}
+
       </div>
 
     </div>

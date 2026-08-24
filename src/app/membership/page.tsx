@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
 import { getMembershipStatus } from "@/lib/entitlements";
-import { SEED_PLANS } from "@/lib/membership-plans";
 import { supabase } from "@/lib/supabase";
 import MembershipList from "@/components/MembershipList";
 
@@ -14,8 +13,6 @@ export const metadata = {
   title: "會員方案",
   description: "訂閱 BDS 會員方案，暢讀產業觀察專欄、解鎖線上課程與專屬社群資源。",
 };
-
-// 保底種子資料統一由 lib/membership-plans 提供（資料庫查無資料時使用）
 
 export default async function MembershipPage() {
   const settings = await getSiteSettingsServer();
@@ -48,12 +45,11 @@ export default async function MembershipPage() {
 
     if (!error && data && data.length > 0) {
       plans = data;
-    } else {
-      plans = SEED_PLANS;
     }
+    // 查無資料時維持空陣列，改顯示「目前尚無開放中的方案」，不以無法購買的種子方案冒充可訂閱方案
   } catch (err) {
-    console.warn("Failed to query membership plans from DB, using fallback seeds:", err);
-    plans = SEED_PLANS;
+    console.error("查詢會員方案失敗：", err);
+    plans = [];
   }
 
   return (
@@ -98,12 +94,18 @@ export default async function MembershipPage() {
         </div>
 
         {/* Dynamic Client-Side Subscription pricing table */}
-        <MembershipList 
-          plans={plans} 
-          primaryColor={primaryColor} 
-          session={session} 
-          currentUserPlanId={currentUserPlanId} 
-        />
+        {plans.length > 0 ? (
+          <MembershipList
+            plans={plans}
+            primaryColor={primaryColor}
+            session={session}
+            currentUserPlanId={currentUserPlanId}
+          />
+        ) : (
+          <div className="max-w-xl mx-auto py-20 text-center text-slate-400 italic font-semibold select-none bg-slate-50/50 border border-dashed border-slate-200 rounded-3xl">
+            目前尚無開放中的方案，敬請期待！
+          </div>
+        )}
       </div>
 
     </div>

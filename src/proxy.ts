@@ -6,21 +6,16 @@ export const proxy = withAuth(
     const token = req.nextauth.token;
     const isAdmin = token?.role === "admin";
 
-    console.log(`🛡️ [Proxy Interceptor] Path: ${req.nextUrl.pathname} | User: ${token?.email || "Guest"} | Role: ${token?.role || "None"} | IsAdmin: ${isAdmin}`);
+    // 不逐請求記錄使用者 Email/角色（避免將 PII 與帳號行為軌跡累積到平台日誌）
 
     // 如果存取 /admin 開頭的網址但不是 admin，則導回首頁
     if (req.nextUrl.pathname.startsWith("/admin") && !isAdmin) {
-      console.log(`🚫 [Proxy Blocked] Non-admin access to ${req.nextUrl.pathname}. Redirecting to /`);
       return NextResponse.redirect(new URL("/", req.url));
     }
   },
   {
     callbacks: {
-      authorized: ({ token }) => {
-        const hasToken = !!token;
-        console.log(`🔐 [Proxy Auth Guard] Checking token presence: ${hasToken}`);
-        return hasToken; // 只有登入使用者才能繼續
-      },
+      authorized: ({ token }) => !!token, // 只有登入使用者才能繼續
     },
     pages: {
       signIn: "/login", // 未登入時導向登入頁面

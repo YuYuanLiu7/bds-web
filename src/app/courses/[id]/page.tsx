@@ -29,6 +29,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     notFound();
   }
 
+  // 未發佈/隱藏的課程僅管理員可瀏覽，避免知道 UUID 的訪客看到草稿課程的標題/售價/章節
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'admin';
+  const courseRow = course as typeof course & { is_published?: boolean; is_hidden?: boolean };
+  if (!isAdmin && (courseRow.is_published === false || courseRow.is_hidden === true)) {
+    notFound();
+  }
+
   let hasAccess = false;
   if (session?.user?.email) {
     const user = await getUserByEmail(session.user.email);

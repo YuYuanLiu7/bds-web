@@ -34,7 +34,6 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
   const pathname = usePathname();
-  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   // 手機版抽屜開關；切換頁面時自動關閉
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -129,33 +128,14 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
       >
         <X className="w-5 h-5" />
       </button>
-      {/* Brand Header / Workspace Switcher */}
-      <div className="relative">
-        <div 
-          onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
-          className="h-16 px-5 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-extrabold text-white text-base">
-              B
-            </div>
-            <span className="font-bold text-slate-800 text-[15px]">BDS</span>
+      {/* Brand Header（單一工作區，僅顯示品牌名稱，不含工作區切換） */}
+      <div className="h-16 px-5 border-b border-slate-100 flex items-center">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-extrabold text-white text-base">
+            B
           </div>
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <span className="font-bold text-slate-800 text-[15px]">BDS</span>
         </div>
-
-        {showWorkspaceMenu && (
-          <div className="absolute top-14 left-4 right-4 bg-white border border-slate-100 rounded-xl shadow-lg p-2 z-50">
-            <div className="text-[11px] font-bold text-slate-400 px-3 py-1.5 uppercase">切換工作區</div>
-            <button className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-50 rounded-lg">
-              BDS By Doing So
-            </button>
-            <div className="border-t border-slate-100 my-1.5"></div>
-            <button className="w-full text-left px-3 py-2 text-sm text-slate-500 hover:bg-slate-50 rounded-lg">
-              + 建立新工作區
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Main Navigation Scrollable */}

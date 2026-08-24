@@ -1,9 +1,18 @@
+import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/auth";
 import DashboardClient from "@/components/admin/DashboardClient";
 
 export const revalidate = 0; // Disable caching to ensure fresh metrics
 
 export default async function AdminDashboardPage() {
+  // 授權檢查靠近資料來源再做一次：本頁為 Server Component，會直接以 service 權限
+  // 查詢全站營收/使用者數等營運數據；不可只依賴 layout 守衛（RSC 部分渲染時 layout 可能不執行）。
+  const sessionUser = await getSessionUser();
+  if (sessionUser?.role !== 'admin') {
+    redirect('/');
+  }
+
   let initialCoursesCount = 0;
   let initialUsersCount = 0;
   let initialRevenue = 0;

@@ -237,17 +237,17 @@ export default function DashboardClient({
                 </div>
               </Link>
 
-              {/* 新增優惠券 */}
-              <Link 
-                href="/admin/marketing" 
+              {/* 行銷工具（建立功能尚未開放，文案誠實標示即將推出） */}
+              <Link
+                href="/admin/marketing"
                 className="flex items-center p-3 rounded-xl border border-slate-50 hover:bg-slate-50 transition text-left group"
               >
                 <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
                   <Tag className="w-5 h-5" />
                 </div>
                 <div className="ml-3 overflow-hidden">
-                  <div className="text-[13px] font-bold text-slate-800">新增優惠券</div>
-                  <div className="text-[11px] font-semibold text-slate-400 truncate mt-0.5">建立優惠券促進銷售</div>
+                  <div className="text-[13px] font-bold text-slate-800">行銷工具（即將推出）</div>
+                  <div className="text-[11px] font-semibold text-slate-400 truncate mt-0.5">優惠券等行銷功能開發中</div>
                 </div>
               </Link>
             </div>

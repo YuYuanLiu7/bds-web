@@ -804,13 +804,11 @@ export default function AdminStudentsPage() {
                   >
                     重設
                   </button>
-                  <button 
-                    type="button"
-                    className="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl font-extrabold text-xs transition select-none flex items-center justify-center cursor-default"
-                  >
+                  {/* 篩選為即時套用，此處僅為狀態標示，非可點擊按鈕 */}
+                  <span className="w-full bg-slate-50 text-slate-400 py-2.5 rounded-xl font-extrabold text-xs select-none flex items-center justify-center">
                     <Check className="w-3.5 h-3.5 mr-1" />
-                    已套用
-                  </button>
+                    已即時套用
+                  </span>
                 </div>
               </div>
             </div>

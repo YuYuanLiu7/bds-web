@@ -62,6 +62,11 @@ export class PayuniTool {
     const ciphertext = Buffer.from(ciphertextBase64Str, 'base64');
     const tag = Buffer.from(tagBase64Str, 'base64');
 
+    // GCM auth tag 必須為完整 16 bytes；拒絕被截短的 tag（截短會大幅降低偽造難度）
+    if (tag.length !== 16) {
+      throw new Error('Invalid GCM auth tag length');
+    }
+
     const decipher = crypto.createDecipheriv(this.algorithm, this.hashKey, this.hashIV) as crypto.DecipherGCM;
     decipher.setAuthTag(tag);
 

@@ -136,7 +136,9 @@ export async function canAccess(
       return !!user?.id && (await ownsCourse(user.id, resource.id));
 
     case 'download': {
-      if ((resource.price || 0) <= 0) return true; // 免費商品
+      // fail-closed：只有「明確標為免費（price 為數字且 <= 0）」才放行；
+      // price 未提供（undefined）時視為付費，必須驗證擁有權，避免呼叫端漏傳 price 造成誤放行。
+      if (typeof resource.price === 'number' && resource.price <= 0) return true;
       return !!user?.id && (await ownsDownload(user.id, resource.id));
     }
 

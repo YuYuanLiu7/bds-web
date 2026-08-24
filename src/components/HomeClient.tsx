@@ -113,7 +113,7 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
                   idx === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                 }`}
               >
-                <Link href={slide.link} className="block w-full h-full group">
+                <Link href={slide.link || '/courses'} className="block w-full h-full group">
                   <SafeImage
                     src={slide.imageUrl}
                     alt={`輪播圖 ${idx + 1}`}

@@ -17,9 +17,15 @@ export async function rateLimit(
       p_limit: limit,
       p_window_seconds: windowSeconds,
     });
-    if (error) return true; // fail-open
+    if (error) {
+      // fail-open（不讓限流機制本身造成服務中斷），但記錄告警：
+      // 若持續出現代表 check_rate_limit RPC 未建立，限流實際上並未生效，需儘速處理。
+      console.error('[rateLimit] RPC 錯誤，暫時放行（限流未生效）：', error.message);
+      return true;
+    }
     return data !== false;
-  } catch {
+  } catch (err) {
+    console.error('[rateLimit] 例外，暫時放行（限流未生效）：', err);
     return true; // fail-open
   }
 }

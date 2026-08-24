@@ -39,9 +39,11 @@ export default function CourseReviews({ courseId, hasAccess }: CourseReviewsProp
 
   const courseReviews = reviews;
 
-  const averageRating = courseReviews.length > 0
+  // 無評價時不預設假五星，改以中性狀態呈現，避免誤導訪客以為已有滿分好評
+  const hasReviews = courseReviews.length > 0;
+  const averageRating = hasReviews
     ? (courseReviews.reduce((sum, r) => sum + r.rating, 0) / courseReviews.length).toFixed(1)
-    : '5.0';
+    : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,8 +82,8 @@ export default function CourseReviews({ courseId, hasAccess }: CourseReviewsProp
         </div>
         <div className="flex items-center space-x-4 bg-slate-50 p-4 rounded-xl border border-slate-100 self-start md:self-auto">
           <div className="text-center">
-            <div className="text-3xl font-extrabold text-gray-900">{averageRating}</div>
-            <div className="text-[10px] text-gray-400 font-bold mt-0.5">平均得分</div>
+            <div className="text-3xl font-extrabold text-gray-900">{hasReviews ? averageRating : '—'}</div>
+            <div className="text-[10px] text-gray-400 font-bold mt-0.5">{hasReviews ? '平均得分' : '尚無評價'}</div>
           </div>
           <div className="w-px h-10 bg-slate-200" />
           <div>
@@ -90,7 +92,7 @@ export default function CourseReviews({ courseId, hasAccess }: CourseReviewsProp
                 <Star
                   key={s}
                   className={`w-4 h-4 ${
-                    s <= Math.round(Number(averageRating)) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'
+                    hasReviews && s <= Math.round(Number(averageRating)) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'
                   }`}
                 />
               ))}

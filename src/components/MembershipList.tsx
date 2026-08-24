@@ -78,11 +78,13 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch checkout parameters');
-      }
-
       const params = await response.json();
+
+      // 讀取伺服器實際錯誤訊息並顯示，讓使用者看到真正原因（比照 DownloadsList / BuyButton 做法）
+      if (!response.ok) {
+        toast.error(params.error || '結帳失敗，請稍後再試');
+        return;
+      }
 
       // 建立隱藏表單並送出至 PayUni（UPP）
       submitPayuniForm(params);
