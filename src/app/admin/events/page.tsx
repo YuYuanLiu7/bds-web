@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Calendar,
   Search,
@@ -15,11 +15,13 @@ import {
   AlertCircle
 } from 'lucide-react';
 import EventModal, { Event } from '@/components/admin/EventModal';
+import { useAdminResource } from '@/hooks/useAdminResource';
+import { useToast } from '@/components/Toast';
 
 export default function AdminEventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
+  // 清單資料改由共用 Hook 統一管理（載入 / 錯誤 / 重抓 / 刪除）
+  const { items: events, loading, error, refetch, remove } = useAdminResource<Event>('/api/admin/events');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -29,32 +31,6 @@ export default function AdminEventsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all'); // 'all', 'upcoming', 'completed'
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  const fetchEvents = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/admin/events');
-      const data = await res.json();
-      
-      if (res.ok && Array.isArray(data)) {
-        setEvents(data);
-      } else {
-        setError(data.error || '無法取得活動資料');
-        setEvents([]);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('連線至資料庫發生錯誤，請確認 events 資料表是否已建立。');
-      setEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
 
   const handleAdd = () => {
     setEditingEvent(null);
@@ -70,15 +46,9 @@ export default function AdminEventsPage() {
     if (!confirm(`確定要刪除活動「${title}」嗎？此動作無法復原。`)) return;
 
     try {
-      const res = await fetch(`/api/admin/events?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!res.ok) throw new Error('刪除失敗');
-
-      fetchEvents();
+      await remove(id);
     } catch (err) {
-      alert('刪除失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('刪除失敗：' + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -157,8 +127,8 @@ export default function AdminEventsPage() {
             <p className="font-extrabold mb-1">提示：系統無法載入活動資料表</p>
             <p className="font-medium text-rose-500 mb-3">若這是您首次部署此功能，請先在您的 Supabase SQL 編輯器中執行我們為您準備的 `db/add_events_table.sql` 腳本建立對應資料表。</p>
             <div className="flex items-center space-x-2">
-              <button 
-                onClick={fetchEvents}
+              <button
+                onClick={refetch}
                 className="bg-white border border-rose-200 text-rose-700 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-rose-100/30 transition cursor-pointer"
               >
                 重新載入試試
@@ -381,8 +351,8 @@ export default function AdminEventsPage() {
         isOpen={isModalOpen} 
         onClose={() => {
           setIsModalOpen(false);
-          fetchEvents();
-        }} 
+          refetch();
+        }}
         event={editingEvent} 
       />
 

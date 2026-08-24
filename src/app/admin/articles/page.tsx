@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
+import { useState } from 'react';
+import {
   FileText, 
   Search, 
   Plus, 
@@ -16,6 +16,8 @@ import {
   User
 } from 'lucide-react';
 import ArticleModal from '@/components/admin/ArticleModal';
+import { useAdminResource } from '@/hooks/useAdminResource';
+import { useToast } from '@/components/Toast';
 
 // 後台文章列表資料結構
 interface ArticleItem {
@@ -30,9 +32,9 @@ interface ArticleItem {
 }
 
 export default function AdminArticlesPage() {
-  const [articles, setArticles] = useState<ArticleItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
+  // 清單資料改由共用 Hook 統一管理（載入 / 錯誤 / 重抓 / 刪除）
+  const { items: articles, loading, error, refetch, remove } = useAdminResource<ArticleItem>('/api/admin/articles');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<ArticleItem | null>(null);
@@ -42,32 +44,6 @@ export default function AdminArticlesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all'); // 'all', 'published', 'draft'
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  const fetchArticles = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/admin/articles');
-      const data = await res.json();
-      
-      if (res.ok && Array.isArray(data)) {
-        setArticles(data);
-      } else {
-        setError(data.error || '無法取得文章資料');
-        setArticles([]);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('連線至資料庫發生錯誤，請確認 articles 資料表是否已建立。');
-      setArticles([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchArticles();
-  }, []);
 
   const handleAdd = () => {
     setEditingArticle(null);
@@ -83,18 +59,9 @@ export default function AdminArticlesPage() {
     if (!confirm(`確定要刪除文章「${title}」嗎？此動作無法復原。`)) return;
 
     try {
-      const res = await fetch(`/api/admin/articles?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || '刪除失敗');
-      }
-
-      fetchArticles();
+      await remove(id);
     } catch (err) {
-      alert('刪除失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('刪除失敗：' + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -104,7 +71,7 @@ export default function AdminArticlesPage() {
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
       })
-      .catch(() => alert('複製失敗，請手動複製'));
+      .catch(() => toast.error('複製失敗，請手動複製'));
   };
 
   const formatTaiwanDate = (dateStr: string) => {
@@ -171,8 +138,8 @@ export default function AdminArticlesPage() {
           <div>
             <p className="font-extrabold mb-1">提示：系統無法載入文章資料表</p>
             <p className="font-medium text-rose-500 mb-3">若這是您首次啟用此功能，請先在您的 Supabase SQL 編輯器中執行我們為您準備的 `db/add_articles_table.sql` 腳本建立對應資料表。</p>
-            <button 
-              onClick={fetchArticles}
+            <button
+              onClick={refetch}
               className="bg-white border border-rose-200 text-rose-700 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-rose-100/30 transition cursor-pointer"
             >
               重新載入
@@ -393,8 +360,8 @@ export default function AdminArticlesPage() {
         isOpen={isModalOpen} 
         onClose={() => {
           setIsModalOpen(false);
-          fetchArticles();
-        }} 
+          refetch();
+        }}
         article={editingArticle} 
       />
 

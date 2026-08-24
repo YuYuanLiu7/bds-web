@@ -26,6 +26,7 @@ import {
   Clock,
   Edit3
 } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 // 課程基本資訊資料型別
 interface CourseInfo {
@@ -86,6 +87,7 @@ interface ChapterPayload {
 export default function CourseStudentsPage() {
   const params = useParams();
   const courseId = params.id as string;
+  const toast = useToast();
 
   // Course Details State
   const [course, setCourse] = useState<CourseInfo | null>(null);
@@ -96,7 +98,6 @@ export default function CourseStudentsPage() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   // Sub Tabs: 'students' | 'chapters' | 'announcements'
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('students');
@@ -126,11 +127,6 @@ export default function CourseStudentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [userSearch, setUserSearch] = useState('');
-
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   // Fetch course, students, & sales revenue details
   const fetchCourseAndStudents = async () => {
@@ -225,7 +221,7 @@ export default function CourseStudentsPage() {
   const handleGrantAccess = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUserId) {
-      showToast('error', '請選擇一位成員！');
+      toast.error('請選擇一位成員！');
       return;
     }
 
@@ -242,17 +238,17 @@ export default function CourseStudentsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast('success', '已成功為學員開通此課程觀看權限！');
+        toast.success('已成功為學員開通此課程觀看權限！');
         setIsModalOpen(false);
         setSelectedUserId('');
         setUserSearch('');
         fetchCourseAndStudents(); // refresh
       } else {
-        showToast('error', data.error || '開通失敗');
+        toast.error(data.error || '開通失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '連線錯誤，開通權限失敗');
+      toast.error('連線錯誤，開通權限失敗');
     } finally {
       setSubmitting(false);
     }
@@ -261,7 +257,7 @@ export default function CourseStudentsPage() {
   // Handle student individual course access revocation
   const handleRevokeAccess = async (student: CourseStudent) => {
     if (student.auth_type === 'subscription') {
-      showToast('error', '訂閱制會員觀看權限無法在個別課程中刪除！');
+      toast.error('訂閱制會員觀看權限無法在個別課程中刪除！');
       return;
     }
 
@@ -276,14 +272,14 @@ export default function CourseStudentsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast('success', '已成功取消該學員的單堂觀看授權！');
+        toast.success('已成功取消該學員的單堂觀看授權！');
         fetchCourseAndStudents(); // refresh
       } else {
-        showToast('error', data.error || '取消授權失敗');
+        toast.error(data.error || '取消授權失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '連線錯誤，取消授權失敗');
+      toast.error('連線錯誤，取消授權失敗');
     }
   };
 
@@ -307,7 +303,7 @@ export default function CourseStudentsPage() {
   const handleSaveChapter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chapterTitle.trim()) {
-      showToast('error', '請填寫單元標題！');
+      toast.error('請填寫單元標題！');
       return;
     }
 
@@ -337,15 +333,15 @@ export default function CourseStudentsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast('success', isEdit ? '單元已成功更新！' : '新單元已成功建立！');
+        toast.success(isEdit ? '單元已成功更新！' : '新單元已成功建立！');
         setIsChapterModalOpen(false);
         fetchChapters(); // refresh
       } else {
-        showToast('error', data.error || '儲存單元失敗');
+        toast.error(data.error || '儲存單元失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '連線錯誤，儲存失敗');
+      toast.error('連線錯誤，儲存失敗');
     } finally {
       setSubmitting(false);
     }
@@ -362,14 +358,14 @@ export default function CourseStudentsPage() {
       });
 
       if (res.ok) {
-        showToast('success', '單元已刪除');
+        toast.success('單元已刪除');
         fetchChapters();
       } else {
-        showToast('error', '刪除失敗');
+        toast.error('刪除失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '連線錯誤，刪除單元失敗');
+      toast.error('連線錯誤，刪除單元失敗');
     }
   };
 
@@ -377,7 +373,7 @@ export default function CourseStudentsPage() {
   const handlePublishAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!annTitle.trim() || !annContent.trim()) {
-      showToast('error', '請填寫公告標題與詳細內容！');
+      toast.error('請填寫公告標題與詳細內容！');
       return;
     }
 
@@ -395,16 +391,16 @@ export default function CourseStudentsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast('success', '課程公告已成功發佈！學員能在播放單元中即時觀看。');
+        toast.success('課程公告已成功發佈！學員能在播放單元中即時觀看。');
         setAnnTitle('');
         setAnnContent('');
         fetchAnnouncements(); // refresh
       } else {
-        showToast('error', data.error || '發佈失敗');
+        toast.error(data.error || '發佈失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '連線錯誤，發佈公告失敗');
+      toast.error('連線錯誤，發佈公告失敗');
     } finally {
       setPostingAnnouncement(false);
     }
@@ -421,14 +417,14 @@ export default function CourseStudentsPage() {
       });
 
       if (res.ok) {
-        showToast('success', '公告已刪除');
+        toast.success('公告已刪除');
         fetchAnnouncements();
       } else {
-        showToast('error', '刪除失敗');
+        toast.error('刪除失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '刪除公告失敗，連線發生錯誤');
+      toast.error('刪除公告失敗，連線發生錯誤');
     }
   };
 
@@ -491,22 +487,6 @@ export default function CourseStudentsPage() {
   return (
     <div className="space-y-6 select-none font-sans text-slate-700 relative">
       
-      {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center px-5 py-3.5 rounded-2xl shadow-xl border text-sm font-extrabold animate-in fade-in slide-in-from-top-4 duration-300 ${
-          toast.type === 'success' 
-            ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
-            : 'bg-rose-50 border-rose-100 text-rose-700'
-        }`}>
-          {toast.type === 'success' ? (
-            <Check className="w-4 h-4 mr-2 text-emerald-600" />
-          ) : (
-            <X className="w-4 h-4 mr-2 text-rose-600" />
-          )}
-          {toast.message}
-        </div>
-      )}
-
       {/* Navigation Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 text-xs font-bold text-slate-400">

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { FileCode, Plus, ExternalLink, Trash2, X, Pencil, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 // 頁面管理資料結構
 interface PageItem {
@@ -82,6 +84,7 @@ const DEFAULT_PAGES: PageItem[] = [
 ];
 
 export default function AdminPagesPage() {
+  const toast = useToast();
   const [pages, setPages] = useState<PageItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -119,11 +122,11 @@ export default function AdminPagesPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(data.error || '頁面內容儲存失敗，請稍後再試。');
+        toast.error(data.error || '頁面內容儲存失敗，請稍後再試。');
       }
     } catch (err) {
       console.error('Save pages error:', err);
-      alert('連線錯誤，頁面內容儲存失敗。');
+      toast.error('連線錯誤，頁面內容儲存失敗。');
     }
   };
 
@@ -167,46 +170,18 @@ export default function AdminPagesPage() {
     }
   };
 
+  // 封面圖片上傳（統一走共用上傳模組，內含 HEIC 轉換與安全檔名處理）
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
     setUploading(true);
-    const data = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
-    data.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data
-      });
-      if (res.ok) {
-        const result = await res.json();
-        setFormData(prev => ({ ...prev, imageUrl: result.url }));
-      } else {
-        const err = await res.json();
-        alert('圖片上傳失敗：' + (err.error || '未知錯誤'));
-      }
+      const url = await uploadFile(file);
+      setFormData(prev => ({ ...prev, imageUrl: url }));
     } catch (err) {
       console.error("Upload error:", err);
-      alert('上傳失敗，請確認伺服器正常運行中。');
+      toast.error('圖片上傳失敗：' + (err instanceof Error ? err.message : '未知錯誤'));
     } finally {
       setUploading(false);
     }

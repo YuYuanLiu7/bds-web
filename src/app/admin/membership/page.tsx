@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Award, Search, Plus, Users, Edit3, Trash2, CheckCircle, Sparkles, X, AlertCircle, DollarSign } from 'lucide-react';
+import { useAdminResource } from '@/hooks/useAdminResource';
+import { useToast } from '@/components/Toast';
 
 interface MembershipPlan {
   id: string;
@@ -17,9 +19,10 @@ interface MembershipPlan {
 }
 
 export default function AdminMembershipPage() {
-  const [plans, setPlans] = useState<MembershipPlan[]>([]);
+  const toast = useToast();
+  // 清單資料改由共用 Hook 統一管理（載入 / 重抓 / 刪除 / 儲存）
+  const { items: plans, loading, refetch, remove, save } = useAdminResource<MembershipPlan>('/api/admin/membership');
   const [filteredPlans, setFilteredPlans] = useState<MembershipPlan[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,25 +47,6 @@ export default function AdminMembershipPage() {
 
   // 狀態切換中的方案 ID（避免切換期間重複點擊造成競態）
   const [togglingId, setTogglingId] = useState<string | null>(null);
-
-  const fetchPlans = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/membership');
-      if (res.ok) {
-        const data = await res.json();
-        setPlans(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch membership plans:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPlans();
-  }, []);
 
   // Filter plans list
   useEffect(() => {
@@ -117,23 +101,10 @@ export default function AdminMembershipPage() {
     if (!confirm('⚠️ 確定要刪除此會員方案嗎？這將會立即移除前台方案與交易關聯！')) return;
     
     try {
-      const res = await fetch(`/api/admin/membership?id=${id}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        alert('🎉 方案已成功刪除！');
-        fetchPlans();
-      } else {
-        let errData: { error?: string } | null = null;
-        try {
-          errData = await res.json();
-        } catch {
-          errData = null;
-        }
-        alert(`❌ 刪除失敗：${errData?.error || '未知錯誤'}`);
-      }
+      await remove(id);
+      toast.success('🎉 方案已成功刪除！');
     } catch (error) {
-      alert(`❌ 刪除失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
+      toast.error(`❌ 刪除失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
     }
   };
 
@@ -144,28 +115,11 @@ export default function AdminMembershipPage() {
     const nextStatus = plan.status === 'active' ? 'draft' : 'active';
     setTogglingId(plan.id);
     try {
-      const res = await fetch('/api/admin/membership', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...plan,
-          status: nextStatus
-        })
-      });
-      if (res.ok) {
-        fetchPlans();
-      } else {
-        let errData: { error?: string } | null = null;
-        try {
-          errData = await res.json();
-        } catch {
-          errData = null;
-        }
-        alert(`❌ 狀態切換失敗：${errData?.error || '未知錯誤'}`);
-      }
+      // plan.id 有值，save 會以 PUT 更新並自動重抓清單
+      await save({ ...plan, status: nextStatus });
     } catch (error) {
       console.error("Failed to toggle plan status:", error);
-      alert(`❌ 狀態切換失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
+      toast.error(`❌ 狀態切換失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
     } finally {
       setTogglingId(null);
     }
@@ -185,7 +139,7 @@ export default function AdminMembershipPage() {
     setFormError('');
 
     try {
-      const method = selectedPlan ? 'PUT' : 'POST';
+      // 有 selectedPlan 時帶入 id，save 會自動改走 PUT 更新
       const body = {
         ...formData,
         price: parseInt(formData.price),
@@ -193,20 +147,9 @@ export default function AdminMembershipPage() {
         ...(selectedPlan ? { id: selectedPlan.id } : {})
       };
 
-      const res = await fetch('/api/admin/membership', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      if (res.ok) {
-        alert(selectedPlan ? '🎉 方案已成功更新！' : '🎉 新會員方案已成功建立！');
-        setIsModalOpen(false);
-        fetchPlans();
-      } else {
-        const errData = await res.json();
-        setFormError(errData.error || '儲存失敗，請重試');
-      }
+      await save(body);
+      toast.success(selectedPlan ? '🎉 方案已成功更新！' : '🎉 新會員方案已成功建立！');
+      setIsModalOpen(false);
     } catch (error) {
       setFormError(error instanceof Error ? error.message : '儲存發生錯誤');
     } finally {
@@ -438,8 +381,8 @@ export default function AdminMembershipPage() {
                 </select>
               </div>
 
-              <button 
-                onClick={fetchPlans}
+              <button
+                onClick={refetch}
                 className="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center cursor-pointer"
               >
                 刷新資料庫

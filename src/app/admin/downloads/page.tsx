@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Download, Search, Plus, Edit3, Trash2, Copy, Check, ShoppingBag, Activity, Filter } from 'lucide-react';
 import DownloadModal from '@/components/admin/DownloadModal';
+import { useAdminResource } from '@/hooks/useAdminResource';
+import { useToast } from '@/components/Toast';
 
 interface DownloadProduct {
   id: string;
@@ -17,10 +19,10 @@ interface DownloadProduct {
 }
 
 export default function AdminDownloadsPage() {
-  const [downloads, setDownloads] = useState<DownloadProduct[]>([]);
+  const toast = useToast();
+  // 清單資料改由共用 Hook 統一管理（載入 / 錯誤 / 重抓 / 刪除）
+  const { items: downloads, loading, error, refetch, remove } = useAdminResource<DownloadProduct>('/api/admin/downloads');
   const [filteredDownloads, setFilteredDownloads] = useState<DownloadProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,34 +34,6 @@ export default function AdminDownloadsPage() {
   
   // Actions
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const fetchDownloads = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const res = await fetch('/api/admin/downloads');
-      if (!res.ok) throw new Error('API request failed');
-      const data = await res.json();
-
-      if (Array.isArray(data) && data.length > 0) {
-        setDownloads(data);
-      } else {
-        // 空資料時呈現空狀態，不以假商品魚目混珠
-        setDownloads([]);
-      }
-    } catch (err) {
-      // API 失敗時標記載入失敗，與「無資料」空狀態做區分
-      console.warn('讀取數位商品失敗：', err);
-      setDownloads([]);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDownloads();
-  }, []);
 
   // Filter & Search Logic
   useEffect(() => {
@@ -92,13 +66,10 @@ export default function AdminDownloadsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('確定要刪除此數位商品嗎？')) return;
     try {
-      // 一律呼叫刪除 API，確保刪除行為與畫面一致
-      const res = await fetch(`/api/admin/downloads?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('刪除失敗');
-
-      setDownloads(prev => prev.filter(item => item.id !== id));
+      // 呼叫刪除 API 並重抓清單，確保刪除行為與畫面一致
+      await remove(id);
     } catch {
-      alert('刪除失敗');
+      toast.error('刪除失敗');
     }
   };
 
@@ -369,7 +340,7 @@ export default function AdminDownloadsPage() {
         isOpen={isModalOpen}
         product={editingProduct}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchDownloads}
+        onSuccess={refetch}
       />
 
     </div>

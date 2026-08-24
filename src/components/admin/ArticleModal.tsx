@@ -9,6 +9,8 @@ import {
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Outdent, Indent, Quote, Code, Table, Video,
   Italic, Underline, Strikethrough, Send, FilePlus, Edit3
 } from 'lucide-react';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 interface Article {
   id?: string;
@@ -44,6 +46,7 @@ interface ArticleModalProps {
 
 export default function ArticleModal({ article, isOpen, onClose }: ArticleModalProps) {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -149,46 +152,18 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
     }
   };
 
+  // 處理編輯器內文插圖上傳（統一走共用上傳模組）
   const handleEditorImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
     setUploading(true);
-    const uploadData = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
-    uploadData.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '上傳失敗');
-
-      if (data.url) {
-        execCmd('insertImage', data.url);
-      }
+      const url = await uploadFile(file);
+      execCmd('insertImage', url);
     } catch (err) {
       console.error(err);
-      alert('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
       if (editorImageInputRef.current) {
@@ -317,47 +292,18 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
 
   if (!isOpen) return null;
 
-  // Handles image uploading to backend
+  // 處理封面精選圖片上傳（統一走共用上傳模組）
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
     setUploading(true);
-    const uploadData = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
-    uploadData.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '上傳失敗');
-
-      if (data.url) {
-        setFormData(prev => ({ ...prev, image_url: data.url }));
-      }
+      const url = await uploadFile(file);
+      setFormData(prev => ({ ...prev, image_url: url }));
     } catch (err) {
       console.error(err);
-      alert('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -391,7 +337,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert('儲存文章出錯：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('儲存文章出錯：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }

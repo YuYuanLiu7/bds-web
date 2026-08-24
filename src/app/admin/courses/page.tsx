@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Plus, Edit3, Trash2, Copy, Check, MoreVertical, BookOpen, GraduationCap, Users, DollarSign, Filter, Search } from "lucide-react";
 import SafeImage from '@/components/SafeImage';
 import CourseModal, { Course } from "@/components/admin/CourseModal";
+import { useAdminResource } from '@/hooks/useAdminResource';
+import { useToast } from '@/components/Toast';
 
 // 課程列表頁額外攜帶之統計欄位（後端 courses_full 回傳）
 interface AdminCourse extends Course {
@@ -15,11 +17,11 @@ interface AdminCourse extends Course {
 }
 
 export default function AdminCoursesPage() {
-  const [courses, setCourses] = useState<AdminCourse[]>([]);
+  const toast = useToast();
+  // 清單資料改由共用 Hook 統一管理（載入 / 錯誤 / 重抓）
+  const { items: courses, loading, error, refetch } = useAdminResource<AdminCourse>('/api/admin/courses_full');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,32 +32,6 @@ export default function AdminCoursesPage() {
   // Tracks which card's menu is open
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const fetchCourses = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/admin/courses_full');
-      const data = await res.json();
-      
-      if (res.ok && Array.isArray(data)) {
-        setCourses(data);
-      } else {
-        setError(data.error || '無法取得課程資料');
-        setCourses([]);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('連線發生錯誤');
-      setCourses([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCourses();
-  }, []);
 
   // 點擊選單與觸發鈕以外的區域時，自動關閉三點選單
   useEffect(() => {
@@ -85,17 +61,18 @@ export default function AdminCoursesPage() {
     if (!confirm('確定要刪除此課程嗎？這將會連同所有章節一起刪除。')) return;
     
     try {
+      // 刪除端點與清單端點不同（清單走 courses_full、刪除走 courses），故保留手動呼叫
       const res = await fetch(`/api/admin/courses?id=${id}`, { method: 'DELETE' });
       // 解析後端回傳內容，取得真實的刪除失敗原因（例如外鍵約束）
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert(data.error || '刪除失敗');
+        toast.error(data.error || '刪除失敗');
         return;
       }
-      fetchCourses();
+      refetch();
     } catch (err) {
       console.error(err);
-      alert('刪除失敗');
+      toast.error('刪除失敗');
     } finally {
       setActiveMenuId(null);
     }
@@ -462,8 +439,8 @@ export default function AdminCoursesPage() {
         isOpen={isModalOpen} 
         onClose={() => {
           setIsModalOpen(false);
-          fetchCourses();
-        }} 
+          refetch();
+        }}
         course={editingCourse} 
       />
 

@@ -17,6 +17,8 @@ import {
   Upload,
   Loader2
 } from 'lucide-react';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 interface Chapter {
   id?: string;
@@ -51,6 +53,7 @@ interface CourseModalProps {
 
 export default function CourseModal({ course, isOpen, onClose }: CourseModalProps) {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null); // tracks which field is uploading (e.g. 'cover', 'course_file', 'chapter-video-idx', 'chapter-file-idx')
   const [deletedChapters, setDeletedChapters] = useState<string[]>([]);
@@ -139,52 +142,24 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     setFormData({ ...formData, chapters: newChapters });
   };
 
-  // Helper to handle general file uploads
+  // 通用檔案上傳處理（統一走共用上傳模組）
   const handleGenericUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldKey: string, callback: (url: string) => void) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
+    // 封面圖片先以本機預覽呈現，提升上傳等待體驗
     if (fieldKey === 'cover') {
       const objectUrl = URL.createObjectURL(file);
       setLocalCoverPreview(objectUrl);
     }
 
     setUploadingField(fieldKey);
-    const uploadData = new FormData();
-    const fileExt = file.name.split('.').pop() || 'file';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
-    uploadData.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '上傳失敗');
-
-      if (data.url) {
-        callback(data.url);
-      }
+      const url = await uploadFile(file);
+      callback(url);
     } catch (err) {
       console.error(err);
-      alert('檔案上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('檔案上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploadingField(null);
     }
@@ -234,7 +209,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert('儲存出錯了，請稍後再試');
+      toast.error('儲存出錯了，請稍後再試');
     } finally {
       setLoading(false);
     }

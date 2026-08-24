@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Save, Image as ImageIcon, Link2, Calendar, MapPin, Users, Award, Tag, Compass } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 export interface Event {
   id?: string;
@@ -29,6 +31,7 @@ interface EventModalProps {
 
 export default function EventModal({ event, isOpen, onClose }: EventModalProps) {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<Event>({
@@ -101,47 +104,18 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
 
   if (!isOpen) return null;
 
-  // Handles image uploading to backend
+  // 處理封面圖片上傳（統一走共用上傳模組）
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
     setUploading(true);
-    const uploadData = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
-    uploadData.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '上傳失敗');
-
-      if (data.url) {
-        setFormData(prev => ({ ...prev, image_url: data.url }));
-      }
+      const url = await uploadFile(file);
+      setFormData(prev => ({ ...prev, image_url: url }));
     } catch (err) {
       console.error(err);
-      alert('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('圖片上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -176,7 +150,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert('儲存活動出錯：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('儲存活動出錯：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }

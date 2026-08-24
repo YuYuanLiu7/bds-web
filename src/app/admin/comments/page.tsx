@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MessageSquare, Search, Trash2, Check, BookOpen, Clock, Filter, CornerDownRight, User } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 // 後台留言資料結構
 interface Comment {
@@ -17,6 +18,7 @@ interface Comment {
 }
 
 export default function AdminCommentsPage() {
+  const toast = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
 
   // 從伺服器載入所有留言（持久化於資料庫）
@@ -48,11 +50,11 @@ export default function AdminCommentsPage() {
         body: JSON.stringify({ id, action: 'approve' }),
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.error || '操作失敗'); return; }
+      if (!res.ok) { toast.error(data.error || '操作失敗'); return; }
       setComments(comments.map(c => (c.id === id ? data : c)));
     } catch (err) {
       console.error('Approve error:', err);
-      alert('連線錯誤，操作失敗。');
+      toast.error('連線錯誤，操作失敗。');
     }
   };
 
@@ -61,11 +63,11 @@ export default function AdminCommentsPage() {
     try {
       const res = await fetch(`/api/admin/comments?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       const data = await res.json();
-      if (!res.ok) { alert(data.error || '刪除失敗'); return; }
+      if (!res.ok) { toast.error(data.error || '刪除失敗'); return; }
       setComments(comments.filter(c => c.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
-      alert('連線錯誤，刪除失敗。');
+      toast.error('連線錯誤，刪除失敗。');
     }
   };
 
@@ -80,13 +82,13 @@ export default function AdminCommentsPage() {
         body: JSON.stringify({ id, action: 'reply', reply: text }),
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.error || '回覆失敗'); return; }
+      if (!res.ok) { toast.error(data.error || '回覆失敗'); return; }
       setComments(comments.map(c => (c.id === id ? data : c)));
       setReplyTextMap({ ...replyTextMap, [id]: '' });
       setActiveReplyId(null);
     } catch (err) {
       console.error('Reply error:', err);
-      alert('連線錯誤，回覆失敗。');
+      toast.error('連線錯誤，回覆失敗。');
     }
   };
 

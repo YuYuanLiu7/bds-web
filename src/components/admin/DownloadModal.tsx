@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Save, FileText, Download, DollarSign, Tag, Globe, Settings, Eye } from 'lucide-react';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 interface DownloadProduct {
   id?: string;
@@ -24,6 +26,7 @@ interface DownloadModalProps {
 
 export default function DownloadModal({ product, isOpen, onClose, onSuccess }: DownloadModalProps) {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -66,31 +69,18 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
 
   if (!isOpen) return null;
 
+  // 處理數位商品檔案上傳（統一走共用上傳模組）
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
-    const uploadData = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
-    uploadData.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '上傳失敗');
-
-      if (data.url) {
-        setFormData(prev => ({ ...prev, file_url: data.url }));
-      }
+      const url = await uploadFile(file);
+      setFormData(prev => ({ ...prev, file_url: url }));
     } catch (err) {
       console.error(err);
-      alert('檔案上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('檔案上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
@@ -120,7 +110,7 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert('儲存數位商品出錯：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('儲存數位商品出錯：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }

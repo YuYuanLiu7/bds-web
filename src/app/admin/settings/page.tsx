@@ -1,22 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Globe, 
-  Power, 
-  ImageIcon, 
-  HelpCircle, 
-  Mail, 
-  Megaphone, 
-  Building2, 
-  X, 
-  Save, 
-  Check, 
-  Plus, 
-  Trash2, 
+import {
+  Globe,
+  Power,
+  ImageIcon,
+  HelpCircle,
+  Mail,
+  Megaphone,
+  Building2,
+  X,
+  Save,
+  Plus,
+  Trash2,
   Pencil,
   Settings
 } from 'lucide-react';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 // 首頁輪播投影片資料結構
 interface CarouselSlide {
@@ -39,8 +40,8 @@ interface Announcement {
 }
 
 export default function AdminSettingsPage() {
+  const toast = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // 1. General & Contact
   const [siteName, setSiteName] = useState('');
@@ -158,10 +159,10 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleShowToast = (msg: string) => {
+  // 顯示通知並關閉當前 Modal（統一改用全站 Toast）
+  const handleShowToast = (msg: string, type: 'success' | 'error' | 'info' = 'success') => {
     setActiveModal(null);
-    setSuccessMsg(msg);
-    setTimeout(() => setSuccessMsg(null), 3000);
+    toast.show(msg, type);
   };
 
   const handleSaveGeneral = async (e: React.FormEvent) => {
@@ -170,7 +171,7 @@ export default function AdminSettingsPage() {
     const ok = await saveSetting('general', {
       siteName, siteDesc, contactEmail, communityUrl, siteStatus, maintenanceMessage,
     });
-    handleShowToast(ok ? '基本資訊與聯絡方式設定已儲存成功！' : '儲存失敗，請稍後再試');
+    handleShowToast(ok ? '基本資訊與聯絡方式設定已儲存成功！' : '儲存失敗，請稍後再試', ok ? 'success' : 'error');
   };
 
   const handleSaveVisual = async (e: React.FormEvent) => {
@@ -191,7 +192,7 @@ export default function AdminSettingsPage() {
       if (res.ok) {
         handleShowToast('前台首頁視覺與圖片設定已儲存成功！');
       } else {
-        alert('儲存失敗，請檢查 API 回應');
+        toast.error('儲存失敗，請檢查 API 回應');
       }
     } catch (err) {
       console.error("Visual settings save error:", err);
@@ -203,19 +204,19 @@ export default function AdminSettingsPage() {
     const ok = await saveSetting('general', {
       siteName, siteDesc, contactEmail, communityUrl, siteStatus, maintenanceMessage,
     });
-    handleShowToast(ok ? '網站上線與運作狀態設定已儲存！' : '儲存失敗，請稍後再試');
+    handleShowToast(ok ? '網站上線與運作狀態設定已儲存！' : '儲存失敗，請稍後再試', ok ? 'success' : 'error');
   };
 
   const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
     const ok = await saveSetting('notifications', { adminEmail, emailSubject, emailTemplate });
-    handleShowToast(ok ? '郵件與通知設定已儲存！' : '儲存失敗，請稍後再試');
+    handleShowToast(ok ? '郵件與通知設定已儲存！' : '儲存失敗，請稍後再試', ok ? 'success' : 'error');
   };
 
   const handleSavePayUni = (e: React.FormEvent) => {
     e.preventDefault();
     // PayUni 金鑰以伺服器環境變數為準，不在此持久化（避免公開金鑰外洩）。
-    handleShowToast('提示：PayUni 金鑰請於 .env / 部署平台環境變數設定，此頁僅供參考。');
+    handleShowToast('提示：PayUni 金鑰請於 .env / 部署平台環境變數設定，此頁僅供參考。', 'info');
   };
 
   // FAQ Manager helpers
@@ -244,7 +245,7 @@ export default function AdminSettingsPage() {
       setFaqs(prevFaqs);
       setEditingFaqIndex(prevEditingIndex);
       setFaqForm(prevForm);
-      handleShowToast('儲存失敗，請稍後再試');
+      handleShowToast('儲存失敗，請稍後再試', 'error');
     }
   };
 
@@ -258,7 +259,7 @@ export default function AdminSettingsPage() {
     if (!ok) {
       // 儲存失敗，還原 FAQ 清單
       setFaqs(prevFaqs);
-      handleShowToast('儲存失敗，請稍後再試');
+      handleShowToast('儲存失敗，請稍後再試', 'error');
     }
   };
 
@@ -288,7 +289,7 @@ export default function AdminSettingsPage() {
       setAnnouncements(prevAnn);
       setEditingAnnouncementIndex(prevEditingIndex);
       setAnnouncementForm(prevForm);
-      handleShowToast('儲存失敗，請稍後再試');
+      handleShowToast('儲存失敗，請稍後再試', 'error');
     }
   };
 
@@ -302,96 +303,41 @@ export default function AdminSettingsPage() {
     if (!ok) {
       // 儲存失敗，還原公告清單
       setAnnouncements(prevAnn);
-      handleShowToast('儲存失敗，請稍後再試');
+      handleShowToast('儲存失敗，請稍後再試', 'error');
     }
   };
 
-  // Image Upload general uploader
+  // 通用圖片上傳（統一走共用上傳模組，內含 HEIC 轉換與安全檔名處理）
   const handleGeneralImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void, fieldId: string) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
     setUploadingField(fieldId);
-    const data = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
-    data.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data
-      });
-      if (res.ok) {
-        const result = await res.json();
-        setter(result.url);
-      } else {
-        alert('圖片上傳失敗，請稍後再試');
-      }
+      const url = await uploadFile(file);
+      setter(url);
     } catch (err) {
       console.error(err);
-      alert('圖片上傳發生錯誤，請檢查網路連線後再試');
+      toast.error('圖片上傳失敗，請稍後再試');
     } finally {
       setUploadingField(null);
     }
   };
 
+  // 首頁輪播圖片上傳（統一走共用上傳模組）
   const handleSlideUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    let file = e.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC image to JPEG if selected
-    const isHEIC = 
-      file.type === 'image/heic' || 
-      file.type === 'image/heif' || 
-      /\.(heic|heif)$/i.test(file.name);
-
-    if (isHEIC) {
-      try {
-        const { ensureClientImageCompatible } = await import('@/lib/image');
-        file = await ensureClientImageCompatible(file);
-      } catch (err) {
-        console.error('HEIC image conversion warning:', err);
-      }
-    }
-
     setUploadingField(`slide-${idx}`);
-    const data = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${crypto.randomUUID()}.${fileExt}`;
-    data.append('file', file, safeName);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data
-      });
-      if (res.ok) {
-        const result = await res.json();
-        const updated = [...slides];
-        updated[idx] = { ...updated[idx], imageUrl: result.url };
-        setSlides(updated);
-      } else {
-        alert('輪播圖片上傳失敗，請稍後再試');
-      }
-    } catch(e) {
-      console.error(e);
-      alert('輪播圖片上傳發生錯誤，請檢查網路連線後再試');
+      const url = await uploadFile(file);
+      const updated = [...slides];
+      updated[idx] = { ...updated[idx], imageUrl: url };
+      setSlides(updated);
+    } catch (err) {
+      console.error(err);
+      toast.error('輪播圖片上傳失敗，請稍後再試');
     } finally {
       setUploadingField(null);
     }
@@ -433,14 +379,6 @@ export default function AdminSettingsPage() {
         </h1>
         <p className="text-slate-400 text-xs mt-1 font-semibold">自訂與配置您的 BDS 平台屬性、金流閘道器及系統通知參數。</p>
       </div>
-
-      {/* Success Toast */}
-      {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-100 text-emerald-600 px-6 py-4 rounded-xl font-bold animate-in fade-in duration-200 shadow-sm flex items-center">
-          <Check className="w-5 h-5 mr-2" />
-          {successMsg}
-        </div>
-      )}
 
       {/* Settings Grid */}
       <div className="space-y-6">

@@ -23,6 +23,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import { uploadFile } from '@/lib/admin-upload';
+import { useToast } from '@/components/Toast';
 
 // 素材庫單一檔案項目之資料型別
 interface MediaItem {
@@ -35,6 +37,7 @@ interface MediaItem {
 }
 
 export default function AdminAssetsPage() {
+  const toast = useToast();
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -51,8 +54,6 @@ export default function AdminAssetsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // 10, 20, 50
 
-  // Toast notifications
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Drag and drop state
@@ -80,62 +81,22 @@ export default function AdminAssetsPage() {
     fetchMedia();
   }, []);
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
-  };
-
-  // Upload file logic
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    const fileExt = file.name.split('.').pop() || 'png';
-    const safeName = `upload-${Date.now()}.${fileExt}`;
-    formData.append('file', file, safeName);
-
-    const res = await fetch('/api/admin/upload', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || '上傳失敗');
-    }
-  };
-
-  // Upload handler
+  // 上傳處理（統一走共用上傳模組，內含 HEIC 轉換與安全檔名處理）
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
     try {
-      // Support multi-file upload sequentially
+      // 支援多檔案依序上傳
       for (let i = 0; i < files.length; i++) {
-        let file = files[i];
-
-        // Convert HEIC image to JPEG if selected
-        const isHEIC = 
-          file.type === 'image/heic' || 
-          file.type === 'image/heif' || 
-          /\.(heic|heif)$/i.test(file.name);
-
-        if (isHEIC) {
-          try {
-            const { ensureClientImageCompatible } = await import('@/lib/image');
-            file = await ensureClientImageCompatible(file);
-          } catch (err) {
-            console.error('HEIC image conversion warning:', err);
-          }
-        }
-
-        await uploadFile(file);
+        await uploadFile(files[i]);
       }
-      showToast(`已成功上傳 ${files.length} 個檔案至素材庫！`);
-      fetchMedia(); // Refresh list
+      toast.success(`已成功上傳 ${files.length} 個檔案至素材庫！`);
+      fetchMedia(); // 重新載入清單
     } catch (err) {
       console.error("Upload file error:", err);
-      alert('上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+      toast.error('上傳失敗：' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -167,11 +128,11 @@ export default function AdminAssetsPage() {
         for (let i = 0; i < files.length; i++) {
           await uploadFile(files[i]);
         }
-        showToast(`已成功上傳 ${files.length} 個檔案至素材庫！`);
-        fetchMedia(); // Refresh list
+        toast.success(`已成功上傳 ${files.length} 個檔案至素材庫！`);
+        fetchMedia(); // 重新載入清單
       } catch (err) {
         console.error("Upload drop error:", err);
-        alert('上傳失敗：' + (err instanceof Error ? err.message : String(err)));
+        toast.error('上傳失敗：' + (err instanceof Error ? err.message : String(err)));
       } finally {
         setUploading(false);
       }
@@ -187,16 +148,16 @@ export default function AdminAssetsPage() {
         });
 
         if (res.ok) {
-          showToast('檔案已成功刪除！');
+          toast.success('檔案已成功刪除！');
           setMedia(prev => prev.filter(m => m.id !== item.id));
           setSelectedIds(prev => prev.filter(id => id !== item.id));
         } else {
           const err = await res.json();
-          alert('刪除失敗：' + (err.error || '未知錯誤'));
+          toast.error('刪除失敗：' + (err.error || '未知錯誤'));
         }
       } catch (err) {
         console.error("Delete file error:", err);
-        alert('刪除發生錯誤，請重試。');
+        toast.error('刪除發生錯誤，請重試。');
       }
     }
   };
@@ -233,12 +194,12 @@ export default function AdminAssetsPage() {
 
         await Promise.all(deletePromises);
         
-        showToast(`批量刪除完成！成功：${successCount} 個，失敗：${failCount} 個。`);
-        fetchMedia(); // Refresh list
+        toast.success(`批量刪除完成！成功：${successCount} 個，失敗：${failCount} 個。`);
+        fetchMedia(); // 重新載入清單
         setSelectedIds([]);
       } catch (err) {
         console.error("Bulk delete error:", err);
-        alert('批量刪除時發生錯誤。');
+        toast.error('批量刪除時發生錯誤。');
       } finally {
         setLoading(false);
       }
@@ -255,7 +216,7 @@ export default function AdminAssetsPage() {
     navigator.clipboard.writeText(fullUrl).then(() => {
       setCopiedId(item.id);
       setTimeout(() => setCopiedId(null), 2000);
-    }).catch(() => alert('複製失敗'));
+    }).catch(() => toast.error('複製失敗'));
   };
 
   // Selection handlers
@@ -381,14 +342,6 @@ export default function AdminAssetsPage() {
           </button>
         </div>
       </div>
-
-      {/* Success Toast */}
-      {toastMsg && (
-        <div className="bg-emerald-50 border border-emerald-100 text-emerald-600 px-6 py-4 rounded-xl font-bold animate-in fade-in duration-200 shadow-sm flex items-center">
-          <Check className="w-5 h-5 mr-2" />
-          {toastMsg}
-        </div>
-      )}
 
       {/* Drag & Drop Upload Zone */}
       <div 

@@ -22,6 +22,7 @@ import {
   Calendar,
   BookOpen
 } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 // 成員（學員 / 講師 / 助教 / 管理員）資料型別
 interface Member {
@@ -69,12 +70,12 @@ interface MemberPayload {
 }
 
 export default function AdminStudentsPage() {
+  const toast = useToast();
   // Tabs: 'student' | 'instructor' | 'assistant' | 'admin' | 'settings'
   const [activeTab, setActiveTab] = useState<MemberTab>('student');
   const [students, setStudents] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   // Search Filters State
   const [searchName, setSearchName] = useState('');
@@ -110,12 +111,6 @@ export default function AdminStudentsPage() {
   const [tosText, setTosText] = useState('');
   const [privacyText, setPrivacyText] = useState('');
   const [requireTosAgreement, setRequireTosAgreement] = useState(true);
-
-  // show success/error toast helper
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   // Fetch all members
   const fetchMembers = async () => {
@@ -294,13 +289,13 @@ export default function AdminStudentsPage() {
   const handleSaveMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberEmail.trim() || !memberName.trim() || !memberRole) {
-      showToast('error', '請填寫必要欄位！');
+      toast.error('請填寫必要欄位！');
       return;
     }
 
     // If new user, password is required
     if (!editingMember && (!memberPassword || memberPassword.length < 6)) {
-      showToast('error', '新建成員時密碼為必填，且至少需要 6 位數！');
+      toast.error('新建成員時密碼為必填，且至少需要 6 位數！');
       return;
     }
 
@@ -340,15 +335,15 @@ export default function AdminStudentsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        showToast('success', isEdit ? '成員與權限資料已成功更新！' : '新成員與權限已成功建立！');
+        toast.success(isEdit ? '成員與權限資料已成功更新！' : '新成員與權限已成功建立！');
         setIsMemberModalOpen(false);
         fetchMembers(); // refresh
       } else {
-        showToast('error', data.error || '儲存失敗，請重試！');
+        toast.error(data.error || '儲存失敗，請重試！');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '伺服器連線發生錯誤');
+      toast.error('伺服器連線發生錯誤');
     }
   };
 
@@ -365,14 +360,14 @@ export default function AdminStudentsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        showToast('success', '成員已被刪除');
+        toast.success('成員已被刪除');
         fetchMembers();
       } else {
-        showToast('error', data.error || '刪除失敗');
+        toast.error(data.error || '刪除失敗');
       }
     } catch (err) {
       console.error(err);
-      showToast('error', '連線錯誤，刪除失敗');
+      toast.error('連線錯誤，刪除失敗');
     }
   };
 
@@ -395,13 +390,13 @@ export default function AdminStudentsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast('success', '學員欄位與服務條款設定已成功儲存！');
+        toast.success('學員欄位與服務條款設定已成功儲存！');
       } else {
-        showToast('error', data.error || '儲存設定失敗');
+        toast.error(data.error || '儲存設定失敗');
       }
     } catch (err) {
       console.error("Save settings error:", err);
-      showToast('error', '儲存設定連線錯誤');
+      toast.error('儲存設定連線錯誤');
     } finally {
       setSettingsLoading(false);
     }
@@ -429,22 +424,6 @@ export default function AdminStudentsPage() {
   return (
     <div className="space-y-6 select-none font-sans text-slate-700 relative">
       
-      {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center px-5 py-3.5 rounded-2xl shadow-xl border text-sm font-extrabold animate-in fade-in slide-in-from-top-4 duration-300 ${
-          toast.type === 'success' 
-            ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
-            : 'bg-rose-50 border-rose-100 text-rose-700'
-        }`}>
-          {toast.type === 'success' ? (
-            <Check className="w-4 h-4 mr-2 text-emerald-600" />
-          ) : (
-            <X className="w-4 h-4 mr-2 text-rose-600" />
-          )}
-          {toast.message}
-        </div>
-      )}
-
       {/* Title & Actions Bar */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
         <div>
