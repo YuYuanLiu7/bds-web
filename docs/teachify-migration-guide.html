@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teachify 搬家手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  :root {
+    --ground:#f5f7fb; --surface:#fff; --surface-2:#eef2f9; --ink:#1a2130; --ink-soft:#55607a;
+    --line:#dde3ee; --brand:#21448e; --brand-soft:#e7edf8; --brand-ink:#21448e;
+    --warn:#a8560a; --warn-soft:#fbf0e0; --warn-line:#f0d3a8; --good:#1c7a45; --good-soft:#e5f3ea; --maxw:760px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0e131d; --surface:#161d2b; --surface-2:#1e2637; --ink:#e7ecf6; --ink-soft:#9aa7c0;
+      --line:#2b3446; --brand:#8fb0e6; --brand-soft:#1c2a44; --brand-ink:#bcd0f2;
+      --warn:#e6a95a; --warn-soft:#2e2416; --warn-line:#4a3a20; --good:#6cc78d; --good-soft:#16281d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0e131d; --surface:#161d2b; --surface-2:#1e2637; --ink:#e7ecf6; --ink-soft:#9aa7c0;
+    --line:#2b3446; --brand:#8fb0e6; --brand-soft:#1c2a44; --brand-ink:#bcd0f2;
+    --warn:#e6a95a; --warn-soft:#2e2416; --warn-line:#4a3a20; --good:#6cc78d; --good-soft:#16281d;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif; font-size:17px; line-height:1.85; }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 20px 100px; }
+  header.hero { background:linear-gradient(160deg,#21448e 0%,#16305f 100%); color:#fff; padding:52px 20px 44px; text-align:center; }
+  header.hero .inner { max-width:var(--maxw); margin:0 auto; }
+  .kicker { font-size:13px; letter-spacing:.22em; text-transform:uppercase; font-weight:700; opacity:.78; margin:0 0 14px; }
+  header.hero h1 { font-family:"Noto Serif TC",serif; font-weight:900; font-size:clamp(28px,5.5vw,42px); line-height:1.25; margin:0 0 14px; text-wrap:balance; }
+  header.hero p { margin:0 auto; max-width:32em; opacity:.92; }
+  h2 { font-family:"Noto Serif TC",serif; font-weight:900; font-size:24px; margin:52px 0 8px; text-wrap:balance; }
+  h3 { font-family:"Noto Serif TC",serif; font-weight:700; font-size:18px; margin:26px 0 6px; }
+  p { margin:10px 0; }
+  a { color:var(--brand-ink); }
+  .eyebrow { display:inline-block; font-size:12px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; color:var(--brand-ink); margin:50px 0 0; }
+  .box { border-radius:14px; padding:18px 20px; margin:20px 0; border:1px solid var(--line); background:var(--surface); }
+  .box p:first-child { margin-top:0; } .box p:last-child { margin-bottom:0; }
+  .box .box-title { font-weight:700; margin-bottom:6px; }
+  .box.tip { background:var(--brand-soft); border-color:color-mix(in srgb,var(--brand) 30%,transparent); } .box.tip .box-title { color:var(--brand-ink); }
+  .box.warn { background:var(--warn-soft); border-color:var(--warn-line); } .box.warn .box-title { color:var(--warn); }
+  .box.good { background:var(--good-soft); border-color:color-mix(in srgb,var(--good) 35%,transparent); } .box.good .box-title { color:var(--good); }
+  .step { background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:24px 26px; margin:20px 0; }
+  .step-head { display:flex; align-items:flex-start; gap:16px; }
+  .step-num { flex:0 0 auto; width:42px; height:42px; border-radius:12px; background:var(--brand); color:#fff;
+    font-family:"JetBrains Mono",monospace; font-weight:700; font-size:19px; display:flex; align-items:center; justify-content:center; }
+  .step-head h2 { margin:0; font-size:22px; }
+  .step-head .sub { color:var(--ink-soft); font-size:14px; margin:4px 0 0; }
+  ol.dolist { padding-left:22px; } ol.dolist>li { margin:10px 0; }
+  ul.plain { list-style:none; padding:0; margin:12px 0; }
+  ul.plain>li { padding:7px 0 7px 30px; position:relative; border-bottom:1px dashed var(--line); }
+  ul.plain>li:last-child { border-bottom:0; }
+  ul.plain>li::before { content:"✓"; position:absolute; left:4px; color:var(--good); font-weight:700; }
+  pre { font-family:"JetBrains Mono",ui-monospace,monospace; font-size:14px; line-height:1.7; background:var(--surface-2);
+    border:1px solid var(--line); border-radius:10px; padding:14px; margin:12px 0; white-space:pre; overflow-x:auto; }
+  code.inline { font-family:"JetBrains Mono",monospace; font-size:.9em; background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:1px 6px; }
+  .tablewrap { overflow-x:auto; margin:18px 0; border:1px solid var(--line); border-radius:12px; }
+  table { border-collapse:collapse; width:100%; font-size:15px; }
+  th,td { text-align:left; padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:var(--surface-2); font-weight:700; } tr:last-child td { border-bottom:0; }
+  .gate { display:inline-block; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn-line); }
+  hr { border:0; border-top:1px solid var(--line); margin:44px 0; }
+  .footer { text-align:center; color:var(--ink-soft); font-size:14px; margin-top:46px; }
+  @media (max-width:520px){ body{font-size:16px;} .step{padding:20px 16px;} }
+  @media print { header.hero{background:none!important;color:#000!important;border-bottom:2px solid #000;} .step,.box{break-inside:avoid;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <p class="kicker">從 Teachify 搬到你自己的系統</p>
+    <h1>把課程、學員、影片搬過來，客戶無縫接軌</h1>
+    <p>這份教你把原本 Teachify 上的一切搬到新網站，並讓你的 656 位學員繼續看到他們買過的課。</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="box tip">
+    <p class="box-title">👋 先懂大方向（1 分鐘）</p>
+    <p>搬家分「內容」和「人」兩部分。<strong>內容</strong>（課程、影片、文章）要重新放進新系統；<strong>人</strong>（656 位學員＋他們買過哪些課）我們已經做好<strong>自動匯入工具</strong>，不用一個個手打。</p>
+    <p>最後把網址 <code class="inline">bds.fu-notes.com</code> 從 Teachify 改指到新網站，客戶用<strong>同一個網址</strong>就繼續用了。</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">⏳ 有一件事客戶一定要做一次：重設密碼</p>
+    <p>密碼<strong>沒有任何平台能匯出</strong>（Teachify 也不行），所以搬不過來。做法是：我們幫每位學員自動寄一封「設定新密碼」信，他點一下設定好，就能用<strong>原本的 Email</strong> 繼續登入看課。這是唯一要客戶動手的一次，其他都無感。</p>
+  </div>
+
+  <p class="eyebrow">搬家順序</p>
+  <h2>照這 6 步做</h2>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">1</div><div>
+      <h2>先把新網站架好</h2>
+      <p class="sub">照《BDS 開站手冊》把新系統上線（Supabase、Netlify 等都設定好）</p>
+    </div></div>
+    <p>還沒架好的話，先看同一個 <code class="inline">docs</code> 資料夾裡的 <strong>buyer-setup-guide.html</strong>。那份做完，你會有一個能登入後台 <code class="inline">/admin</code> 的空網站，接著才開始搬東西。</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">2</div><div>
+      <h2>把影片上傳到 Bunny</h2>
+      <p class="sub">你手上有原始影片檔，這步就沒問題</p>
+    </div></div>
+    <ol class="dolist">
+      <li>把每一支課程影片的<strong>原始檔</strong>上傳到 Bunny 的影片庫。</li>
+      <li>之後在後台建立課程章節時，把影片網址貼進「影片網址」欄位。</li>
+    </ol>
+    <div class="box warn">
+      <p class="box-title">⏳ 這步最花時間</p>
+      <p>影片檔通常很大，上傳要時間。建議<strong>分批進行</strong>，網路穩一點的環境做。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">3</div><div>
+      <h2>在後台建立課程 —— 標題要一模一樣 ⚠️</h2>
+      <p class="sub">這是讓學員權限對得上的關鍵</p>
+    </div></div>
+    <p>到後台 <code class="inline">/admin</code> 建立課程。<strong>課程標題必須跟 Teachify 上完全相同</strong>（連 <code class="inline">｜</code>、<code class="inline">《》</code>、Vol. 編號都要一樣），因為匯入工具是「用標題對應」誰能看哪門課。</p>
+    <div class="box tip">
+      <p class="box-title">💡 最保險的做法</p>
+      <p>執行下面這行，工具會印出<strong>你的名單裡出現的所有課程標題</strong>，直接複製這些標題去建立課程，就不會打錯字：</p>
+      <pre>node scripts/import-students.mjs "你的CSV路徑" --preview</pre>
+      <p>（你的名單目前含 <strong>26 種課程</strong>、<strong>656 位學員</strong>。至少要先把這 26 門建好。）</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">4</div><div>
+      <h2>匯入學員與課程權限（自動）</h2>
+      <p class="sub">656 位學員一次匯入，不用手打</p>
+    </div></div>
+    <p><strong>先「試跑」看結果</strong>（不會寫入任何東西）：</p>
+    <pre>node scripts/import-students.mjs "你的CSV路徑"</pre>
+    <p>它會告訴你「26 種課程標題有幾種對上了、哪幾種還沒對上（打錯字或還沒建）」。<strong>全部對上</strong>後，正式匯入：</p>
+    <pre>node scripts/import-students.mjs "你的CSV路徑" --commit</pre>
+    <div class="box good">
+      <p class="box-title">✅ 完成後</p>
+      <p>656 位學員都建好了，每個人也自動開通了他在 Teachify 買過的課。可以重複跑，不會重複建立。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">5</div><div>
+      <h2>寄「設定新密碼」信給全體學員（自動）</h2>
+      <p class="sub">客戶點一下就能繼續用</p>
+    </div></div>
+    <div class="box warn">
+      <p class="box-title">⏳ 寄信前的前提</p>
+      <p>要真的寄到 656 位客戶，你的寄信設定 <code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（例如 <code class="inline">no-reply@你的網址</code>）。還在用預設沙盒地址的話，工具會擋下、只允許寄測試信給你自己。<span class="gate">要先驗證網域</span></p>
+    </div>
+    <p><strong>先寄一封測試信給自己</strong>看看信長怎樣：</p>
+    <pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱@example.com</pre>
+    <p>沒問題後，<strong>正式寄給全部人</strong>（每封間隔 0.4 秒，自動避開寄信限制）：</p>
+    <pre>node scripts/send-invites.mjs "你的CSV路徑" --send</pre>
+    <p>學員收到信 → 點按鈕 → 設定新密碼 → 用原本 Email 登入，課程權限都在。</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">6</div><div>
+      <h2>把網址切到新網站</h2>
+      <p class="sub">客戶用同一個網址無縫接軌</p>
+    </div></div>
+    <ol class="dolist">
+      <li><strong>先在新網站的臨時網址上把 1～5 步全部測好</strong>（登入、看課、金流都正常）。</li>
+      <li>確認無誤後，到你的<strong>網域管理處</strong>（買 <code class="inline">fu-notes.com</code> 的地方），把 <code class="inline">bds.fu-notes.com</code> 的指向從 Teachify 改到 Netlify（Netlify 的 Domain 設定會給你要填的值）。</li>
+      <li>同時把新網站的 <code class="inline">NEXTAUTH_URL</code> 改成 <code class="inline">https://bds.fu-notes.com</code>，重新部署。</li>
+      <li>切換後有幾分鐘～幾小時的生效時間，建議選離峰時段做。</li>
+    </ol>
+    <div class="box good">
+      <p class="box-title">✅ 完成！</p>
+      <p>客戶打開 <code class="inline">bds.fu-notes.com</code>（同一個網址），就進到你的新系統了。之後不用再付 Teachify 年費。</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <p class="eyebrow">一眼看懂</p>
+  <h2>哪些無縫、哪些要動手</h2>
+  <div class="tablewrap">
+    <table>
+      <tr><th>項目</th><th>狀況</th></tr>
+      <tr><td>網址</td><td>✅ 不變（同一個 bds.fu-notes.com）</td></tr>
+      <tr><td>學員名單、電話</td><td>✅ 自動匯入</td></tr>
+      <tr><td>已購課權限</td><td>✅ 自動保留（依課程標題對應）</td></tr>
+      <tr><td>登入密碼</td><td>⚠️ 客戶要重設一次（自動寄信邀請）</td></tr>
+      <tr><td>影片</td><td>⚠️ 用原始檔重新上傳 Bunny</td></tr>
+      <tr><td>課程／文章文字</td><td>⚠️ 手動重建（標題要一致）</td></tr>
+    </table>
+  </div>
+
+  <div class="box tip">
+    <p class="box-title">🆘 步驟 4、5 是電腦指令，不會用怎麼辦？</p>
+    <p>那兩支工具要在電腦終端機執行。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約半小時），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
+  </div>
+
+  <div class="footer">
+    <p>Teachify 搬家手冊　·　照 1→6 順序做　·　遇到 <span class="gate">要等 / 要幫忙</span> 就先做別的</p>
+  </div>
+
+</div>
+</body>
+</html>
