@@ -33,10 +33,10 @@ export async function POST(req: Request) {
       return NextResponse.redirect(fallbackRedirect, 303);
     }
 
-    // 2. 解密交易結果
+    // 2. 解密交易結果（僅記錄必要欄位，避免將買家個資/卡片遮罩資訊寫入日誌）
     const decodedData = tool.decrypt(encryptInfo);
-    console.log('[PayUni Return] Decoded transaction data:', decodedData);
     const merTradeNo = decodedData.MerTradeNo;
+    console.log(`[PayUni Return] MerTradeNo: ${merTradeNo}, Status: ${decodedData.Status}`);
 
     if (merTradeNo) {
       // 3. 查資料庫確認訂單購買的品項

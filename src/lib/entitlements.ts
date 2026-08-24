@@ -165,13 +165,17 @@ export async function canAccess(
 
 // ── 發放端 ──
 
-/** 開通單堂課程觀看權限（重複發放安全：upsert） */
+/**
+ * 開通單堂課程觀看權限（重複發放安全：upsert）。
+ * 發放失敗時拋出例外——付款履約流程據此得知「已收款但開通失敗」，不再靜默吞掉。
+ */
 export async function grantCourse(userId: string, courseId: string): Promise<void> {
-  await supabase.from('user_courses').upsert({
+  const { error } = await supabase.from('user_courses').upsert({
     user_id: userId,
     course_id: courseId,
     purchased_at: new Date().toISOString(),
   });
+  if (error) throw new Error(`開通課程權限失敗：${error.message}`);
 }
 
 /** 批次開通多堂課程（後台建立/編輯學員用）；回傳錯誤讓呼叫端決定是否僅記錄 */
@@ -204,26 +208,28 @@ export async function revokeAllCourses(userId: string): Promise<{ error: Error |
   return { error: error ? new Error(error.message) : null };
 }
 
-/** 開通數位下載擁有權（重複發放安全：upsert） */
+/** 開通數位下載擁有權（重複發放安全：upsert）；發放失敗時拋出例外 */
 export async function grantDownload(userId: string, downloadId: string): Promise<void> {
-  await supabase.from('user_downloads').upsert({
+  const { error } = await supabase.from('user_downloads').upsert({
     user_id: userId,
     download_id: downloadId,
     purchased_at: new Date().toISOString(),
   });
+  if (error) throw new Error(`開通下載權限失敗：${error.message}`);
 }
 
-/** 開通會員方案（expiresAt 為 null 代表永久） */
+/** 開通會員方案（expiresAt 為 null 代表永久）；發放失敗時拋出例外 */
 export async function grantMembership(
   userId: string,
   planId: string,
   expiresAt: string | null
 ): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('users')
     .update({
       membership_plan_id: planId,
       membership_expires_at: expiresAt,
     })
     .eq('id', userId);
+  if (error) throw new Error(`開通會員方案失敗：${error.message}`);
 }

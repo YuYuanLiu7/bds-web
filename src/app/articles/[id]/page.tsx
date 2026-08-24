@@ -9,6 +9,7 @@ import {
   Lock, ShieldAlert, LogIn, ShoppingBag
 } from 'lucide-react';
 import { useSettings } from '@/components/SettingsProvider';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface ArticlePageProps {
   params: Promise<{ id: string }>;
@@ -359,9 +360,10 @@ export default function ArticleDetailPage({ params }: ArticlePageProps) {
                 if (hasAccess) {
                   // 渲染文章內容
                   return isHTML(article.content) ? (
-                    <div 
+                    <div
                       className="text-left text-xs md:text-sm text-slate-600 font-semibold leading-relaxed space-y-4 prose-headings:font-black prose-h2:text-xl prose-h3:text-lg prose-strong:text-slate-900 prose-strong:font-black"
-                      dangerouslySetInnerHTML={{ __html: article.content }}
+                      // 以 DOMPurify 消毒後才注入，過濾 <script>、on* 事件屬性、javascript: 等 XSS 向量
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }}
                     />
                   ) : (
                     renderContent(article.content)

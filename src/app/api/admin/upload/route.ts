@@ -1,8 +1,19 @@
 import { requireAdmin } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+
+// 允許上傳的類型白名單：圖片、影片、常見文件（供數位下載商品）。
+// 明確排除 .svg / .html 等可被瀏覽器當作內容執行、造成儲存型 XSS 的類型。
+const ALLOWED = new Map<string, string>([
+  ['jpg', 'image/jpeg'], ['jpeg', 'image/jpeg'], ['png', 'image/png'],
+  ['gif', 'image/gif'], ['webp', 'image/webp'],
+  ['mp4', 'video/mp4'], ['webm', 'video/webm'], ['mov', 'video/quicktime'],
+  ['pdf', 'application/pdf'], ['zip', 'application/zip'],
+]);
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 伺服器端硬上限 50MB
 
 export async function POST(req: Request) {
   try {
@@ -11,23 +22,35 @@ export async function POST(req: Request) {
     if (!auth.ok) return auth.res;
 
     // 2. Parse file from FormData
-    console.log("Incoming content-type:", req.headers.get("content-type"));
-    console.log("Incoming content-length:", req.headers.get("content-length"));
     const formData = await req.formData();
     const file = formData.get('file') as File;
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    // 3. 伺服器端驗證副檔名與類型（不信任用戶端 file.type / 檔名，避免上傳可執行內容）
+    const rawExt = (file.name.split('.').pop() || '').toLowerCase();
+    const safeContentType = ALLOWED.get(rawExt);
+    if (!safeContentType) {
+      return NextResponse.json(
+        { error: "不支援的檔案類型。允許：JPG/PNG/GIF/WEBP、MP4/WEBM/MOV、PDF/ZIP" },
+        { status: 400 }
+      );
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileExt = file.name.split('.').pop() || 'png';
-    const fileName = `bds-img-${Date.now()}.${fileExt}`;
+    if (buffer.length > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ error: "檔案過大，伺服器上限為 50MB" }, { status: 400 });
+    }
+
+    // 檔名改用隨機值，避免用戶端操控檔名或同毫秒併發覆蓋
+    const fileName = `bds-${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${rawExt}`;
     const bucketName = 'uploads';
 
     // 4. 主要策略：上傳到 Supabase Storage（無狀態平台 Netlify/Vercel 唯一可行的持久化方式）
     const doUpload = () =>
       supabase.storage.from(bucketName).upload(fileName, buffer, {
-        contentType: file.type,
+        contentType: safeContentType, // 使用白名單推導的安全類型，不採信用戶端 file.type
         upsert: true,
       });
 

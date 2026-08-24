@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
 import { ownsCourse, hasActiveMembership } from "@/lib/entitlements";
+import { rateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
@@ -62,6 +63,11 @@ export async function POST(req: Request) {
     const userId = sessionUser?.id;
     if (!userId) {
       return NextResponse.json({ error: "請先登入" }, { status: 401 });
+    }
+
+    // 速率限制：同一使用者每 10 分鐘最多 10 則評價，防止灌評價
+    if (!(await rateLimit(`review:${userId}`, 10, 600))) {
+      return NextResponse.json({ error: "評價過於頻繁，請稍後再試" }, { status: 429 });
     }
 
     const { courseId, rating, comment } = await req.json();

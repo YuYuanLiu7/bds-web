@@ -29,11 +29,10 @@ export async function POST(req: Request) {
       return new Response('ERROR');
     }
 
-    // 2. 解密 EncryptInfo
+    // 2. 解密 EncryptInfo（僅記錄必要欄位，避免將買家個資/卡片遮罩資訊寫入日誌）
     const decodedData = tool.decrypt(encryptInfo);
-    console.log('Payment Callback Data:', decodedData);
-
     const merTradeNo = decodedData.MerTradeNo;
+    console.log(`[PayUni Callback] MerTradeNo: ${merTradeNo}, Status: ${decodedData.Status}`);
 
     // 3. 非成功通知：標記失敗（已 paid 的訂單不會被降級）
     if (decodedData.Status !== 'SUCCESS') {
@@ -67,18 +66,31 @@ export async function POST(req: Request) {
       return new Response('ERROR');
     }
 
-    // 5. 原子地將訂單標記為 paid；'duplicate' 代表被並發回呼搶先，不重複履約
+    // 5. 原子地將訂單標記為 paid
     const result = await markOrderPaid(merTradeNo, decodedData.PaymentType);
     if (result === 'duplicate') {
+      // 被並發回呼搶先，不重複履約
       console.warn('Concurrent duplicate paid callback ignored for order:', merTradeNo);
       return new Response('SUCCESS');
     }
-    if (result === 'updated') {
-      // 6. 履約：開通權益 + 寄送通知信
-      await fulfillOrder(order);
+    if (result === 'error') {
+      // DB 更新失敗：回 ERROR 讓 PayUni 重送通知以自我修復，避免訂單卡在 pending、權益不發放
+      console.error('markOrderPaid 失敗，回 ERROR 以觸發 PayUni 重送：', merTradeNo);
+      return new Response('ERROR');
     }
 
-    console.log('Payment success and access granted:', merTradeNo);
+    // result === 'updated'：履約（開通權益 + 寄送通知信）
+    // 訂單此時已標記 paid，若履約失敗回 ERROR 會使 PayUni 重送卻被 paid 短路而永不履約；
+    // 因此改為記錄明確的嚴重告警供人工補開通，仍回 SUCCESS。
+    try {
+      await fulfillOrder(order);
+      console.log('Payment success and access granted:', merTradeNo);
+    } catch (fulfillErr) {
+      console.error(
+        `[需人工處理] 訂單 ${merTradeNo} 已付款(paid)但權益開通失敗，請至後台手動補開通：`,
+        fulfillErr
+      );
+    }
     return new Response('SUCCESS');
   } catch (error) {
     console.error('Callback error:', error);

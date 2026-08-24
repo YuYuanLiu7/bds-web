@@ -35,10 +35,17 @@ export async function GET(req: Request) {
       if (error) throw error;
       const data = article as ArticleRow;
 
+      const session = await getServerSession(authOptions);
+      const isAdminSession = (session?.user as SessionUser | undefined)?.role === 'admin';
+
+      // 🔒 未發佈（草稿/下架）文章僅管理員可讀，避免知道 id/slug 的訪客直接讀到草稿全文
+      if (data.status !== 'published' && !isAdminSession) {
+        return NextResponse.json({ error: '找不到文章' }, { status: 404 });
+      }
+
       // 🔒 後端強制付費牆：依文章 visibility 決定是否回傳付費內容，
       //    避免前端鎖被繞過（直接打 API / 看 network response 即可拿到全文）
       const visibility = data.visibility || 'public';
-      const session = await getServerSession(authOptions);
       const hasAccess = await canAccess(session?.user as SessionUser | undefined, {
         kind: 'article',
         visibility,

@@ -17,6 +17,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '請提供電子郵件信箱' }, { status: 400 });
     }
 
+    // 防帳號枚舉：無論帳號是否存在／是否已驗證，一律回傳相同的中性成功訊息。
+    // 僅在「帳號存在且尚未驗證」時才實際寄信，但回應不透露此差異。
+    const NEUTRAL_MESSAGE = '若該信箱存在且尚未完成驗證，我們已重新寄出驗證信，請檢查信箱（含垃圾郵件匣）。';
+
     // 1. 查詢使用者
     const { data: user, error: userError } = await supabase
       .from('users')
@@ -24,13 +28,9 @@ export async function POST(req: Request) {
       .eq('email', email)
       .maybeSingle();
 
-    if (userError || !user) {
-      return NextResponse.json({ error: '找不到此電子郵件的註冊帳號。' }, { status: 400 });
-    }
-
-    // 2. 檢查是否已驗證
-    if (user.is_verified) {
-      return NextResponse.json({ error: '此帳戶先前已完成驗證，可直接登入！' }, { status: 400 });
+    if (userError || !user || user.is_verified) {
+      // 帳號不存在或已驗證：回中性訊息，不寄信、不透露帳號狀態
+      return NextResponse.json({ message: NEUTRAL_MESSAGE });
     }
 
     // 3. 刪除該 Email 舊有的未過期 verification_token（保持資料庫整潔）
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '信件寄送失敗，請稍後再試。' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: '驗證信已重新寄出，請檢查您的電子信箱（包含垃圾郵件匣）。' });
+    return NextResponse.json({ message: NEUTRAL_MESSAGE });
   } catch (error) {
     console.error('Resend verification API error:', error);
     return NextResponse.json({ error: '伺服器錯誤' }, { status: 500 });

@@ -184,25 +184,27 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
       const savedCourse = await res.json();
       const courseId = formData.id || savedCourse.id;
 
-      // 1. Delete removed chapters
+      // 1. Delete removed chapters（檢查每次回應，失敗即中止並提示，避免靜默吞掉錯誤）
       for (const chapterId of deletedChapters) {
-        await fetch(`/api/admin/chapters?id=${chapterId}`, {
+        const delRes = await fetch(`/api/admin/chapters?id=${chapterId}`, {
           method: 'DELETE',
         });
+        if (!delRes.ok) throw new Error('章節刪除失敗，請重試');
       }
 
-      // 2. Add or update chapters
+      // 2. Add or update chapters（同樣檢查每次回應）
       for (let i = 0; i < formData.chapters.length; i++) {
         const chapter = formData.chapters[i];
-        await fetch('/api/admin/chapters', {
+        const chRes = await fetch('/api/admin/chapters', {
           method: chapter.id ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            ...chapter, 
+          body: JSON.stringify({
+            ...chapter,
             course_id: courseId,
             order_index: i + 1 // Re-calculate orders
           }),
         });
+        if (!chRes.ok) throw new Error(`章節「${chapter.title || i + 1}」儲存失敗，請重試`);
       }
 
       onClose();

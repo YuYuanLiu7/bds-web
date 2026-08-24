@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { resolvePurchasable, createOrder, buildPayuniCheckout, PurchaseType } from '@/lib/purchases';
+import { rateLimit } from '@/lib/rate-limit';
 
 // 結帳請求主體（金額一律以資料庫為準，此處僅用於指定品項與類型）
 interface CheckoutBody {
@@ -20,15 +22,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '請先登入再進行結帳' }, { status: 401 });
     }
 
+    // 速率限制：同一使用者每 10 分鐘最多 20 次結帳請求，避免大量產生 pending 髒訂單
+    if (!(await rateLimit(`checkout:${session.user.email.toLowerCase()}`, 20, 600))) {
+      return NextResponse.json({ error: '操作過於頻繁，請稍後再試' }, { status: 429 });
+    }
+
     // 🔒 金流金鑰必須由環境變數提供；缺漏時直接拒絕（fail-fast），
     //    避免以無效預設金鑰送出交易、產生髒訂單或可被偽造的簽章
     const MerID = process.env.PAYUNI_MERID;
     const HashKey = process.env.PAYUNI_HASH_KEY;
     const HashIV = process.env.PAYUNI_HASH_IV;
-
-    console.log(`[DEBUG PayUni Env] MerID: ${MerID}`);
-    console.log(`[DEBUG PayUni Env] HashKey length: ${HashKey?.length}, starts with: ${HashKey?.substring(0, 4)}`);
-    console.log(`[DEBUG PayUni Env] HashIV length: ${HashIV?.length}, starts with: ${HashIV?.substring(0, 4)}`);
 
     if (!MerID || !HashKey || !HashIV) {
       console.error('PayUni env not configured (PAYUNI_MERID/HASH_KEY/HASH_IV)');
@@ -46,16 +49,25 @@ export async function POST(req: Request) {
     }
     const { item } = resolved;
 
-    const merTradeNo = `BDS${Date.now()}`;
+    // 訂單編號加入隨機成分，避免同一毫秒的並發結帳產生相同編號而互相覆蓋
+    const merTradeNo = `BDS${Date.now()}${crypto.randomBytes(4).toString('hex')}`;
 
-    // 建立 pending 訂單（依 email 找使用者）
+    // 建立 pending 訂單（依 email 找使用者）。
+    // 🔒 不變式：一定要先有 pending 訂單，才發出付款參數。
+    //    否則使用者付了錢，callback 卻查無訂單可履約（收了錢卻不開通）。
     const { data: userData } = await supabase
       .from('users')
       .select('id')
       .eq('email', session.user.email)
       .single();
-    if (userData) {
+    if (!userData) {
+      return NextResponse.json({ error: '找不到您的帳號資料，請重新登入後再試' }, { status: 400 });
+    }
+    try {
       await createOrder(merTradeNo, userData.id, item.amount, item.orderFields);
+    } catch (orderErr) {
+      console.error('建立訂單失敗，中止結帳：', orderErr);
+      return NextResponse.json({ error: '建立訂單失敗，請稍後再試或聯絡客服' }, { status: 500 });
     }
 
     // ReturnURL 統一走 /api/checkout/return：由該端點驗章後依訂單品項導回正確頁面

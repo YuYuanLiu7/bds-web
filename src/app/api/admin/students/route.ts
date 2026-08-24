@@ -27,6 +27,14 @@ interface UserWriteData {
   membership_expires_at?: string | null;
 }
 
+// 回傳給前端前移除敏感欄位（password_hash 等），避免整列 users 外洩到瀏覽器
+function sanitizeUser<T extends Record<string, unknown> | null>(row: T): T {
+  if (!row) return row;
+  const clone = { ...row } as Record<string, unknown>;
+  delete clone.password_hash;
+  return clone as T;
+}
+
 // 1. GET：取得所有成員列表 (含電話、會員方案、到期日)
 export async function GET() {
   try {
@@ -141,9 +149,9 @@ export async function POST(req: Request) {
         .single();
 
       if (retryResult.error) throw retryResult.error;
-      
+
       // 如果重試成功，將新 user 綁定為 newUser 以繼續後續流程
-      return NextResponse.json(retryResult.data);
+      return NextResponse.json(sanitizeUser(retryResult.data));
     }
 
     // B. 如果是學員且勾選了線上課程，透過權益模組批次開通
@@ -155,7 +163,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json(newUser);
+    return NextResponse.json(sanitizeUser(newUser));
   } catch (error) {
     console.error("POST admin student error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
@@ -236,7 +244,7 @@ export async function PUT(req: Request) {
         .single();
 
       if (retryResult.error) throw retryResult.error;
-      return NextResponse.json(retryResult.data);
+      return NextResponse.json(sanitizeUser(retryResult.data));
     }
 
     // B. 如果是學員，透過權益模組同步課程授權（先清空再依勾選重新開通）
@@ -252,7 +260,7 @@ export async function PUT(req: Request) {
       }
     }
 
-    return NextResponse.json(updatedUser);
+    return NextResponse.json(sanitizeUser(updatedUser));
   } catch (error) {
     console.error("PUT admin student error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });

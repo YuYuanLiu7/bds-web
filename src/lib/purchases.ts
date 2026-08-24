@@ -109,29 +109,32 @@ export async function createOrder(
   amount: number,
   orderFields: Purchasable['orderFields']
 ): Promise<void> {
-  try {
-    await supabase.from('orders').insert({
-      id: orderId,
-      user_id: userId,
-      amount,
-      status: 'pending',
-      ...orderFields,
-    });
-  } catch (dbErr) {
+  // 注意：supabase 的 .insert() 失敗時是回傳 { error } 而非拋出例外，
+  // 因此必須明確檢查 error（先前用 try/catch 攔截，實際上永遠攔不到）。
+  const { error } = await supabase.from('orders').insert({
+    id: orderId,
+    user_id: userId,
+    amount,
+    status: 'pending',
+    ...orderFields,
+  });
+
+  if (error) {
+    // 會員方案欄位可能尚未遷移：降級為不含該欄位的保底寫入並重試一次
     if (orderFields.membership_plan_id) {
-      console.warn(
-        'DB insert membership order failed (table migration might not be executed yet):',
-        dbErr
-      );
-      await supabase.from('orders').insert({
+      console.warn('建立會員訂單失敗（membership 欄位可能尚未遷移），改以保底欄位重試：', error.message);
+      const retry = await supabase.from('orders').insert({
         id: orderId,
         user_id: userId,
         amount,
         status: 'pending',
       });
-    } else {
-      throw dbErr;
+      if (retry.error) {
+        throw new Error(`建立訂單失敗：${retry.error.message}`);
+      }
+      return;
     }
+    throw new Error(`建立訂單失敗：${error.message}`);
   }
 }
 
@@ -287,10 +290,8 @@ export function buildPayuniCheckout(config: {
   });
   const hashInfo = tool.generateHash(encryptInfo);
 
-  // 除錯記錄：沙盒串接排查用（不含金鑰明文）
-  console.log(`[DEBUG PayUni Payload] Amount: ${config.amount}, MerTradeNo: ${config.merTradeNo}`);
-  console.log(`[DEBUG PayUni Payload] EncryptInfo: ${encryptInfo}`);
-  console.log(`[DEBUG PayUni Payload] HashInfo: ${hashInfo}`);
+  // 僅記錄非機密的訂單編號與金額供對帳；不記錄 EncryptInfo/HashInfo（可被重放的付款請求密文與簽章）
+  console.log(`[PayUni] 建立結帳 MerTradeNo: ${config.merTradeNo}, Amount: ${config.amount}`);
 
   return {
     MerID: config.merId,

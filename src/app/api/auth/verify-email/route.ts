@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { rateLimit, clientIp } from '@/lib/rate-limit';
 
 export async function GET(req: Request) {
   try {
+    // 速率限制：同一 IP 每 10 分鐘最多 20 次，防止對驗證 token 暴力猜測
+    if (!(await rateLimit(`verify-email:${clientIp(req)}`, 20, 600))) {
+      return NextResponse.json({ error: '操作過於頻繁，請稍後再試' }, { status: 429 });
+    }
+
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token');
     const email = searchParams.get('email');

@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import bcrypt from 'bcryptjs';
+import { isValidPassword, hashPassword, MIN_PASSWORD_LENGTH } from '@/lib/validate';
+import { rateLimit, clientIp } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
   try {
+    // 速率限制：同一 IP 每 10 分鐘最多 10 次，防止對重設 token 暴力嘗試
+    if (!(await rateLimit(`reset-pw:${clientIp(req)}`, 10, 600))) {
+      return NextResponse.json({ error: '操作過於頻繁，請稍後再試' }, { status: 429 });
+    }
+
     const { email, token, password } = await req.json();
 
     if (!email || !token || !password) {
       return NextResponse.json({ error: '請提供電子郵件、驗證 Token 與新密碼。' }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: '新密碼長度至少需要 6 位' }, { status: 400 });
+    if (!isValidPassword(password)) {
+      return NextResponse.json({ error: `新密碼長度至少需要 ${MIN_PASSWORD_LENGTH} 位` }, { status: 400 });
     }
 
     // 1. 查詢重設 Token
@@ -33,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     // 3. 密碼加密
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await hashPassword(password);
 
     // 4. 更新使用者密碼
     const { error: updateError } = await supabase

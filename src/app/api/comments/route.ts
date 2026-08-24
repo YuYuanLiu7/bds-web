@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
+import { ownsCourse, hasActiveMembership } from "@/lib/entitlements";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
@@ -83,9 +85,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "請先登入" }, { status: 401 });
     }
 
-    const { courseId, chapterId, courseTitle, chapterTitle, text } = await req.json();
+    // 速率限制：同一使用者每 10 分鐘最多 20 則留言，防止洗待審留言
+    if (!(await rateLimit(`comment:${userId}`, 20, 600))) {
+      return NextResponse.json({ error: "留言過於頻繁，請稍後再試" }, { status: 429 });
+    }
+
+    const { courseId, chapterId, text } = await req.json();
     if (!courseId || !text?.trim()) {
       return NextResponse.json({ error: "缺少課程或留言內容" }, { status: 400 });
+    }
+
+    // 權限檢查（比照評價）：僅管理員 / 已購課 / 有效付費會員可留言，避免未購課者灌留言
+    const isAdmin = sessionUser?.role === 'admin';
+    const hasAccess =
+      isAdmin ||
+      (await ownsCourse(userId, courseId)) ||
+      (await hasActiveMembership(userId));
+    if (!hasAccess) {
+      return NextResponse.json({ error: "只有已購買或具看課權限的學員才能留言" }, { status: 403 });
+    }
+
+    // 課程/章節標題一律由資料庫反查，不採信前端傳入值（避免偽造標示到任意課程）
+    const { data: courseRow } = await supabase
+      .from('courses').select('title').eq('id', courseId).maybeSingle();
+    let chapterTitle: string | null = null;
+    if (chapterId) {
+      const { data: chapterRow } = await supabase
+        .from('chapters').select('title').eq('id', chapterId).maybeSingle();
+      chapterTitle = chapterRow?.title ?? null;
     }
 
     const studentName = sessionUser?.name || sessionUser?.email?.split('@')[0] || '匿名學員';
@@ -95,8 +122,8 @@ export async function POST(req: Request) {
       .insert({
         course_id: courseId,
         chapter_id: chapterId || null,
-        course_title: courseTitle || null,
-        chapter_title: chapterTitle || null,
+        course_title: courseRow?.title ?? null,
+        chapter_title: chapterTitle,
         user_id: userId,
         student_name: studentName,
         text: text.trim(),
