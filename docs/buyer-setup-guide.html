@@ -1,0 +1,628 @@
+<title>BDS 開站手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+
+<style>
+  :root {
+    --ground: #f5f7fb;
+    --surface: #ffffff;
+    --surface-2: #eef2f9;
+    --ink: #1a2130;
+    --ink-soft: #55607a;
+    --line: #dde3ee;
+    --brand: #21448e;
+    --brand-soft: #e7edf8;
+    --brand-ink: #21448e;
+    --warn: #a8560a;
+    --warn-soft: #fbf0e0;
+    --warn-line: #f0d3a8;
+    --good: #1c7a45;
+    --good-soft: #e5f3ea;
+    --radius: 14px;
+    --maxw: 760px;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ground: #0e131d;
+      --surface: #161d2b;
+      --surface-2: #1e2637;
+      --ink: #e7ecf6;
+      --ink-soft: #9aa7c0;
+      --line: #2b3446;
+      --brand: #8fb0e6;
+      --brand-soft: #1c2a44;
+      --brand-ink: #bcd0f2;
+      --warn: #e6a95a;
+      --warn-soft: #2e2416;
+      --warn-line: #4a3a20;
+      --good: #6cc78d;
+      --good-soft: #16281d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0e131d;
+    --surface: #161d2b;
+    --surface-2: #1e2637;
+    --ink: #e7ecf6;
+    --ink-soft: #9aa7c0;
+    --line: #2b3446;
+    --brand: #8fb0e6;
+    --brand-soft: #1c2a44;
+    --brand-ink: #bcd0f2;
+    --warn: #e6a95a;
+    --warn-soft: #2e2416;
+    --warn-line: #4a3a20;
+    --good: #6cc78d;
+    --good-soft: #16281d;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Noto Sans TC", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px 100px; }
+
+  /* ---- Hero ---- */
+  header.hero {
+    background: linear-gradient(160deg, var(--brand) 0%, #16305f 100%);
+    color: #fff;
+    padding: 56px 20px 48px;
+    text-align: center;
+  }
+  header.hero .inner { max-width: var(--maxw); margin: 0 auto; }
+  .kicker {
+    font-size: 13px; letter-spacing: .22em; text-transform: uppercase;
+    font-weight: 700; opacity: .78; margin: 0 0 14px;
+  }
+  header.hero h1 {
+    font-family: "Noto Serif TC", serif; font-weight: 900;
+    font-size: clamp(30px, 6vw, 46px); line-height: 1.25;
+    margin: 0 0 16px; text-wrap: balance;
+  }
+  header.hero p { margin: 0 auto; max-width: 30em; font-size: 17px; opacity: .92; }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px;
+  }
+  .hero-meta span {
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+    border-radius: 999px; padding: 6px 15px; font-size: 14px; font-weight: 500;
+  }
+
+  h2 {
+    font-family: "Noto Serif TC", serif; font-weight: 900;
+    font-size: 25px; line-height: 1.35; margin: 56px 0 8px; text-wrap: balance;
+  }
+  h3 { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 19px; margin: 30px 0 8px; }
+  p { margin: 10px 0; }
+  a { color: var(--brand-ink); }
+  strong { font-weight: 700; }
+
+  .lead { font-size: 18px; color: var(--ink-soft); }
+
+  /* ---- Section eyebrow ---- */
+  .eyebrow {
+    display: inline-block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    font-weight: 700; color: var(--brand-ink); margin: 54px 0 0;
+  }
+
+  /* ---- Callouts ---- */
+  .box {
+    border-radius: var(--radius); padding: 18px 20px; margin: 20px 0;
+    border: 1px solid var(--line); background: var(--surface);
+  }
+  .box p:first-child { margin-top: 0; }
+  .box p:last-child { margin-bottom: 0; }
+  .box .box-title { font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+  .box.tip { background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent); }
+  .box.tip .box-title { color: var(--brand-ink); }
+  .box.warn { background: var(--warn-soft); border-color: var(--warn-line); }
+  .box.warn .box-title { color: var(--warn); }
+  .box.good { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 35%, transparent); }
+  .box.good .box-title { color: var(--good); }
+
+  /* ---- Step cards ---- */
+  .step {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 26px 26px 24px; margin: 20px 0; position: relative;
+  }
+  .step-head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 4px; }
+  .step-num {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 12px;
+    background: var(--brand); color: #fff; font-family: "JetBrains Mono", monospace;
+    font-weight: 700; font-size: 20px; display: flex; align-items: center; justify-content: center;
+  }
+  .step-head h2 { margin: 0; font-size: 23px; }
+  .step-head .sub { color: var(--ink-soft); font-size: 15px; margin: 4px 0 0; }
+
+  ol.dolist { padding-left: 22px; margin: 14px 0; }
+  ol.dolist > li { margin: 12px 0; padding-left: 4px; }
+  ul.plain { list-style: none; padding: 0; margin: 14px 0; }
+  ul.plain > li { padding: 7px 0 7px 30px; position: relative; border-bottom: 1px dashed var(--line); }
+  ul.plain > li:last-child { border-bottom: 0; }
+  ul.plain > li::before { content: "✓"; position: absolute; left: 4px; color: var(--good); font-weight: 700; }
+
+  /* ---- Paste box (exact value to copy) ---- */
+  .paste {
+    margin: 12px 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    background: var(--surface-2);
+  }
+  .paste .label {
+    font-size: 12.5px; letter-spacing: .04em; font-weight: 700; color: var(--ink-soft);
+    padding: 8px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px;
+  }
+  .paste .label .where { font-weight: 500; color: var(--brand-ink); }
+  .paste code, .paste pre {
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 14px; line-height: 1.7;
+    display: block; padding: 12px 14px; margin: 0; white-space: pre; overflow-x: auto; color: var(--ink);
+  }
+  code.inline {
+    font-family: "JetBrains Mono", monospace; font-size: .9em; background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px;
+  }
+
+  /* ---- Tables ---- */
+  .tablewrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 700; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+
+  /* ---- Gate tag ---- */
+  .gate {
+    display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn-line); margin-left: 8px;
+    vertical-align: middle;
+  }
+  .time-tag { display:inline-block; font-size:13px; font-weight:700; color: var(--brand-ink); background: var(--brand-soft); border-radius: 999px; padding: 3px 12px; }
+
+  /* ---- TOC ---- */
+  nav.toc { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin: 30px 0; }
+  nav.toc ol { margin: 8px 0 0; padding-left: 20px; }
+  nav.toc li { margin: 5px 0; }
+  nav.toc a { text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  hr { border: 0; border-top: 1px solid var(--line); margin: 46px 0; }
+  .footer { text-align: center; color: var(--ink-soft); font-size: 14px; margin-top: 50px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 16px; }
+    .step { padding: 20px 16px; }
+    .step-head { gap: 12px; }
+  }
+  @media print {
+    header.hero { background: none; color: #000; border-bottom: 2px solid #000; }
+    .step, .box, nav.toc { break-inside: avoid; }
+  }
+</style>
+
+<header class="hero">
+  <div class="inner">
+    <p class="kicker">給新站長的完整開站手冊</p>
+    <h1>把這個網站變成你的，從零開始</h1>
+    <p>這是一份「照著做就會成功」的說明書。給完全沒有工程背景的人。每一步都告訴你按哪裡、貼什麼。</p>
+    <div class="hero-meta">
+      <span>🗣️ 白話講解</span>
+      <span>📋 逐步照做</span>
+      <span>⏱️ 分幾天完成</span>
+      <span>🖨️ 可列印</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="box tip">
+    <p class="box-title">👋 先看這裡（30 秒）</p>
+    <p>這個網站可以：<strong>賣線上課程、賣數位檔案、收月費會員、刷卡收錢、寄通知信、放防盜影片</strong>。你會有一個專屬的「後台」，之後上架課程、看訂單都在那裡點一點就好。</p>
+    <p>架設要用到 <strong>6 個免費服務</strong>（像積木一樣拼起來）。全部弄好大約要花 <strong>3～5 小時</strong>，但<strong>不是一次做完</strong>——中間有幾關要「等別人審核」，所以請分幾天做，不要趕。</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">⏳ 老實話：有 3 個地方一定要等，這不是你的問題</p>
+    <p>再詳細的說明書也跳不過這 3 關，因為它們是「別人要處理」的事。看到 <span class="gate">要等 / 要幫忙</span> 標記就是這種關卡：</p>
+    <ul class="plain">
+      <li><strong>刷卡收錢（PayUni）</strong>：要送件給金流公司審核你的商家資格，通常等 <strong>幾個工作天</strong>。建議<strong>第一天就先去送件</strong>，一邊等一邊做其他步驟。</li>
+      <li><strong>用自己的網址寄信</strong>：要改網域設定並等它生效（幾分鐘到幾小時）。先用系統預設的也能動。</li>
+      <li><strong>每日自動備份</strong>（步驟 9）：這步比較技術，<strong>建議找懂電腦的人幫你用一次就好</strong>，之後全自動。</li>
+    </ul>
+  </div>
+
+  <nav class="toc" aria-label="目錄">
+    <strong>這份手冊的順序</strong>
+    <ol>
+      <li><a href="#s0">開始前：準備什麼</a></li>
+      <li><a href="#s1">申請 6 個帳號（含馬上送 PayUni 審核）</a></li>
+      <li><a href="#s2">建立資料庫（Supabase）</a></li>
+      <li><a href="#s3">設定影片（Bunny）</a></li>
+      <li><a href="#s4">設定寄信（Resend）</a></li>
+      <li><a href="#s5">設定刷卡（PayUni）</a></li>
+      <li><a href="#s6">把網站放上線（Netlify）</a></li>
+      <li><a href="#s7">建立你的管理員帳號</a></li>
+      <li><a href="#s8">開門收客前的安全檢查（很重要）</a></li>
+      <li><a href="#s9">進階：自動備份（找人幫一次）</a></li>
+      <li><a href="#daily">上線後的日常操作</a></li>
+    </ol>
+  </nav>
+
+  <p class="eyebrow">名詞先講清楚</p>
+  <h2>只有 2 個詞要記住</h2>
+  <div class="tablewrap">
+    <table>
+      <tr><th>你會看到的詞</th><th>白話意思</th></tr>
+      <tr><td>環境變數<br>（Environment Variables）</td><td>就是一堆「設定值」，像帳號密碼。你要把它們貼到網站平台的設定欄位裡，網站才知道怎麼連到資料庫、怎麼收錢。本手冊會告訴你每一個去哪拿、貼到哪。</td></tr>
+      <tr><td>金鑰 / Key</td><td>一長串英文數字，等於「通行密碼」。<strong>看到寫「機密 / secret」的絕對不能給別人、不能貼到公開的地方。</strong></td></tr>
+    </table>
+  </div>
+
+  <!-- STEP 0 -->
+  <p class="eyebrow" id="s0">步驟 0</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">0</div>
+      <div>
+        <h2>開始前，準備這些</h2>
+        <p class="sub"><span class="time-tag">約 10 分鐘</span></p>
+      </div>
+    </div>
+    <ul class="plain">
+      <li>一台<strong>電腦</strong>（Windows 或 Mac 都可以）與網路。</li>
+      <li>一個常用的<strong>電子信箱</strong>（用來註冊下面的服務）。</li>
+      <li><strong>賣方交給你的東西</strong>：這個網站的程式碼（通常是一個 GitHub 連結或一個壓縮檔），以及賣方原本填好的一份設定清單（檔名 <code class="inline">.env.example</code> 或 <code class="inline">.env.local</code>）。</li>
+      <li>如果你要用<strong>自己的網址</strong>（例如 <code class="inline">yourschool.com</code>）：先準備好，或之後用平台送的免費網址也行。</li>
+      <li>刷卡收錢會用到<strong>公司/商號的營業登記</strong>（PayUni 審核要）。個人也可問 PayUni 可否申請。</li>
+    </ul>
+  </div>
+
+  <!-- STEP 1 -->
+  <p class="eyebrow" id="s1">步驟 1</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div>
+        <h2>申請 6 個帳號</h2>
+        <p class="sub"><span class="time-tag">約 30 分鐘</span>　每個都用同一個信箱註冊，比較好記</p>
+      </div>
+    </div>
+    <p>先把 6 個免費帳號都申請好。點下面連結 → 用信箱註冊 → 收信點驗證即可。</p>
+    <div class="tablewrap">
+      <table>
+        <tr><th>服務</th><th>它負責什麼（白話）</th></tr>
+        <tr><td><a href="https://github.com">GitHub</a></td><td>放程式碼的倉庫（網站上線平台會從這裡讀程式）。</td></tr>
+        <tr><td><a href="https://supabase.com">Supabase</a></td><td>資料庫＝記住會員、訂單、課程的地方。</td></tr>
+        <tr><td><a href="https://netlify.com">Netlify</a></td><td>把網站真正「放上網」讓大家看得到。</td></tr>
+        <tr><td><a href="https://bunny.net">Bunny.net</a></td><td>放課程影片，並防止被人偷連結盜看。</td></tr>
+        <tr><td><a href="https://resend.com">Resend</a></td><td>幫系統寄信（購買成功通知、聯絡表單）。</td></tr>
+        <tr><td><a href="https://www.payuni.com.tw">PayUni 統一金流</a></td><td>刷卡 / ATM 收錢。<span class="gate">要等審核</span></td></tr>
+      </table>
+    </div>
+    <div class="box warn">
+      <p class="box-title">⏳ 今天先做這件事：送 PayUni 審核</p>
+      <p>PayUni 註冊後<strong>馬上申請「商家帳號」</strong>並送出資料。它要審幾個工作天，你越早送，越不會卡在最後。送出後就先放著，繼續做步驟 2～4，等它通過再回來做步驟 5。</p>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <p class="eyebrow" id="s2">步驟 2</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <div>
+        <h2>建立資料庫（Supabase）</h2>
+        <p class="sub"><span class="time-tag">約 40 分鐘</span>　這步最多字，但每個動作都很簡單</p>
+      </div>
+    </div>
+
+    <h3>2-1. 建立專案</h3>
+    <ol class="dolist">
+      <li>登入 Supabase → 按 <strong>New project</strong>（新專案）。</li>
+      <li>取一個名字、選最近的區域（例如 Singapore）。</li>
+      <li>它會要你<strong>設一組資料庫密碼</strong>。<strong>請把這組密碼抄下來存好</strong>（之後備份會用到）。</li>
+      <li>按建立，等它跑好（約 1～2 分鐘）。</li>
+    </ol>
+
+    <h3>2-2. 建立資料表（把「空櫃子」擺好）</h3>
+    <p>左側點 <strong>SQL Editor</strong> → <strong>New query</strong>。接下來要把程式碼裡 <code class="inline">db/</code> 資料夾中的檔案，<strong>一個一個</strong>整份貼進去、各按一次 <strong>Run</strong>（右下角綠色按鈕）。<strong>順序很重要，照下面來：</strong></p>
+    <div class="paste">
+      <div class="label"><span>依序貼上並各按 Run（每個都開一個 New query）</span></div>
+<pre>1.  db/init.sql                  ← 建立所有櫃子＋範例資料
+2.  db/add_auth_flows.sql        ← 信箱驗證、忘記密碼
+3.  db/add_rate_limiting.sql     ← 防止被灌爆的保護
+4.  db/add_performance_indexes.sql ← 讓網站更快（可選但建議）
+5.  db/enable_rls.sql            ← 最後跑！打開資料保護鎖</pre>
+    </div>
+    <div class="box warn">
+      <p class="box-title">⚠️ 第 5 個一定要放最後</p>
+      <p><code class="inline">enable_rls.sql</code> 是「上鎖」的動作。一定要等前面都跑完、再跑它。跑完看到 <em>Success. No rows returned</em> 就對了。</p>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 想更省事？（給願意開一次終端機的人）</p>
+      <p>賣方或工程師可以在電腦上跑一行指令 <code class="inline">npm run setup -- --migrate</code>，自動把上面 5 個檔一次跑完。做不到就用上面的手動貼上法，一樣的結果。</p>
+    </div>
+
+    <h3>2-3. 拿 3 把鑰匙（等一下要貼到上線平台）</h3>
+    <p>點 Supabase 畫面<strong>最上方的 <em>Connect</em> 按鈕</strong>（把所有金鑰放在同一個視窗，最好找）。抄下這 3 個：</p>
+    <div class="paste">
+      <div class="label"><span>① 專案網址</span><span class="where">Connect 視窗 → App Frameworks</span></div>
+      <code>NEXT_PUBLIC_SUPABASE_URL</code>
+    </div>
+    <div class="paste">
+      <div class="label"><span>② 公開金鑰（給瀏覽器用，新版叫 Publishable key）</span><span class="where">同上視窗</span></div>
+      <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>
+    </div>
+    <div class="paste">
+      <div class="label"><span>③ 機密金鑰 ⚠️ 絕不外洩（新版 Secret key / 舊版 service_role）</span><span class="where">Connect → Secret / Legacy API Keys</span></div>
+      <code>SUPABASE_SERVICE_ROLE_KEY</code>
+    </div>
+    <p class="lead">（順手也複製一份「連線字串 Connection string / URI」，把裡面的 <code class="inline">[YOUR-PASSWORD]</code> 換成 2-1 設的密碼——步驟 9 備份會用到。現在用不到可先跳過。）</p>
+
+    <h3>2-4. 建立圖片儲存空間</h3>
+    <ol class="dolist">
+      <li>左側點 <strong>Storage</strong> → <strong>New bucket</strong>。</li>
+      <li>名字打 <code class="inline">uploads</code>，勾選 <strong>Public</strong>，建立。</li>
+    </ol>
+    <div class="box good">
+      <p class="box-title">✅ 完成後你會有</p>
+      <p>一個裝好所有資料表的資料庫、3 把鑰匙抄在手邊、一個 <code class="inline">uploads</code> 圖片空間。</p>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <p class="eyebrow" id="s3">步驟 3</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <div>
+        <h2>設定影片（Bunny.net）</h2>
+        <p class="sub"><span class="time-tag">約 20 分鐘</span>　沒有課程影片的話可先跳過，之後再補</p>
+      </div>
+    </div>
+    <ol class="dolist">
+      <li>Bunny → <strong>Stream</strong> → 建一個 <strong>Video Library</strong>（影片庫）。</li>
+      <li>進這個影片庫的 <strong>Security</strong> 分頁，打開 <strong>Embed View Token Authentication</strong>（這就是「防盜開關」）。</li>
+      <li>抄下這 2 個值：</li>
+    </ol>
+    <div class="paste">
+      <div class="label"><span>① 影片庫 ID（一串數字）</span><span class="where">影片庫 → API 分頁</span></div>
+      <code>BUNNY_STREAM_LIBRARY_ID</code>
+    </div>
+    <div class="paste">
+      <div class="label"><span>② 防盜金鑰 ⚠️ 機密</span><span class="where">影片庫 → Security 分頁</span></div>
+      <code>BUNNY_TOKEN_AUTH_KEY</code>
+    </div>
+    <p>之後在後台新增課程章節時，「影片網址」欄位貼該影片的網址或編號，系統會自動加防盜。</p>
+  </div>
+
+  <!-- STEP 4 -->
+  <p class="eyebrow" id="s4">步驟 4</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">4</div>
+      <div>
+        <h2>設定寄信（Resend）</h2>
+        <p class="sub"><span class="time-tag">約 15 分鐘</span></p>
+      </div>
+    </div>
+    <ol class="dolist">
+      <li>Resend → 左側 <strong>API Keys</strong> → <strong>Create</strong>，複製那把鑰匙。</li>
+      <li>（建議、但可晚點做 <span class="gate">要等生效</span>）左側 <strong>Domains</strong> 驗證你的網域，之後就能用 <code class="inline">no-reply@你的網址</code> 當寄件人。還沒用自己網域前，先照下面填法一樣能動。</li>
+    </ol>
+    <div class="paste">
+      <div class="label"><span>寄信鑰匙</span><span class="where">Resend → API Keys</span></div>
+      <code>RESEND_API_KEY</code>
+    </div>
+    <div class="paste">
+      <div class="label"><span>寄件人信箱（還沒驗證網域就先填這個沙盒地址）</span><span class="where">先用預設值</span></div>
+<pre>RESEND_FROM_EMAIL = onboarding@resend.dev</pre>
+    </div>
+    <div class="paste">
+      <div class="label"><span>聯絡表單的收件信箱（填你自己的客服信箱）</span></div>
+<pre>CONTACT_TO_EMAIL = 你的客服信箱@example.com</pre>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <p class="eyebrow" id="s5">步驟 5</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">5</div>
+      <div>
+        <h2>設定刷卡（PayUni）</h2>
+        <p class="sub"><span class="time-tag">審核通過後約 10 分鐘</span> <span class="gate">要等審核</span></p>
+      </div>
+    </div>
+    <p>等步驟 1 送的商家審核通過後，回來做這步。</p>
+    <ol class="dolist">
+      <li>登入 PayUni 後台 → <strong>會員 → 商店清單 → 點 SHOP 開頭的商店 → 串接設定 → 《API 串接金鑰》</strong>。</li>
+      <li>抄下 3 個值（測試階段先用 <strong>Sandbox 測試</strong>那組）。</li>
+    </ol>
+    <div class="paste">
+      <div class="label"><span>商店代號、加密金鑰、加密向量</span><span class="where">PayUni → API 串接金鑰</span></div>
+<pre>PAYUNI_MERID       = 你的商店代號
+PAYUNI_HASH_KEY    = 你的 HashKey
+PAYUNI_HASH_IV     = 你的 HashIV</pre>
+    </div>
+    <div class="paste">
+      <div class="label"><span>付款頁網址（測試先用 sandbox，正式上線再換）</span></div>
+<pre># 測試階段：
+NEXT_PUBLIC_PAYUNI_UPP_URL = https://sandbox-api.payuni.com.tw/api/upp
+# 正式收真錢時改成：
+# NEXT_PUBLIC_PAYUNI_UPP_URL = https://api.payuni.com.tw/api/upp
+NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 不用手動填回呼網址</p>
+      <p>系統送出付款時會自動帶上回呼網址。若 PayUni 後台有 <em>Notify URL</em> 欄位要你填，就填 <code class="inline">https://你的網址/api/webhook/payuni</code>（網址等步驟 6 上線後才會有）。</p>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <p class="eyebrow" id="s6">步驟 6</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">6</div>
+      <div>
+        <h2>把網站放上線（Netlify）</h2>
+        <p class="sub"><span class="time-tag">約 30 分鐘</span>　這步做完就有一個能開的網址了</p>
+      </div>
+    </div>
+
+    <h3>6-1. 讓程式碼進到你的 GitHub</h3>
+    <p>請賣方把專案<strong>轉移或複製到你的 GitHub 帳號</strong>底下（最簡單：賣方在 GitHub repo 的 <em>Settings → Transfer</em> 轉給你）。轉好後你的 GitHub 就會有一個 <code class="inline">bds-web</code> 之類的倉庫。</p>
+
+    <h3>6-2. 匯入到 Netlify</h3>
+    <ol class="dolist">
+      <li>Netlify → <strong>Add new project → Import an existing project</strong>。</li>
+      <li>選 <strong>GitHub</strong> → 授權 → 選你的那個倉庫。</li>
+      <li>先<strong>不要急著按 Deploy</strong>，先做下面 6-3 填設定。</li>
+    </ol>
+
+    <h3>6-3. 把所有鑰匙貼進去</h3>
+    <p>進 <strong>Project configuration → Environment variables</strong>。把前面各步驟抄下的值全部加進來（有「Import from a .env file」可整份貼更快）。完整清單如下：</p>
+    <div class="paste">
+      <div class="label"><span>要貼的全部設定（左邊名字、右邊你的值）</span></div>
+<pre># --- 網站基本 ---
+NEXTAUTH_URL              = （先貼 Netlify 給你的網址，綁自己網域後再改）
+NEXTAUTH_SECRET           = （見下方「怎麼產生」）
+
+# --- 資料庫 Supabase（步驟 2）---
+NEXT_PUBLIC_SUPABASE_URL       = ...
+NEXT_PUBLIC_SUPABASE_ANON_KEY  = ...
+SUPABASE_SERVICE_ROLE_KEY      = ...
+
+# --- 刷卡 PayUni（步驟 5）---
+PAYUNI_MERID               = ...
+PAYUNI_HASH_KEY            = ...
+PAYUNI_HASH_IV             = ...
+NEXT_PUBLIC_PAYUNI_UPP_URL = https://sandbox-api.payuni.com.tw/api/upp
+NEXT_PUBLIC_PAYUNI_MERID   = ...
+
+# --- 影片 Bunny（步驟 3）---
+BUNNY_STREAM_LIBRARY_ID    = ...
+BUNNY_TOKEN_AUTH_KEY       = ...
+
+# --- 寄信 Resend（步驟 4）---
+RESEND_API_KEY             = ...
+RESEND_FROM_EMAIL          = onboarding@resend.dev
+CONTACT_TO_EMAIL           = 你的客服信箱
+
+# --- 安全開關（正式站務必是 false）---
+ENABLE_PAYMENT_SIMULATION  = false</pre>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 NEXTAUTH_SECRET 怎麼產生？</p>
+      <p>它只是一段很長的隨機亂碼（網站拿來加密登入用）。最簡單：打開網頁 <a href="https://generate-secret.vercel.app/32">generate-secret.vercel.app/32</a>，把畫面上那串複製貼上即可。</p>
+    </div>
+    <ol class="dolist">
+      <li>全部貼好後，按 <strong>Deploy</strong>（部署）。等幾分鐘。</li>
+      <li>完成後 Netlify 會給你一個網址（像 <code class="inline">xxxx.netlify.app</code>）。<strong>回到上面把 <code class="inline">NEXTAUTH_URL</code> 改成這個網址，再重新部署一次。</strong></li>
+      <li>（之後有自己網域）到 <strong>Domain management</strong> 綁定你的網址，再把 <code class="inline">NEXTAUTH_URL</code> 改成它、重新部署。</li>
+    </ol>
+    <div class="box good">
+      <p class="box-title">✅ 完成後你會有</p>
+      <p>一個可以打開的網站！先點進去看看首頁、課程頁有沒有正常顯示。</p>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <p class="eyebrow" id="s7">步驟 7</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">7</div>
+      <div>
+        <h2>建立你的管理員帳號</h2>
+        <p class="sub"><span class="time-tag">約 5 分鐘</span></p>
+      </div>
+    </div>
+    <ol class="dolist">
+      <li>打開你的網站，網址後面加 <code class="inline">/signup</code>，用你的信箱<strong>註冊一個帳號</strong>。</li>
+      <li>回 Supabase → <strong>SQL Editor</strong> → New query，貼上下面這行（把信箱換成你剛註冊的），按 Run。它會把你變成管理員、同時免去信箱驗證：</li>
+    </ol>
+    <div class="paste">
+      <div class="label"><span>把自己設為管理員（信箱記得換成你的）</span><span class="where">Supabase → SQL Editor</span></div>
+<pre>UPDATE users SET role = 'admin', is_verified = true
+WHERE email = '你的信箱@example.com';</pre>
+    </div>
+    <ol class="dolist" start="3">
+      <li>重新登入 → 右上角會出現「管理後台」→ 進入 <code class="inline">/admin</code>。大功告成！</li>
+    </ol>
+  </div>
+
+  <!-- STEP 8 -->
+  <p class="eyebrow" id="s8">步驟 8</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">8</div>
+      <div>
+        <h2>開門收客前的安全檢查</h2>
+        <p class="sub"><span class="time-tag">約 20 分鐘</span>　開始收真錢之前，這幾項一定要確認</p>
+      </div>
+    </div>
+    <ul class="plain">
+      <li>資料保護鎖有打開：確定步驟 2 的 <code class="inline">db/enable_rls.sql</code> 有跑過（最後一個）。</li>
+      <li>安全開關關好：Netlify 設定裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
+      <li>金流換正式：確認商家審核通過後，把 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 換成正式端點、金鑰換成正式那組，重新部署。</li>
+      <li>網址填對：<code class="inline">NEXTAUTH_URL</code> 已改成你真正的網址（不是預設的假網址）。</li>
+      <li>真卡實測：用一張真卡買一筆最便宜的商品，確認「付款成功 → 自動開通 → 收到通知信」整條走得通，再退刷。</li>
+      <li>換成你的品牌：後台「設定」把站名、Logo、主色、聯絡信箱、FAQ、公告改成你自己的；刪掉範例課程與範例訂單。</li>
+    </ul>
+    <div class="box tip">
+      <p class="box-title">💡 賣方已附一份「上線前清單」</p>
+      <p>專案裡有一個檔案 <code class="inline">LAUNCH-CHECKLIST.md</code> 與 <code class="inline">GO-LIVE-TEST.md</code>，是更完整的逐項打勾清單，上線前照著再走一遍最安心。</p>
+    </div>
+  </div>
+
+  <!-- STEP 9 -->
+  <p class="eyebrow" id="s9">步驟 9（進階，可晚點做）</p>
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">9</div>
+      <div>
+        <h2>自動備份與防休眠</h2>
+        <p class="sub"><span class="time-tag">約 30 分鐘</span> <span class="gate">建議找人幫一次</span></p>
+      </div>
+    </div>
+    <p>這是整份手冊<strong>唯一比較技術</strong>的一步——設定每天自動把資料庫備份到你的 Google Drive，並避免免費資料庫因太久沒人用而「睡著」。</p>
+    <div class="box warn">
+      <p class="box-title">⏳ 我的建議</p>
+      <p>這步<strong>找一位懂電腦的朋友或工程師幫你設定一次</strong>（約半小時），之後就全自動、不用再管。專案裡的 <code class="inline">SETUP-GUIDE.md</code> 步驟 8、9 有完整的技術指令，直接給他看即可。</p>
+      <p>還沒設定也沒關係：系統本身<strong>已內建每天備份成一份檔案（保留 90 天）</strong>，不會讓你資料完全沒保障。Google Drive 備份是「加保險」。</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- DAILY -->
+  <p class="eyebrow" id="daily">上線之後</p>
+  <h2>日常操作超簡單（這部分才是你每天用的）</h2>
+  <p class="lead">架設好之後，你<strong>不用再碰上面那些設定</strong>。每天只要登入網站、進 <code class="inline">/admin</code> 後台，點一點就能經營：</p>
+  <div class="tablewrap">
+    <table>
+      <tr><th>後台功能</th><th>你可以做什麼</th></tr>
+      <tr><td>課程 / 章節</td><td>新增課程、貼影片網址、上傳教材講義。</td></tr>
+      <tr><td>文章 / 活動 / 數位下載 / 會員方案</td><td>上架與管理各種內容和商品。</td></tr>
+      <tr><td>成員</td><td>管理學員、手動幫某人開通課程。</td></tr>
+      <tr><td>財務</td><td>看訂單、看營收、匯出報表。</td></tr>
+      <tr><td>留言</td><td>審核、回覆學員的提問。</td></tr>
+      <tr><td>頁面管理 / 設定</td><td>改「關於我們」「聯絡我們」、站名、Logo、公告等。</td></tr>
+    </table>
+  </div>
+
+  <div class="box tip">
+    <p class="box-title">🆘 卡住了怎麼辦？</p>
+    <p>技術性的步驟（2、6、9）如果自己弄不出來，<strong>可以請工程師幫你做「一次性」設定</strong>——設定好之後，上架課程、改內容這些日常事，你自己就能完全掌握。這份手冊也可以直接轉給幫你的人看。</p>
+  </div>
+
+  <div class="footer">
+    <p>BDS 開站手冊　·　照順序做、遇到 <span class="gate" style="margin:0">要等 / 要幫忙</span> 就先做別的　·　祝開站順利 🚀</p>
+  </div>
+
+</div>
