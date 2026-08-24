@@ -53,17 +53,4 @@ export async function getCourseById(id: string): Promise<CourseWithChapters | nu
   };
 }
 
-export async function checkCourseAccess(userId: string, courseId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('user_courses')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('course_id', courseId)
-    .single();
-
-  if (error || !data) {
-    return false;
-  }
-
-  return true;
-}
+// 課程觀看權限的判斷已移至權益模組 src/lib/entitlements.ts（canAccess / ownsCourse）

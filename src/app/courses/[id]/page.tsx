@@ -1,7 +1,8 @@
 import SafeImage from '@/components/SafeImage';
 import { CheckCircle, PlayCircle, Clock, Users } from 'lucide-react';
 import BuyButton from '@/components/BuyButton';
-import { getCourseById, checkCourseAccess } from '@/lib/courses';
+import { getCourseById } from '@/lib/courses';
+import { canAccess } from '@/lib/entitlements';
 import { getUserByEmail } from '@/lib/users';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
@@ -32,7 +33,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   if (session?.user?.email) {
     const user = await getUserByEmail(session.user.email);
     if (user) {
-      hasAccess = await checkCourseAccess(user.id, id) || user.role === 'admin';
+      hasAccess = await canAccess({ id: user.id, role: user.role }, { kind: 'course', id });
     }
   }
 

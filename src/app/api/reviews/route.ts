@@ -1,8 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
-import { checkCourseAccess } from "@/lib/courses";
-import { hasActiveMembership } from "@/lib/users";
+import { ownsCourse, hasActiveMembership } from "@/lib/entitlements";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
@@ -73,7 +72,7 @@ export async function POST(req: Request) {
     const isAdmin = sessionUser?.role === 'admin';
     const hasAccess =
       isAdmin ||
-      (await checkCourseAccess(userId, courseId)) ||
+      (await ownsCourse(userId, courseId)) ||
       (await hasActiveMembership(userId));
     if (!hasAccess) {
       return NextResponse.json({ error: "只有已購買或具看課權限的學員才能撰寫評價" }, { status: 403 });

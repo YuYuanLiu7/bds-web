@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/auth";
+import { grantCourses, revokeAllCourses } from "@/lib/entitlements";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -151,18 +152,9 @@ export async function POST(req: Request) {
       return NextResponse.json(retryResult.data);
     }
 
-    // B. 如果是學員且勾選了線上課程，同步寫入 user_courses
+    // B. 如果是學員且勾選了線上課程，透過權益模組批次開通
     if ((role === 'user' || role === 'student') && newUser && Array.isArray(courseIds) && courseIds.length > 0) {
-      const insertRows = courseIds.map((courseId: string) => ({
-        user_id: newUser.id,
-        course_id: courseId,
-        purchased_at: new Date().toISOString()
-      }));
-
-      const { error: coursesError } = await supabase
-        .from('user_courses')
-        .insert(insertRows);
-
+      const { error: coursesError } = await grantCourses(newUser.id, courseIds);
       if (coursesError) {
         console.error("Batch insert course permissions error:", coursesError);
         // 這邊僅記錄錯誤，不讓主程序中斷 (因為學員已經註冊成功，管理員可以後續重設課程)
@@ -260,28 +252,13 @@ export async function PUT(req: Request) {
       return NextResponse.json(retryResult.data);
     }
 
-    // B. 如果是學員，同步處理課程授權 (批次更新 user_courses)
+    // B. 如果是學員，透過權益模組同步課程授權（先清空再依勾選重新開通）
     if ((role === 'user' || role === 'student') && Array.isArray(courseIds)) {
-      // 1. 先清除此學員舊有的所有課程權限
-      const { error: deleteError } = await supabase
-        .from('user_courses')
-        .delete()
-        .eq('user_id', id);
-
+      const { error: deleteError } = await revokeAllCourses(id);
       if (deleteError) {
         console.error("Failed to delete user old course permissions:", deleteError);
-      } else if (courseIds.length > 0) {
-        // 2. 寫入勾選的新課程權限
-        const insertRows = courseIds.map((courseId: string) => ({
-          user_id: id,
-          course_id: courseId,
-          purchased_at: new Date().toISOString()
-        }));
-
-        const { error: insertError } = await supabase
-          .from('user_courses')
-          .insert(insertRows);
-
+      } else {
+        const { error: insertError } = await grantCourses(id, courseIds);
         if (insertError) {
           console.error("Failed to insert user new course permissions:", insertError);
         }

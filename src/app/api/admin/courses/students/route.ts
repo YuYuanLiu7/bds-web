@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { ownsCourse, grantCourse, revokeCourse } from "@/lib/entitlements";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -157,28 +158,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "缺少必要參數 (courseId, userId)" }, { status: 400 });
     }
 
-    // 檢查是否已擁有授權
-    const { data: existing } = await supabase
-      .from('user_courses')
-      .select('user_id')
-      .eq('user_id', userId)
-      .eq('course_id', courseId)
-      .maybeSingle();
-
-    if (existing) {
+    // 檢查是否已擁有授權；未擁有才透過權益模組開通
+    if (await ownsCourse(userId, courseId)) {
       return NextResponse.json({ error: "此學員已擁有該課程之觀看權限" }, { status: 400 });
     }
 
-    const { error } = await supabase
-      .from('user_courses')
-      .insert([{
-        user_id: userId,
-        course_id: courseId,
-        purchased_at: new Date().toISOString()
-      }])
-      .select();
-
-    if (error) throw error;
+    await grantCourse(userId, courseId);
 
     return NextResponse.json({ success: true, message: "已成功為學員開通此課程觀看權限" });
   } catch (error) {
@@ -201,13 +186,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "缺少必要參數 (courseId, userId)" }, { status: 400 });
     }
 
-    const { error } = await supabase
-      .from('user_courses')
-      .delete()
-      .eq('user_id', userId)
-      .eq('course_id', courseId);
-
-    if (error) throw error;
+    await revokeCourse(userId, courseId);
 
     return NextResponse.json({ success: true, message: "已成功取消該學員之單堂課程觀看權限" });
   } catch (error) {

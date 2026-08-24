@@ -1,4 +1,5 @@
-import { getCourseById, checkCourseAccess } from "@/lib/courses";
+import { getCourseById } from "@/lib/courses";
+import { canAccess } from "@/lib/entitlements";
 import { getUserByEmail } from "@/lib/users";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -22,8 +23,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
     redirect("/login");
   }
 
-  const hasAccess = await checkCourseAccess(user.id, id);
-  if (!hasAccess && user.role !== 'admin') {
+  const hasAccess = await canAccess({ id: user.id, role: user.role }, { kind: 'course', id });
+  if (!hasAccess) {
     redirect(`/courses/${id}`);
   }
 

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import DownloadsList from "@/components/DownloadsList";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { ownedDownloadIds } from "@/lib/entitlements";
 
 export const revalidate = 0;
 
@@ -72,18 +73,7 @@ export default async function DownloadsPage() {
   const userId = sessionUser?.id;
 
   // 查詢目前使用者已購買的數位下載商品（供前台判斷顯示「立即下載」或「立即購買」）
-  let ownedIds: string[] = [];
-  if (userId) {
-    try {
-      const { data: owned } = await supabase
-        .from('user_downloads')
-        .select('download_id')
-        .eq('user_id', userId);
-      ownedIds = (owned || []).map((o: { download_id: string }) => o.download_id);
-    } catch (err) {
-      console.warn('Failed to query user downloads ownership:', err);
-    }
-  }
+  const ownedIds: string[] = userId ? await ownedDownloadIds(userId) : [];
 
   let downloads: DownloadRow[] = [];
   try {

@@ -2,7 +2,8 @@ import { getSiteSettingsServer } from "@/lib/site-settings";
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions, SessionUser } from "@/lib/auth";
+import { getMembershipStatus } from "@/lib/entitlements";
 import { supabase } from "@/lib/supabase";
 import MembershipList from "@/components/MembershipList";
 
@@ -71,19 +72,14 @@ export default async function MembershipPage() {
   // 1. Get current user session
   const session = await getServerSession(authOptions);
 
-  // 2. Fetch the user's active membership details from DB
+  // 2. 查詢使用者的會員狀態：只有「未過期」的方案才視為目前方案
+  //    （修正：先前只看 membership_plan_id、未檢查到期日，導致過期會員仍被當作有效）
   let currentUserPlanId: string | null = null;
-  if (session?.user?.email) {
+  const sessionUserId = (session?.user as SessionUser | undefined)?.id;
+  if (sessionUserId) {
     try {
-      const { data: userData } = await supabase
-        .from('users')
-        .select('membership_plan_id')
-        .eq('email', session.user.email)
-        .single();
-      
-      if (userData) {
-        currentUserPlanId = userData.membership_plan_id;
-      }
+      const status = await getMembershipStatus(sessionUserId);
+      currentUserPlanId = status.active ? status.planId : null;
     } catch (err) {
       console.warn("Failed to query user membership status (DB columns might not be migrated yet):", err);
     }

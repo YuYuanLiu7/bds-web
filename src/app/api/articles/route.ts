@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
-import { hasActiveMembership } from "@/lib/users";
+import { canAccess } from "@/lib/entitlements";
 import { NextResponse } from "next/server";
 
 // 文章資料列（僅標註本路由使用到的付費牆相關欄位，其餘以索引簽章保留彈性）
@@ -39,29 +39,11 @@ export async function GET(req: Request) {
       //    避免前端鎖被繞過（直接打 API / 看 network response 即可拿到全文）
       const visibility = data.visibility || 'public';
       const session = await getServerSession(authOptions);
-      const isAdmin = !!session && (session.user as SessionUser | undefined)?.role === 'admin';
-      let hasAccess = isAdmin || visibility === 'public';
-
-      if (!hasAccess && visibility === 'members') {
-        // 會員限定文章需為「有效付費會員」（含到期日判斷），僅登入不足以解鎖
-        const userId = (session?.user as SessionUser | undefined)?.id;
-        hasAccess = userId ? await hasActiveMembership(userId) : false;
-      }
-      if (!hasAccess && visibility === 'course_purchasers') {
-        const userId = (session?.user as SessionUser | undefined)?.id;
-        const requiredIds = (data.required_course_ids || '')
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-        if (userId && requiredIds.length > 0) {
-          const { data: owned } = await supabase
-            .from('user_courses')
-            .select('course_id')
-            .eq('user_id', userId)
-            .in('course_id', requiredIds);
-          hasAccess = !!(owned && owned.length > 0);
-        }
-      }
+      const hasAccess = await canAccess(session?.user as SessionUser | undefined, {
+        kind: 'article',
+        visibility,
+        requiredCourseIds: data.required_course_ids,
+      });
 
       if (!hasAccess) {
         // 不外洩付費正文；保留標題/摘要/解鎖所需的 required_course_ids 供前端顯示鎖卡

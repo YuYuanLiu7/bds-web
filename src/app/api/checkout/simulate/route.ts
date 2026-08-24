@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { grantMembership, computeMembershipExpiry } from "@/lib/entitlements";
 import { sendPurchaseSuccessEmail } from "@/lib/email";
 
 // 模擬付款請求主體
@@ -25,6 +26,9 @@ export async function POST(req: Request) {
     }
 
     const { planId, planName, price, period }: SimulateBody = await req.json();
+    if (!planId) {
+      return NextResponse.json({ error: "缺少方案 ID (planId)" }, { status: 400 });
+    }
     // 與原行為一致：將 price 以 10 進位解析為整數金額（無法解析則為 0）
     const amount = parseInt(String(price)) || 0;
 
@@ -56,26 +60,10 @@ export async function POST(req: Request) {
       console.warn("DB insert simulated order skipped (table/columns might not be migrated yet):", e);
     }
 
-    // 3. 計算到期日
-    let expiresAt = null;
-    const now = new Date();
-    if (period === '月繳') {
-      now.setMonth(now.getMonth() + 1);
-      expiresAt = now.toISOString();
-    } else if (period === '年繳') {
-      now.setFullYear(now.getFullYear() + 1);
-      expiresAt = now.toISOString();
-    } // '一次性' 為永久會員，expiresAt 為 null
-
-    // 4. 開通使用者會員方案權限
+    // 3. 計算到期日並開通使用者會員方案權限（'一次性' 為永久會員，expiresAt 為 null）
+    const expiresAt = computeMembershipExpiry(period);
     try {
-      await supabase
-        .from('users')
-        .update({
-          membership_plan_id: planId,
-          membership_expires_at: expiresAt
-        })
-        .eq('id', user.id);
+      await grantMembership(user.id, planId, expiresAt);
     } catch (e) {
       console.warn("DB update user membership skipped (table/columns might not be migrated yet):", e);
     }

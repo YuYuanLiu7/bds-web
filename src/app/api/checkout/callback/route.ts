@@ -1,5 +1,6 @@
 import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
+import { grantCourse, grantDownload, grantMembership, computeMembershipExpiry } from '@/lib/entitlements';
 import { sendPurchaseSuccessEmail } from '@/lib/email';
 import crypto from 'crypto';
 
@@ -92,18 +93,10 @@ export async function POST(req: Request) {
       if (!updateError) {
         if (order.course_id) {
           // 開通課程權限
-          await supabase.from('user_courses').upsert({
-            user_id: order.user_id,
-            course_id: order.course_id,
-            purchased_at: new Date().toISOString()
-          });
+          await grantCourse(order.user_id, order.course_id);
         } else if (order.download_id) {
           // 開通數位下載擁有權
-          await supabase.from('user_downloads').upsert({
-            user_id: order.user_id,
-            download_id: order.download_id,
-            purchased_at: new Date().toISOString()
-          });
+          await grantDownload(order.user_id, order.download_id);
         } else if (order.membership_plan_id) {
           // 開通會員方案訂閱權限
           try {
@@ -113,31 +106,14 @@ export async function POST(req: Request) {
               .select('period')
               .eq('id', order.membership_plan_id)
               .single();
-            
-            let expiresAt = null;
-            if (plan) {
-              const now = new Date();
-              if (plan.period === '月繳') {
-                now.setMonth(now.getMonth() + 1);
-                expiresAt = now.toISOString();
-              } else if (plan.period === '年繳') {
-                now.setFullYear(now.getFullYear() + 1);
-                expiresAt = now.toISOString();
-              } // '一次性' expiresAt 為 null 代表無期限
-            } else {
-              // 查不到方案時不臆測付款週期，保留 expiresAt 為 null，
-              // 避免把「一次性永久會員」誤設成 30 天到期。改以記錄警告供後台稽核補正。
+
+            if (!plan) {
+              // 查不到方案時不臆測付款週期，computeMembershipExpiry 會回傳 null（永久），
+              // 避免把「一次性永久會員」誤設成 30 天到期。記錄警告供後台稽核補正。
               console.warn(`Membership plan ${order.membership_plan_id} not found in callback; leaving membership_expires_at as null.`);
             }
-
-            // 更新使用者的訂閱方案與過期日
-            await supabase
-              .from('users')
-              .update({
-                membership_plan_id: order.membership_plan_id,
-                membership_expires_at: expiresAt
-              })
-              .eq('id', order.user_id);
+            const expiresAt = computeMembershipExpiry(plan?.period);
+            await grantMembership(order.user_id, order.membership_plan_id, expiresAt);
           } catch (mErr) {
             console.error("Failed to process membership order callback (table might not exist yet):", mErr);
           }

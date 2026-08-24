@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
+import { ownsDownload } from "@/lib/entitlements";
 import { NextResponse } from "next/server";
 
 // 安全下載端點：只有「管理員」「已購買者」或「免費商品」才會拿到 file_url。
@@ -36,13 +37,7 @@ export async function GET(
       if (!userId) {
         return NextResponse.json({ error: "請先登入" }, { status: 401 });
       }
-      const { data: owned } = await supabase
-        .from('user_downloads')
-        .select('download_id')
-        .eq('user_id', userId)
-        .eq('download_id', id)
-        .single();
-      if (!owned) {
+      if (!(await ownsDownload(userId, id))) {
         return NextResponse.json({ error: "您尚未購買此資源" }, { status: 403 });
       }
     }
