@@ -11,11 +11,22 @@ export interface VisualSettings {
   sectionImage2?: { imageUrl: string; link: string };
 }
 
+// 後台 CMS 頁面內容（about/contact/privacy 等靜態頁的標題、副標、內文、封面）
+export interface CmsPage {
+  path: string;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  imageUrl?: string;
+  [k: string]: unknown;
+}
+
 export interface PublicSettings {
   visual: VisualSettings;
   announcements: { content: string; url?: string; status?: string }[];
   general: { siteStatus?: string; maintenanceMessage?: string; [k: string]: unknown };
   faqs: { q: string; a: string }[];
+  pages: CmsPage[];
 }
 
 const DEFAULTS: PublicSettings = {
@@ -23,6 +34,7 @@ const DEFAULTS: PublicSettings = {
   announcements: [],
   general: {},
   faqs: [],
+  pages: [],
 };
 
 const SettingsContext = createContext<PublicSettings>(DEFAULTS);

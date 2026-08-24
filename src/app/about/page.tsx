@@ -1,43 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { BookOpen, Users, Award, ShieldCheck } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
-
-// 後台 CMS 頁面內容（/api/settings?key=pages 回傳項目）
-interface CmsPage {
-  path: string;
-  title?: string;
-  subtitle?: string;
-  content?: string;
-  imageUrl?: string;
-}
+import { useSettings } from '@/components/SettingsProvider';
 
 export default function AboutPage() {
-  const [pageData, setPageData] = useState({
-    title: '關於我們',
-    subtitle: '業務不是超人，卻有超能力！',
-    content: 'BDS By Doing So 是一個專為「硬體科技、半導體、生醫材料及跨領域商務開發」量身打造的實戰學習平台。我們深信真正的專業來自於實踐與經驗傳承，協助每一位渴望躍升的夥伴實現職場轉型與能力升級。',
-    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200'
-  });
-
-  useEffect(() => {
-    // 從伺服器讀取頁面內容（後台 CMS 編輯後對所有訪客生效）
-    fetch('/api/settings?key=pages')
-      .then(res => (res.ok ? res.json() : null))
-      .then(list => {
-        const item = Array.isArray(list) ? list.find((p: CmsPage) => p.path === '/about') : null;
-        if (item) {
-          setPageData({
-            title: item.title || '關於我們',
-            subtitle: item.subtitle || '業務不是超人，卻有超能力！',
-            content: item.content || '',
-            imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200'
-          });
-        }
-      })
-      .catch(err => console.warn('Failed to load page content:', err));
-  }, []);
+  // 頁面內容由後台 CMS 設定；layout 已於伺服器端讀取一次並經 Context 下傳
+  const { pages } = useSettings();
+  const item = pages.find((p) => p.path === '/about');
+  const pageData = {
+    title: item?.title || '關於我們',
+    subtitle: item?.subtitle || '業務不是超人，卻有超能力！',
+    content: item?.content || '',
+    imageUrl: item?.imageUrl || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200',
+  };
 
   const coreValues = [
     {

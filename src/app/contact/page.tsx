@@ -1,28 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, MessageSquare, Send, CheckCircle } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
 import { useToast } from '@/components/Toast';
-
-// 後台 CMS 頁面內容（/api/settings?key=pages 回傳項目）
-interface CmsPage {
-  path: string;
-  title?: string;
-  subtitle?: string;
-  content?: string;
-  imageUrl?: string;
-}
+import { useSettings } from '@/components/SettingsProvider';
 
 export default function ContactPage() {
   const toast = useToast();
-  const [pageData, setPageData] = useState({
-    title: '有任何問題？我們隨時為您解答',
-    subtitle: '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
-    content: '客服與合作信箱：bydoingso@gmail.com。任何諮詢將於 1-2 個工作天內回覆。',
-    imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200'
-  });
+  // 頁面內容由後台 CMS 設定；layout 已於伺服器端讀取一次並經 Context 下傳
+  const { pages } = useSettings();
+  const item = pages.find((p) => p.path === '/contact');
+  const pageData = {
+    title: item?.title || '有任何問題？我們隨時為您解答',
+    subtitle: item?.subtitle || '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
+    content: item?.content || '客服與合作信箱：bydoingso@gmail.com。任何諮詢將於 1-2 個工作天內回覆。',
+    imageUrl: item?.imageUrl || 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200',
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -33,24 +28,6 @@ export default function ContactPage() {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // 從伺服器讀取頁面內容（後台 CMS 編輯後對所有訪客生效）
-    fetch('/api/settings?key=pages')
-      .then(res => (res.ok ? res.json() : null))
-      .then(list => {
-        const item = Array.isArray(list) ? list.find((p: CmsPage) => p.path === '/contact') : null;
-        if (item) {
-          setPageData({
-            title: item.title || '有任何問題？我們隨時為您解答',
-            subtitle: item.subtitle || '不論是關於課程內容、付費方式、企業包班或是商務合作諮詢，歡迎填寫表單或直接寄信至我們的信箱。',
-            content: item.content || '',
-            imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=1200'
-          });
-        }
-      })
-      .catch(err => console.warn('Failed to load page content:', err));
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

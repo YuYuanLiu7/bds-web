@@ -1,6 +1,5 @@
+import { cache } from 'react';
 import { supabase } from './supabase';
-import fs from 'fs';
-import path from 'path';
 
 export interface CarouselSlide {
   id: string;
@@ -22,24 +21,10 @@ export interface SiteSettings {
   sectionImage2: SectionImage;
 }
 
-// 取得本地 JSON 快照路徑
-const getLocalJsonPath = () => {
-  return path.join(process.cwd(), 'src', 'lib', 'site-settings.json');
-};
-
-// 取得預設的本地設定值
+// 保底預設值：僅在資料庫讀取失敗或尚未初始化時使用。
+// 唯一的真相來源是 Supabase site_settings（先前另有本地 JSON 檔與檔案系統寫入，
+// 在無狀態部署平台上寫不進去且會與資料庫悄悄分歧，已移除）。
 export const getLocalDefaultSettings = (): SiteSettings => {
-  try {
-    const jsonPath = getLocalJsonPath();
-    if (fs.existsSync(jsonPath)) {
-      const content = fs.readFileSync(jsonPath, 'utf8');
-      return JSON.parse(content);
-    }
-  } catch (error) {
-    console.error("Error reading local default settings file:", error);
-  }
-  
-  // 保底硬編碼設定值，防止完全讀不到檔案
   return {
     primaryColor: "#21448e",
     logoUrl: "https://s.teachifycdn.com/image/width=400,quality=80/school/logo/a0285805-c7b3-48c3-bd43-24c2909be4e2/9c048f8f-d7d1-4091-9ea6-aa921655102a.png",
@@ -62,11 +47,11 @@ export const getLocalDefaultSettings = (): SiteSettings => {
 
 /**
  * 伺服器端讀取視覺設定：
- * 優先從 Supabase 資料庫撈取，若讀取失敗或資料庫未建表，則改為讀取本地 site-settings.json 檔案。
+ * 從 Supabase 資料庫撈取，讀取失敗或尚未初始化時退回硬編碼預設值。
+ * 以 React cache() 包裝：同一個 request 樹內多頁/多元件重複呼叫只會實際查詢一次。
  */
-export async function getSiteSettingsServer(): Promise<SiteSettings> {
+export const getSiteSettingsServer = cache(async (): Promise<SiteSettings> => {
   try {
-    // 1. 嘗試從 Supabase 讀取
     const { data, error } = await supabase
       .from('site_settings')
       .select('value')
@@ -76,58 +61,37 @@ export async function getSiteSettingsServer(): Promise<SiteSettings> {
     if (!error && data && data.value) {
       return data.value as SiteSettings;
     }
-    
+
     if (error) {
-      console.warn("Supabase site_settings read warning (falling back to JSON file):", error.message);
+      console.warn("Supabase site_settings read warning (falling back to defaults):", error.message);
     }
   } catch (error) {
-    console.error("Supabase connection error, falling back to local JSON file:", error);
+    console.error("Supabase connection error, falling back to default settings:", error);
   }
 
-  // 2. 資料庫故障或尚未初始化時，讀取本地 JSON 檔
   return getLocalDefaultSettings();
-}
+});
 
 /**
- * 伺服器端寫入視覺設定：
- * 嘗試寫入 Supabase，同時寫入本地端 JSON 檔作為雙重持久備份與本機持久化。
+ * 伺服器端寫入視覺設定：唯一寫入目標是 Supabase。
+ * （寫入成功與否如實回報；不再有「任一來源成功就算成功」的模糊語意）
  */
 export async function updateSiteSettingsServer(newSettings: SiteSettings): Promise<{ success: boolean; error?: string }> {
-  let dbSuccess = false;
-  let fileSuccess = false;
-  let lastError = "";
-
-  // 1. 嘗試寫入 Supabase
   try {
     const { error } = await supabase
       .from('site_settings')
       .upsert({ key: 'homepage', value: newSettings, updated_at: new Date().toISOString() });
 
-    if (!error) {
-      dbSuccess = true;
-    } else {
-      lastError = error.message;
+    if (error) {
       console.warn("Supabase upsert failed:", error.message);
+      return { success: false, error: error.message };
     }
-  } catch (err) {
-    lastError = err instanceof Error ? err.message : String(err);
-    console.error("Supabase upsert error:", err);
-  }
-
-  // 2. 嘗試寫入本地 JSON 備份檔（主要供 localhost 本地開發持久化與 Vercel 部署初次初始化 fallback）
-  try {
-    const jsonPath = getLocalJsonPath();
-    fs.writeFileSync(jsonPath, JSON.stringify(newSettings, null, 2), 'utf8');
-    fileSuccess = true;
-  } catch (err) {
-    console.error("Local JSON write error:", err);
-  }
-
-  if (dbSuccess || fileSuccess) {
     return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Supabase upsert error:", err);
+    return { success: false, error: message };
   }
-
-  return { success: false, error: lastError || "Failed to save settings on both DB and local filesystem" };
 }
 
 /**
@@ -155,7 +119,7 @@ interface AnnouncementItem {
   url?: string;
   status?: string;
 }
-interface PageItem {
+export interface PageItem {
   id: string;
   name: string;
   path: string;
@@ -166,6 +130,7 @@ interface PageItem {
   subtitle?: string;
   content?: string;
   imageUrl?: string;
+  [key: string]: unknown;
 }
 interface SettingsDefaults {
   general: GeneralSetting;
@@ -252,7 +217,8 @@ export const PUBLIC_SETTING_KEYS = ['general', 'faqs', 'announcements', 'pages']
 // 後台可寫入的所有 key
 export const WRITABLE_SETTING_KEYS = Object.keys(SETTINGS_DEFAULTS);
 
-export async function getJsonSetting<T = unknown>(key: string, fallback: T): Promise<T> {
+// 依 key 讀取設定列（以 React cache() 去除同一 request 內的重複查詢）
+const readSettingRow = cache(async (key: string): Promise<unknown> => {
   try {
     const { data, error } = await supabase
       .from('site_settings')
@@ -261,12 +227,17 @@ export async function getJsonSetting<T = unknown>(key: string, fallback: T): Pro
       .single();
 
     if (!error && data && data.value !== null && data.value !== undefined) {
-      return data.value as T;
+      return data.value;
     }
   } catch (error) {
     console.error(`Supabase read setting '${key}' error (falling back to default):`, error);
   }
-  return fallback;
+  return undefined;
+});
+
+export async function getJsonSetting<T = unknown>(key: string, fallback: T): Promise<T> {
+  const value = await readSettingRow(key);
+  return value === undefined ? fallback : (value as T);
 }
 
 export async function setJsonSetting(key: string, value: unknown): Promise<{ success: boolean; error?: string }> {

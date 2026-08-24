@@ -1,40 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Shield, Lock, FileText } from 'lucide-react';
-
-// 後台 CMS 頁面內容（/api/settings?key=pages 回傳項目）
-interface CmsPage {
-  path: string;
-  title?: string;
-  subtitle?: string;
-  content?: string;
-  imageUrl?: string;
-}
+import { useSettings } from '@/components/SettingsProvider';
 
 export default function PrivacyPage() {
-  const [pageData, setPageData] = useState({
-    title: '服務條款與隱私權政策',
-    subtitle: '法律與條約規定說明',
-    content: '歡迎您使用 BDS By Doing So（以下簡稱「本平台」）。本服務條款旨在規範本平台與註冊會員（以下簡稱「會員」）之間的權利義務關係。當您註冊成為本平台會員或開始使用本平台提供的付費/免費課程時，即表示您已閱讀、理解並同意接受本條款之所有內容。',
-  });
-
-  useEffect(() => {
-    // 從伺服器讀取頁面內容（後台 CMS 編輯後對所有訪客生效）
-    fetch('/api/settings?key=pages')
-      .then(res => (res.ok ? res.json() : null))
-      .then(list => {
-        const item = Array.isArray(list) ? list.find((p: CmsPage) => p.path === '/privacy') : null;
-        if (item) {
-          setPageData({
-            title: item.title || '服務條款與隱私權政策',
-            subtitle: item.subtitle || '法律與條約規定說明',
-            content: item.content || '',
-          });
-        }
-      })
-      .catch(err => console.warn('Failed to load page content:', err));
-  }, []);
+  // 頁面內容由後台 CMS 設定；layout 已於伺服器端讀取一次並經 Context 下傳
+  const { pages } = useSettings();
+  const item = pages.find((p) => p.path === '/privacy');
+  const pageData = {
+    title: item?.title || '服務條款與隱私權政策',
+    subtitle: item?.subtitle || '法律與條約規定說明',
+    content: item?.content || '歡迎您使用 BDS By Doing So（以下簡稱「本平台」）。本服務條款旨在規範本平台與註冊會員（以下簡稱「會員」）之間的權利義務關係。當您註冊成為本平台會員或開始使用本平台提供的付費/免費課程時，即表示您已閱讀、理解並同意接受本條款之所有內容。',
+  };
 
   return (
     <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-20 font-sans relative overflow-hidden select-none">
