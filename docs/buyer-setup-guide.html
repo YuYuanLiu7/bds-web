@@ -1,8 +1,12 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BDS 開站手冊</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-
 <style>
   :root {
     --ground: #f5f7fb;
@@ -22,8 +26,8 @@
     --radius: 14px;
     --maxw: 760px;
   }
-  :root:not([data-theme="light"]) {
-    @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
       --ground: #0e131d;
       --surface: #161d2b;
       --surface-2: #1e2637;
@@ -62,16 +66,15 @@
     margin: 0;
     background: var(--ground);
     color: var(--ink);
-    font-family: "Noto Sans TC", system-ui, sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
     font-size: 17px;
     line-height: 1.85;
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px 100px; }
 
-  /* ---- Hero ---- */
   header.hero {
-    background: linear-gradient(160deg, var(--brand) 0%, #16305f 100%);
+    background: linear-gradient(160deg, #21448e 0%, #16305f 100%);
     color: #fff;
     padding: 56px 20px 48px;
     text-align: center;
@@ -106,13 +109,11 @@
 
   .lead { font-size: 18px; color: var(--ink-soft); }
 
-  /* ---- Section eyebrow ---- */
   .eyebrow {
     display: inline-block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
     font-weight: 700; color: var(--brand-ink); margin: 54px 0 0;
   }
 
-  /* ---- Callouts ---- */
   .box {
     border-radius: var(--radius); padding: 18px 20px; margin: 20px 0;
     border: 1px solid var(--line); background: var(--surface);
@@ -128,7 +129,6 @@
   .box.good { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 35%, transparent); }
   .box.good .box-title { color: var(--good); }
 
-  /* ---- Step cards ---- */
   .step {
     background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
     padding: 26px 26px 24px; margin: 20px 0; position: relative;
@@ -149,14 +149,13 @@
   ul.plain > li:last-child { border-bottom: 0; }
   ul.plain > li::before { content: "✓"; position: absolute; left: 4px; color: var(--good); font-weight: 700; }
 
-  /* ---- Paste box (exact value to copy) ---- */
   .paste {
     margin: 12px 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
     background: var(--surface-2);
   }
   .paste .label {
     font-size: 12.5px; letter-spacing: .04em; font-weight: 700; color: var(--ink-soft);
-    padding: 8px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px;
+    padding: 8px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
   }
   .paste .label .where { font-weight: 500; color: var(--brand-ink); }
   .paste code, .paste pre {
@@ -168,14 +167,12 @@
     border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px;
   }
 
-  /* ---- Tables ---- */
   .tablewrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 12px; }
   table { border-collapse: collapse; width: 100%; font-size: 15px; }
   th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { background: var(--surface-2); font-weight: 700; white-space: nowrap; }
   tr:last-child td { border-bottom: 0; }
 
-  /* ---- Gate tag ---- */
   .gate {
     display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
     background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn-line); margin-left: 8px;
@@ -183,7 +180,6 @@
   }
   .time-tag { display:inline-block; font-size:13px; font-weight:700; color: var(--brand-ink); background: var(--brand-soft); border-radius: 999px; padding: 3px 12px; }
 
-  /* ---- TOC ---- */
   nav.toc { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin: 30px 0; }
   nav.toc ol { margin: 8px 0 0; padding-left: 20px; }
   nav.toc li { margin: 5px 0; }
@@ -199,10 +195,12 @@
     .step-head { gap: 12px; }
   }
   @media print {
-    header.hero { background: none; color: #000; border-bottom: 2px solid #000; }
+    header.hero { background: none !important; color: #000 !important; border-bottom: 2px solid #000; }
     .step, .box, nav.toc { break-inside: avoid; }
   }
 </style>
+</head>
+<body>
 
 <header class="hero">
   <div class="inner">
@@ -263,7 +261,6 @@
     </table>
   </div>
 
-  <!-- STEP 0 -->
   <p class="eyebrow" id="s0">步驟 0</p>
   <div class="step">
     <div class="step-head">
@@ -282,7 +279,6 @@
     </ul>
   </div>
 
-  <!-- STEP 1 -->
   <p class="eyebrow" id="s1">步驟 1</p>
   <div class="step">
     <div class="step-head">
@@ -310,7 +306,6 @@
     </div>
   </div>
 
-  <!-- STEP 2 -->
   <p class="eyebrow" id="s2">步驟 2</p>
   <div class="step">
     <div class="step-head">
@@ -375,7 +370,6 @@
     </div>
   </div>
 
-  <!-- STEP 3 -->
   <p class="eyebrow" id="s3">步驟 3</p>
   <div class="step">
     <div class="step-head">
@@ -401,7 +395,6 @@
     <p>之後在後台新增課程章節時，「影片網址」欄位貼該影片的網址或編號，系統會自動加防盜。</p>
   </div>
 
-  <!-- STEP 4 -->
   <p class="eyebrow" id="s4">步驟 4</p>
   <div class="step">
     <div class="step-head">
@@ -429,7 +422,6 @@
     </div>
   </div>
 
-  <!-- STEP 5 -->
   <p class="eyebrow" id="s5">步驟 5</p>
   <div class="step">
     <div class="step-head">
@@ -464,7 +456,6 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
     </div>
   </div>
 
-  <!-- STEP 6 -->
   <p class="eyebrow" id="s6">步驟 6</p>
   <div class="step">
     <div class="step-head">
@@ -532,7 +523,6 @@ ENABLE_PAYMENT_SIMULATION  = false</pre>
     </div>
   </div>
 
-  <!-- STEP 7 -->
   <p class="eyebrow" id="s7">步驟 7</p>
   <div class="step">
     <div class="step-head">
@@ -556,7 +546,6 @@ WHERE email = '你的信箱@example.com';</pre>
     </ol>
   </div>
 
-  <!-- STEP 8 -->
   <p class="eyebrow" id="s8">步驟 8</p>
   <div class="step">
     <div class="step-head">
@@ -580,7 +569,6 @@ WHERE email = '你的信箱@example.com';</pre>
     </div>
   </div>
 
-  <!-- STEP 9 -->
   <p class="eyebrow" id="s9">步驟 9（進階，可晚點做）</p>
   <div class="step">
     <div class="step-head">
@@ -600,7 +588,6 @@ WHERE email = '你的信箱@example.com';</pre>
 
   <hr>
 
-  <!-- DAILY -->
   <p class="eyebrow" id="daily">上線之後</p>
   <h2>日常操作超簡單（這部分才是你每天用的）</h2>
   <p class="lead">架設好之後，你<strong>不用再碰上面那些設定</strong>。每天只要登入網站、進 <code class="inline">/admin</code> 後台，點一點就能經營：</p>
@@ -626,3 +613,5 @@ WHERE email = '你的信箱@example.com';</pre>
   </div>
 
 </div>
+</body>
+</html>
