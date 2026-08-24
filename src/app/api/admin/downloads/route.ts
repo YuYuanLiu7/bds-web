@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 // Session 使用者型別（含角色資訊）
@@ -8,10 +7,8 @@ type SessionUser = { role?: string };
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as SessionUser).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { data, error } = await supabase
       .from('downloads')
@@ -27,10 +24,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as SessionUser).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { title, price, type, description, downloads_count, status, file_url } = body;
@@ -58,10 +53,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as SessionUser).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { id, title, price, type, description, downloads_count, status, file_url } = body;
@@ -90,10 +83,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as SessionUser).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

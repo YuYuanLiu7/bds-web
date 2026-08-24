@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -27,21 +26,11 @@ interface UserWriteData {
   membership_expires_at?: string | null;
 }
 
-// 驗證管理員身分
-async function checkAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== 'admin') {
-    return false;
-  }
-  return true;
-}
-
 // 1. GET：取得所有成員列表 (含電話、會員方案、到期日)
 export async function GET() {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     let queryResult: UserRow[] | null = null;
 
@@ -87,9 +76,8 @@ export async function GET() {
 // 2. POST：新增成員 (同時處理課程授權與會員訂閱)
 export async function POST(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { name, email, phone, role, password, membershipPlanId, membershipExpiresAt, courseIds } = body;
@@ -191,9 +179,8 @@ export async function POST(req: Request) {
 // 3. PUT：更新成員資料 (同時同步處理課程授權與會員訂閱)
 export async function PUT(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { id, name, email, phone, role, password, membershipPlanId, membershipExpiresAt, courseIds } = body;
@@ -311,9 +298,8 @@ export async function PUT(req: Request) {
 // 4. DELETE：刪除成員 ( user_courses 因 FOREIGN KEY CASCADE 級聯刪除，不需多慮)
 export async function DELETE(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

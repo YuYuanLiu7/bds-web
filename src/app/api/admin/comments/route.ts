@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
@@ -39,28 +38,11 @@ function toClient(c: CommentRow) {
   };
 }
 
-// 管理員身分驗證（以資料庫 role 為準）
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return { ok: false as const, status: 401, error: "Unauthorized: Please log in." };
-  }
-  const { data: userData, error } = await supabase
-    .from('users')
-    .select('role')
-    .eq('email', session.user.email)
-    .single();
-  if (error || !userData || userData.role !== 'admin') {
-    return { ok: false as const, status: 403, error: "Forbidden: Admin access required." };
-  }
-  return { ok: true as const };
-}
-
 // GET：取得所有留言供後台管理
 export async function GET() {
   try {
     const auth = await requireAdmin();
-    if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (!auth.ok) return auth.res;
 
     const { data, error } = await supabase
       .from('course_comments')
@@ -78,7 +60,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const auth = await requireAdmin();
-    if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (!auth.ok) return auth.res;
 
     const { id, action, reply } = await req.json();
     if (!id) return NextResponse.json({ error: "缺少留言 id" }, { status: 400 });
@@ -112,7 +94,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const auth = await requireAdmin();
-    if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

@@ -1,19 +1,6 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
-// Session 使用者型別（含角色資訊）
-type SessionUser = { role?: string };
-
-// 驗證管理員身分
-async function checkAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as SessionUser).role !== 'admin') {
-    return false;
-  }
-  return true;
-}
 
 // 預設學員設定值
 const DEFAULT_STUDENT_SETTINGS = {
@@ -26,9 +13,8 @@ const DEFAULT_STUDENT_SETTINGS = {
 // 1. GET：取得當前學員設定值（含服務條款/隱私權文案，僅供後台編輯介面，須為管理員）
 export async function GET() {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { data, error } = await supabase
       .from('site_settings')
@@ -51,9 +37,8 @@ export async function GET() {
 // 2. POST：儲存學員設定值 (受到 Admin 身分保護)
 export async function POST(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { phoneMode, tosText, privacyText, requireTosAgreement } = body;

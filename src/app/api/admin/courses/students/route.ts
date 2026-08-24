@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 // 由 user_courses 關聯帶出的使用者資料
@@ -28,21 +27,11 @@ interface CourseStudent {
   membership_expires_at?: string | null;
 }
 
-// 驗證管理員身分
-async function checkAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== 'admin') {
-    return false;
-  }
-  return true;
-}
-
 // 1. GET：取得可觀看特定課程的學員名冊 (包含單堂與訂閱會員，以及淨銷售總額)
 export async function GET(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const courseId = searchParams.get('courseId');
@@ -158,9 +147,8 @@ export async function GET(req: Request) {
 // 2. POST：在課程內手動新增單堂學員授權
 export async function POST(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { courseId, userId } = body;
@@ -202,9 +190,8 @@ export async function POST(req: Request) {
 // 3. DELETE：在課程內取消學員的單堂授權
 export async function DELETE(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const courseId = searchParams.get('courseId');

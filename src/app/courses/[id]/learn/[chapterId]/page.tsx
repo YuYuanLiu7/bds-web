@@ -1,7 +1,7 @@
 import { getCourseById, checkCourseAccess } from "@/lib/courses";
 import { getUserByEmail } from "@/lib/users";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";

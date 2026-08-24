@@ -1,12 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions, SessionUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
-// 登入會話使用者（補上本專案的 role 欄位）
-interface SessionUser {
-  role?: string;
-}
 
 // 數位下載商品資料列（標註本路由使用到的欄位，其餘保留彈性）
 interface DownloadRow {

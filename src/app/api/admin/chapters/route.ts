@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 // 章節單元更新欄位型別（file_url 視資料庫遷移狀態而定，故為選填）
@@ -14,10 +13,8 @@ interface ChapterUpdateData {
 // 1. GET：取得特定課程的所有章節單元 (依順序排序)
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const courseId = searchParams.get('courseId');
@@ -42,10 +39,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { course_id, title, video_url, order_index, file_url } = body;
@@ -82,10 +77,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { id, title, video_url, order_index } = body;
@@ -134,10 +127,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

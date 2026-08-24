@@ -2,7 +2,7 @@ import { getSiteSettingsServer } from "@/lib/site-settings";
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import MembershipList from "@/components/MembershipList";
 

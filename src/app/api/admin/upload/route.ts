@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 import fs from 'fs';
@@ -7,24 +6,11 @@ import path from 'path';
 
 export async function POST(req: Request) {
   try {
-    // 1. Session verification
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized: Please log in." }, { status: 401 });
-    }
+    // 1. 管理員身分驗證
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
-    // 2. Validate admin role from Database
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('email', session.user.email)
-      .single();
-
-    if (userError || !userData || userData.role !== 'admin') {
-      return NextResponse.json({ error: "Forbidden: Admin access required." }, { status: 403 });
-    }
-
-    // 3. Parse file from FormData
+    // 2. Parse file from FormData
     console.log("Incoming content-type:", req.headers.get("content-type"));
     console.log("Incoming content-length:", req.headers.get("content-length"));
     const formData = await req.formData();

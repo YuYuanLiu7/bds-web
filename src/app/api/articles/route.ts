@@ -1,14 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions, SessionUser } from "@/lib/auth";
 import { hasActiveMembership } from "@/lib/users";
 import { NextResponse } from "next/server";
-
-// 登入會話使用者（補上本專案的 id 與 role 欄位）
-interface SessionUser {
-  id?: string;
-  role?: string;
-}
 
 // 文章資料列（僅標註本路由使用到的付費牆相關欄位，其餘以索引簽章保留彈性）
 interface ArticleRow {

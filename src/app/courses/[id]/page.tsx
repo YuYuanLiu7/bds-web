@@ -5,7 +5,7 @@ import { getCourseById, checkCourseAccess } from '@/lib/courses';
 import { getUserByEmail } from '@/lib/users';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 import CourseReviews from '@/components/CourseReviews';
 

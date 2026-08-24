@@ -1,13 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions, SessionUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
-// 登入會話使用者（補上本專案的 id 與 role 欄位）
-interface SessionUser {
-  id?: string;
-  role?: string;
-}
 
 // 安全下載端點：只有「管理員」「已購買者」或「免費商品」才會拿到 file_url。
 // 付費商品的 file_url 不放在公開列表回應中，必須經此端點逐筆驗證權限後才取得，

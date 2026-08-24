@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 // 結帳請求主體（金額一律以資料庫為準，此處僅用於指定品項與類型）
 interface CheckoutBody {

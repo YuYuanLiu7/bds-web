@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { supabase } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/auth";
 import { getSiteSettingsServer, updateSiteSettingsServer } from "@/lib/site-settings";
 import { NextResponse } from "next/server";
 
@@ -22,24 +20,11 @@ export async function GET() {
 // 2. POST 接口：管理員更新視覺設定值 (受到 Admin 身分保護)
 export async function POST(req: Request) {
   try {
-    // A. 驗證登入 Session
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized: Please log in." }, { status: 401 });
-    }
+    // A. 管理員身分驗證
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
-    // B. 從資料庫驗證管理員 Role
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('email', session.user.email)
-      .single();
-
-    if (userError || !userData || userData.role !== 'admin') {
-      return NextResponse.json({ error: "Forbidden: Admin access required." }, { status: 403 });
-    }
-
-    // C. 寫入設定
+    // B. 寫入設定
     const body = await req.json();
     
     // 簡單驗證資料完整性：欄位需存在即可（logoUrl 允許留空字串，代表不顯示 Logo）

@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { supabase } from "@/lib/supabase";
 import DownloadsList from "@/components/DownloadsList";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export const revalidate = 0;
 

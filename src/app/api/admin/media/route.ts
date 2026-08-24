@@ -1,29 +1,14 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import type { Session } from "next-auth";
 import fs from 'fs';
 import path from 'path';
-
-// Helper to check admin role
-async function checkAdmin(session: Session | null) {
-  if (!session?.user?.email) return false;
-  const { data, error } = await supabase
-    .from('users')
-    .select('role')
-    .eq('email', session.user.email)
-    .single();
-  return !error && data?.role === 'admin';
-}
 
 // 1. GET: List all uploaded media files
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(await checkAdmin(session))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const bucketName = 'uploads';
 
@@ -112,10 +97,8 @@ export async function GET() {
 // 2. DELETE: Remove a specific media file
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(await checkAdmin(session))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const fileName = searchParams.get('name');

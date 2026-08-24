@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettingsServer } from "@/lib/site-settings";
 import HomeClient from "@/components/HomeClient";

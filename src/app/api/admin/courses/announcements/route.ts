@@ -1,23 +1,12 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
-// 驗證管理員身分
-async function checkAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== 'admin') {
-    return false;
-  }
-  return true;
-}
 
 // 1. GET：取得該課程的所有公告列表
 export async function GET(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const courseId = searchParams.get('courseId');
@@ -47,9 +36,8 @@ export async function GET(req: Request) {
 // 2. POST：建立新公告
 export async function POST(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const body = await req.json();
     const { course_id, title, content } = body;
@@ -81,9 +69,8 @@ export async function POST(req: Request) {
 // 3. DELETE：刪除公告
 export async function DELETE(req: Request) {
   try {
-    if (!(await checkAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

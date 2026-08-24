@@ -1,17 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions, SessionUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
-
-// 登入會話使用者（補上本專案的 id 與 role 欄位）
-interface SessionUser {
-  id?: string;
-  role?: string;
-  name?: string | null;
-  email?: string | null;
-}
 
 // 資料庫 course_comments 資料列
 interface CommentRow {
