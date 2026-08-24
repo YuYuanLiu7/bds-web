@@ -15,7 +15,11 @@ interface AppUser extends Omit<User, "id"> {
 interface AppToken extends JWT {
   id?: string;
   role?: string;
+  roleCheckedAt?: number; // 上次向資料庫確認 role 的時間戳（毫秒），用於定期刷新
 }
+
+// 每隔多久重新向資料庫確認一次使用者 role（撤銷管理員後最長生效時間）
+const ROLE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 // 全專案唯一的 session 使用者型別（先前在 6 個檔案各自重複宣告）
 export interface SessionUser {
@@ -83,11 +87,32 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      const appToken = token as AppToken;
+
+      // 登入當下：寫入 role/id 並記錄確認時間
       if (user) {
         const appUser = user as AppUser;
-        const appToken = token as AppToken;
         appToken.role = appUser.role;
         appToken.id = appUser.id;
+        appToken.roleCheckedAt = Date.now();
+        return token;
+      }
+
+      // 後續請求：每隔 ROLE_REFRESH_INTERVAL_MS 從資料庫重新確認 role，
+      // 讓「撤銷管理員」最長於該區間內生效，而非等到 JWT 自然過期（預設 30 天）。
+      const last = appToken.roleCheckedAt ?? 0;
+      if (appToken.email && Date.now() - last > ROLE_REFRESH_INTERVAL_MS) {
+        try {
+          const { data } = await supabase
+            .from('users')
+            .select('role')
+            .eq('email', appToken.email)
+            .single();
+          if (data) appToken.role = data.role;
+          appToken.roleCheckedAt = Date.now();
+        } catch {
+          // 資料庫暫時異常時保留既有 role，不阻斷既有登入
+        }
       }
       return token;
     },

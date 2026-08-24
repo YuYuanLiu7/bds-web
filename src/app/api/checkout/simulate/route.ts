@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { grantMembership, computeMembershipExpiry } from "@/lib/entitlements";
 import { sendPurchaseSuccessEmail } from "@/lib/email";
@@ -15,14 +14,17 @@ interface SimulateBody {
 
 export async function POST(req: Request) {
   try {
-    // 🔒 模擬付款端點僅供開發/測試環境，正式環境必須關閉，否則任何登入者可免費開通會員
+    // 🔒 模擬付款端點僅供開發/測試環境，正式環境必須關閉
     if (process.env.NODE_ENV === 'production' && process.env.ENABLE_PAYMENT_SIMULATION !== 'true') {
       return NextResponse.json({ error: "此端點僅供開發測試環境使用" }, { status: 403 });
     }
 
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 🔒 縱深防禦：即使旗標誤開，也僅限管理員可用（免費開通會員的測試工具，不可對一般使用者開放）
+    const auth = await requireAdmin();
+    if (!auth.ok) return auth.res;
+    const userId = auth.user.id;
+    if (!userId || !auth.user.email) {
+      return NextResponse.json({ error: "找不到管理員帳號資料" }, { status: 400 });
     }
 
     const { planId, planName, price, period }: SimulateBody = await req.json();
@@ -32,24 +34,13 @@ export async function POST(req: Request) {
     // 與原行為一致：將 price 以 10 進位解析為整數金額（無法解析則為 0）
     const amount = parseInt(String(price)) || 0;
 
-    // 1. 依據 Email 尋找使用者 ID
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "User not found in database" }, { status: 404 });
-    }
-
     const merTradeNo = `BDS_SIM_${Date.now()}`;
 
     // 2. 建立已付費訂單紀錄
     try {
       await supabase.from('orders').insert({
         id: merTradeNo,
-        user_id: user.id,
+        user_id: userId,
         membership_plan_id: planId,
         amount,
         status: 'paid',
@@ -63,7 +54,7 @@ export async function POST(req: Request) {
     // 3. 計算到期日並開通使用者會員方案權限（'一次性' 為永久會員，expiresAt 為 null）
     const expiresAt = computeMembershipExpiry(period);
     try {
-      await grantMembership(user.id, planId, expiresAt);
+      await grantMembership(userId, planId, expiresAt);
     } catch (e) {
       console.warn("DB update user membership skipped (table/columns might not be migrated yet):", e);
     }
@@ -71,8 +62,8 @@ export async function POST(req: Request) {
     // 5. 寄送模擬購買成功通知信
     try {
       await sendPurchaseSuccessEmail({
-        email: session.user.email,
-        name: session.user.name || '學員',
+        email: auth.user.email,
+        name: auth.user.name || '學員',
         itemName: `訂閱會員 - ${planName}`,
         amount,
         tradeNo: merTradeNo
