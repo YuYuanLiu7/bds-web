@@ -917,7 +917,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                     <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
                       <span className="flex items-center">
                         <ImageIcon className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                        封面精選圖片
+                        封面精選圖片 <span className="text-[9px] font-semibold text-slate-400/80 normal-case ml-1.5">(限制 4.5MB 以下)</span>
                       </span>
                       <label className="text-[9px] text-indigo-600 hover:text-indigo-800 font-black cursor-pointer select-none">
                         {uploading ? '圖片上傳中...' : '📸 上傳檔案'}

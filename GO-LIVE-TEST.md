@@ -7,7 +7,7 @@
 > 再用本檔逐項測試是否真的能跑。
 
 ## 0. 前置確認
-- [ ] 已完成 [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) 第 1～2 區（資料庫遷移＋RLS、Storage bucket、
+- [ ] 已完成 [`LAUNCH-CHECKLIST.md`](./LAUNCH-CHECKLIST.md) 第 1～2 區（資料庫建置＋RLS、Storage bucket、
   管理員帳號、環境變數齊全）。最快做法：`npm run setup -- --migrate --admin`。
 
 ---
@@ -37,11 +37,9 @@
 - [ ] `BUNNY_STREAM_LIBRARY_ID`、`BUNNY_TOKEN_AUTH_KEY` 已設定（皆無 NEXT_PUBLIC_ 前綴）
 - [ ] 後台課程章節「影片網址」填該影片的 embed 網址或 GUID
 - [ ] 用**有購課權限**的學員進入該單元 → 影片正常播放
-- [ ] **防盜驗證**：
-  - [ ] 在播放頁面看原始碼，影片網址帶有 `?token=...&expires=...`（短效）
-  - [ ] 直接把不帶 token 的 Bunny 原始 embed 網址貼到無痕視窗 → 應**無法播放**（被 Token Auth 擋）
-  - [ ] 等 6 小時後（或把 expires 改過期）原 token 網址失效
-- [ ] 若 Bunny 端回報驗章失敗 → 依 `src/lib/bunny.ts` 註解調整 token 串接順序後再測
+- [ ] **防盜安全驗證**：
+  - [ ] **確認網址加密**：在播放頁面點擊影片右鍵選擇「檢查」，確認 `<iframe>` 影片網址後方有自動帶上長長的 `?token=...&expires=...` 參數（代表伺服器已開啟防護）。
+  - [ ] **測試防盜連**：直接把不含 token 的 Bunny 原始 embed 網址貼到瀏覽器無痕視窗，**確認會出現 403 拒絕播放錯誤**（代表防外連與防盜功能運作正常）。
 
 ---
 

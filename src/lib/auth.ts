@@ -37,9 +37,10 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         // 速率限制：同一帳號每 10 分鐘最多 8 次登入嘗試，防止密碼暴力破解
+        // 丟出特定錯誤碼讓登入頁能顯示友善的限流訊息（而非一般的帳密錯誤）
         if (!(await rateLimit(`login:${credentials.email.toLowerCase()}`, 8, 600))) {
           console.warn("Login rate limit exceeded for:", credentials.email);
-          return null;
+          throw new Error("RATE_LIMIT_EXCEEDED");
         }
 
         // 從資料庫找使用者
@@ -60,6 +61,12 @@ export const authOptions: NextAuthOptions = {
         if (!isValid) {
           console.log("Invalid password for user:", credentials.email);
           return null;
+        }
+
+        // 檢查 Email 是否已驗證（若資料表未更新，undefined 將自動放行）
+        if (user.is_verified === false) {
+          console.log("Email not verified for user:", credentials.email);
+          throw new Error("EMAIL_NOT_VERIFIED");
         }
 
         return {

@@ -360,3 +360,183 @@ TRADE_NO: ${tradeNo}
     return false;
   }
 }
+
+interface AuthEmailParams {
+  email: string;
+  name: string;
+  token: string;
+}
+
+/**
+ * 寄送 Email 驗證信（帳戶啟用）
+ */
+export async function sendVerificationEmail({
+  email,
+  name,
+  token,
+}: AuthEmailParams): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const siteUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
+  let targetEmail = email;
+  const testRecipient = process.env.RESEND_TEST_RECIPIENT;
+  if (fromEmail === 'onboarding@resend.dev' && testRecipient && email !== testRecipient) {
+    targetEmail = testRecipient;
+    console.log(`[Email System Sandbox] Redirecting target email from ${email} to verified testing email: ${testRecipient}`);
+  }
+
+  const verifyUrl = `${siteUrl}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>驗證您的 Email 帳號</title>
+        <style>
+          body { font-family: sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 40px 20px; }
+          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; padding: 32px; border: 1px solid #e2e8f0; }
+          .header { text-align: center; margin-bottom: 24px; }
+          .btn-container { text-align: center; margin: 28px 0; }
+          .btn { display: inline-block; background-color: #3b82f6; color: #ffffff !important; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: bold; }
+          .footer { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2 style="color: #1e3a8a;">BDS 線上學習平台</h2>
+          </div>
+          <p>親愛的 ${name} 您好：</p>
+          <p>感謝您註冊 BDS 線上學習平台！請點擊下方的按鈕驗證您的電子郵件地址，以啟用您的帳戶並開始學習：</p>
+          <div class="btn-container">
+            <a href="${verifyUrl}" class="btn">驗證電子郵件</a>
+          </div>
+          <p>或是複製並貼上以下連結至您的瀏覽器中：</p>
+          <p style="word-break: break-all; color: #3b82f6; font-size: 14px;">${verifyUrl}</p>
+          <p>此驗證連結將在 24 小時後過期。如果您沒有註冊此帳戶，請忽略此郵件。</p>
+          <div class="footer">
+            本郵件由 BDS 系統自動發送。如有任何疑問，請聯絡 support@bydoingso.com。
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  if (!apiKey) {
+    console.warn(`
+[Email System WARNING] RESEND_API_KEY is not defined. Email Verification simulated.
+EMAIL TO: ${email}
+URL: ${verifyUrl}
+    `);
+    return true; // 模擬模式回傳成功以利本機測試
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        from: `BDS 帳戶驗證 <${fromEmail}>`,
+        to: [targetEmail],
+        subject: `【BDS 平台】請驗證您的電子郵件信箱` + (targetEmail !== email ? ` [測試導向: ${email}]` : ''),
+        html: htmlContent
+      })
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to send verification email:', error);
+    return false;
+  }
+}
+
+/**
+ * 寄送密碼重設信
+ */
+export async function sendPasswordResetEmail({
+  email,
+  name,
+  token,
+}: AuthEmailParams): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const siteUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
+  let targetEmail = email;
+  const testRecipient = process.env.RESEND_TEST_RECIPIENT;
+  if (fromEmail === 'onboarding@resend.dev' && testRecipient && email !== testRecipient) {
+    targetEmail = testRecipient;
+    console.log(`[Email System Sandbox] Redirecting target email from ${email} to verified testing email: ${testRecipient}`);
+  }
+
+  const resetUrl = `${siteUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>重設您的密碼</title>
+        <style>
+          body { font-family: sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 40px 20px; }
+          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; padding: 32px; border: 1px solid #e2e8f0; }
+          .header { text-align: center; margin-bottom: 24px; }
+          .btn-container { text-align: center; margin: 28px 0; }
+          .btn { display: inline-block; background-color: #ef4444; color: #ffffff !important; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: bold; }
+          .footer { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2 style="color: #1e3a8a;">BDS 線上學習平台</h2>
+          </div>
+          <p>親愛的 ${name} 您好：</p>
+          <p>您收到了此封郵件，是因為我們收到了重設您帳戶密碼的請求。請點擊下方按鈕以設定新密碼：</p>
+          <div class="btn-container">
+            <a href="${resetUrl}" class="btn">重設密碼</a>
+          </div>
+          <p>或是複製並貼上以下連結至您的瀏覽器中：</p>
+          <p style="word-break: break-all; color: #3b82f6; font-size: 14px;">${resetUrl}</p>
+          <p>此重設連結將在 1 小時後過期。如果您沒有要求重設密碼，請忽略此郵件，您的密碼將保持不變。</p>
+          <div class="footer">
+            本郵件由 BDS 系統自動發送。如有任何疑問，請聯絡 support@bydoingso.com。
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  if (!apiKey) {
+    console.warn(`
+[Email System WARNING] RESEND_API_KEY is not defined. Password Reset Email simulated.
+EMAIL TO: ${email}
+URL: ${resetUrl}
+    `);
+    return true; // 模擬模式回傳成功以利本機測試
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        from: `BDS 密碼重設 <${fromEmail}>`,
+        to: [targetEmail],
+        subject: `【BDS 平台】密碼重設請求` + (targetEmail !== email ? ` [測試導向: ${email}]` : ''),
+        html: htmlContent
+      })
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to send password reset email:', error);
+    return false;
+  }
+}

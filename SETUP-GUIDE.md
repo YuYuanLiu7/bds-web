@@ -37,7 +37,8 @@
    1. `db/init.sql`
    2. `db/add_performance_indexes.sql`
    3. `db/add_rate_limiting.sql`
-   4. `db/enable_rls.sql` ← **最後執行（開啟資料保護）**
+   4. `db/add_auth_flows.sql` ← **信箱驗證與密碼重設資料表**
+   5. `db/enable_rls.sql` ← **最後執行（開啟資料保護）**
    > 💡 更快：本地跑 `npm run setup -- --migrate` 可一鍵自動跑完上面所有 SQL（需先有連線字串，見第 5 點）。
 3. **取得網址與金鑰**——點儀表板頂部的 **Connect** 按鈕（或左側 **齒輪 Settings → API Keys**）：
    - **Project URL / `NEXT_PUBLIC_SUPABASE_URL`**（像 `https://xxxx.supabase.co`）— 在 Connect 視窗的 App Frameworks 分頁可直接看到。
@@ -133,11 +134,38 @@ GitHub repo → **Actions → 每日資料庫備份 → Run workflow**。執行�
 ---
 
 ## 步驟 9：設定保活（防 Supabase 休眠）
-GitHub **Settings → Secrets** 再加：
-- `SUPABASE_URL`：你的 Supabase Project URL
-- `SUPABASE_ANON_KEY`：anon public 金鑰
+這是確保您的免費 Supabase 資料庫不會因為 7 天無人造訪而進入休眠的重要步驟。
 
-到 **Actions → Supabase 保活 → Run workflow** 測一次（回應 200 即可）。之後每 3 天自動跑。
+**A. 在 Supabase 取得金鑰與網址**
+1. 登入您的 [Supabase 控制台](https://supabase.com)。
+2. 點選專案儀表板頂部的 **Connect** 按鈕。
+3. 在彈出視窗的 **App Frameworks** 分頁中，複製以下兩個欄位值：
+   - **Project URL**（格式類似 `https://xxxx.supabase.co`）
+   - **Publishable key**（一串以 `eyJ...` 開頭的極長公開金鑰）
+
+**B. 在 GitHub 設定 Secrets（安全變數）**
+1. 前往您的 GitHub 專案網頁。
+2. 點選上方選單最右側的 **Settings**（齒輪圖示）。
+3. 在左側選單中，點擊 **Secrets and variables**，展開後點選 **Actions**。
+4. 點擊綠色的 **New repository secret** 按鈕：
+   - **Name** 輸入：`SUPABASE_URL`
+   - **Value** 貼上您的 **Project URL**。
+   - 點選 **Add secret** 存檔。
+5. 再次點擊 **New repository secret** 按鈕：
+   - **Name** 輸入：`SUPABASE_ANON_KEY`
+   - **Value** 貼上您的 **Publishable key**。
+   - 點選 **Add secret** 存檔。
+
+**C. 手動執行測試與確認回應碼**
+1. 點選專案上方選單的 **Actions** 分頁。
+2. *（若提示工作流已被禁用，請點擊「I understand my workflows, go ahead and enable them」啟用 Actions 功能。）*
+3. 在左側選單中，選取 **Supabase 保活（防免費版休眠）**。
+4. 點擊右側的 **Run workflow** 下拉按鈕，並點選綠色的 **Run workflow** 開始執行。
+5. 等待約 10~20 秒，會出現一筆正在執行的任務（黃色圈圈），當圖示變成**綠色打勾**時，點擊該筆紀錄進入。
+6. **確認回應碼**：
+   - 點擊左側選單「All jobs」底下的 **`ping`** 工作。
+   - 在黑底日誌中，點擊展開 **`對 Supabase 做輕量查詢以保持喚醒`** 步驟。
+   - 確認日誌的倒數第二行顯示：`Supabase 保活查詢回應碼：200`，即代表設定成功！
 
 ---
 

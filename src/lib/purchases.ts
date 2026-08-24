@@ -34,11 +34,10 @@ export interface OrderRow {
 }
 
 // 可購買品項：查價結果與建立訂單所需的欄位
+// （付款完成後的導回頁面由 /api/checkout/return 依訂單品項決定，不在此處指定）
 export interface Purchasable {
   amount: number;
   prodDesc: string;
-  /** 付款完成後導回的站內路徑（不含網域） */
-  returnPath: string;
   /** 寫入 orders 的品項欄位（course_id / download_id / membership_plan_id 擇一） */
   orderFields: Partial<Pick<OrderRow, 'course_id' | 'download_id' | 'membership_plan_id'>>;
 }
@@ -65,7 +64,6 @@ export async function resolvePurchasable(
       item: {
         amount: plan.price,
         prodDesc: `Subscribe to ${plan.title}`,
-        returnPath: '/membership',
         orderFields: { membership_plan_id: id },
       },
     };
@@ -83,7 +81,6 @@ export async function resolvePurchasable(
       item: {
         amount: download.price,
         prodDesc: `Purchase ${download.title}`,
-        returnPath: '/downloads',
         orderFields: { download_id: id },
       },
     };
@@ -100,7 +97,6 @@ export async function resolvePurchasable(
     item: {
       amount: course.price,
       prodDesc: `Purchase ${course.title}`,
-      returnPath: `/courses/${id}`,
       orderFields: { course_id: id },
     },
   };
@@ -289,10 +285,17 @@ export function buildPayuniCheckout(config: {
     NotifyURL: config.notifyUrl,
     Version: '2.0',
   });
+  const hashInfo = tool.generateHash(encryptInfo);
+
+  // 除錯記錄：沙盒串接排查用（不含金鑰明文）
+  console.log(`[DEBUG PayUni Payload] Amount: ${config.amount}, MerTradeNo: ${config.merTradeNo}`);
+  console.log(`[DEBUG PayUni Payload] EncryptInfo: ${encryptInfo}`);
+  console.log(`[DEBUG PayUni Payload] HashInfo: ${hashInfo}`);
+
   return {
     MerID: config.merId,
     Version: '2.0',
     EncryptInfo: encryptInfo,
-    HashInfo: tool.generateHash(encryptInfo),
+    HashInfo: hashInfo,
   };
 }

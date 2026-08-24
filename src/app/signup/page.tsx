@@ -41,8 +41,8 @@ export default function SignupPage() {
         throw new Error(data.error || '註冊失敗');
       }
 
-      // 註冊成功，導向登入頁
-      router.push('/login?registered=true');
+      // 註冊成功，導向登入頁，提醒收驗證信
+      router.push(`/login?registered=verification_pending&email=${encodeURIComponent(formData.email)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

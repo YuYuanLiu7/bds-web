@@ -74,6 +74,7 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 大小限制與 HEIC 轉換皆由共用上傳模組處理
     setUploading(true);
     try {
       const url = await uploadFile(file);
@@ -253,7 +254,7 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
               <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
                 <span className="flex items-center">
                   <Settings className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  數位商品檔案連結 (可上傳本機檔案)
+                  數位商品檔案連結 <span className="text-[9px] font-semibold text-slate-400/80 normal-case ml-1.5">(限制 4.5MB 以下)</span>
                 </span>
                 <label className="text-[9px] text-indigo-600 hover:text-indigo-800 font-black cursor-pointer select-none">
                   {uploading ? '上傳中...' : '📸 上傳數位資源'}

@@ -25,6 +25,11 @@ export async function POST(req: Request) {
     const MerID = process.env.PAYUNI_MERID;
     const HashKey = process.env.PAYUNI_HASH_KEY;
     const HashIV = process.env.PAYUNI_HASH_IV;
+
+    console.log(`[DEBUG PayUni Env] MerID: ${MerID}`);
+    console.log(`[DEBUG PayUni Env] HashKey length: ${HashKey?.length}, starts with: ${HashKey?.substring(0, 4)}`);
+    console.log(`[DEBUG PayUni Env] HashIV length: ${HashIV?.length}, starts with: ${HashIV?.substring(0, 4)}`);
+
     if (!MerID || !HashKey || !HashIV) {
       console.error('PayUni env not configured (PAYUNI_MERID/HASH_KEY/HASH_IV)');
       return NextResponse.json({ error: '金流尚未設定，請聯絡客服' }, { status: 500 });
@@ -53,6 +58,9 @@ export async function POST(req: Request) {
       await createOrder(merTradeNo, userData.id, item.amount, item.orderFields);
     }
 
+    // ReturnURL 統一走 /api/checkout/return：由該端點驗章後依訂單品項導回正確頁面
+    const cleanBaseUrl = (process.env.NEXTAUTH_URL || '').replace(/\/$/, '');
+
     return NextResponse.json(
       buildPayuniCheckout({
         merId: MerID,
@@ -61,8 +69,8 @@ export async function POST(req: Request) {
         merTradeNo,
         amount: item.amount,
         prodDesc: item.prodDesc,
-        returnUrl: `${process.env.NEXTAUTH_URL}${item.returnPath}`,
-        notifyUrl: `${process.env.NEXTAUTH_URL}/api/webhook/payuni`,
+        returnUrl: `${cleanBaseUrl}/api/checkout/return`,
+        notifyUrl: `${cleanBaseUrl}/api/webhook/payuni`,
       })
     );
   } catch (error) {

@@ -358,7 +358,7 @@ export default function AdminAssetsPage() {
         <UploadCloud className={`w-10 h-10 ${dragActive ? 'text-indigo-600 animate-bounce' : 'text-slate-400'}`} />
         <div>
           <span className="font-bold text-xs">將檔案拖曳至此處</span>
-          <span className="text-[11px] text-slate-400 block mt-0.5">支援多檔案上傳，單一檔案上限為 5GB</span>
+          <span className="text-[11px] text-slate-400 block mt-0.5">支援多檔案上傳，單一檔案上限為 4.5MB (大檔案請以外部連結分享)</span>
         </div>
       </div>
 

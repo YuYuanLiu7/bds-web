@@ -293,7 +293,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
               {/* Course-wide Attachment File Upload */}
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider flex items-center justify-between">
-                  <span>課程教材檔案 (下載資源)</span>
+                  <span>課程教材檔案 (下載資源) <span className="text-[10px] font-semibold text-gray-400 normal-case ml-1.5">(限制 4.5MB 以下)</span></span>
                   {uploadingField === 'course_file' && <span className="text-[10px] text-blue-600 font-bold flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> 上傳中...</span>}
                 </label>
                 <div className="flex gap-2">
@@ -368,7 +368,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-700">點擊上傳課程封面圖片</p>
-                        <p className="text-[10px] text-gray-400 mt-1 font-semibold">支援 PNG, JPG, WEBP，建議尺寸 1280x800 px</p>
+                        <p className="text-[10px] text-gray-400 mt-1 font-semibold">支援 PNG, JPG, WEBP (限制 4.5MB 以下，建議尺寸 1280x800 px)</p>
                       </div>
                     </div>
                   )}

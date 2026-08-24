@@ -13,7 +13,7 @@
 # 驗證環境變數、檢查資料表、自動建立 uploads bucket
 npm run setup
 
-# 進階：另用 SUPABASE_DB_URL 自動跑完所有 SQL 遷移（含 RLS，冪等可重跑）
+# 進階：另用 SUPABASE_DB_URL 自動執行 SQL 建置所有資料表（含 RLS，冪等可重跑）
 npm run setup -- --migrate
 
 # 一併建立管理員帳號（密碼至少 6 位，會自動雜湊）
@@ -24,8 +24,8 @@ ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=你的密碼 ADMIN_NAME=站長 npm ru
 
 ---
 
-## 1. 資料庫（Supabase）
-> 💡 上述 `npm run setup -- --migrate --admin` 可一次完成本區全部項目；以下為手動對照。
+## 1. 資料庫（Supabase 建置）
+> 💡 上述 `npm run setup -- --migrate --admin` 可一次自動建置好資料表與管理員帳號；以下為手動對照。
 - [ ] 建立 Supabase 專案，於 SQL Editor 執行 `db/init.sql`（冪等，可重跑）
 - [ ] 執行 `db/enable_rls.sql`（**最後**執行，對所有資料表開啟 RLS）
 - [ ] 確認 Storage 有 `uploads` bucket（`npm run setup` 會自動建立，亦可手動建）

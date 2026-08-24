@@ -349,7 +349,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                 <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-wider flex items-center justify-between">
                   <span className="flex items-center">
                     <ImageIcon className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                    活動封面圖片
+                    活動封面圖片 <span className="text-[10px] font-semibold text-slate-400 normal-case ml-1.5">(限制 4.5MB 以下)</span>
                   </span>
                   
                   {/* File Uploader Button */}

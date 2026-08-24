@@ -548,7 +548,7 @@ export default function AdminSettingsPage() {
                       <div className="text-[9px] font-bold text-indigo-600 uppercase">投影片廣告 #{sIdx + 1}</div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[9px] text-slate-400">上傳投影片圖片</label>
+                          <label className="text-[9px] text-slate-400 font-semibold">上傳投影片圖片 <span className="text-slate-400/80">(限制 4.5MB)</span></label>
                           <div className="aspect-[21/9] w-full rounded border overflow-hidden bg-slate-50 relative flex items-center justify-center">
                             {slide.imageUrl ? <img src={slide.imageUrl} alt="首頁輪播圖片預覽" className="w-full h-full object-cover" onError={(e)=>{const t=e.currentTarget; if(!t.src.endsWith('/images/course-placeholder.svg')) t.src='/images/course-placeholder.svg';}} /> : <ImageIcon className="w-6 h-6 text-slate-300" />}
                             {uploadingField === `slide-${sIdx}` && <div className="absolute inset-0 bg-black/60 text-xs text-white flex items-center justify-center">上傳中...</div>}

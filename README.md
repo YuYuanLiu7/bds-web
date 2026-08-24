@@ -46,7 +46,7 @@ PAYUNI_HASH_IV=YOUR_PAYUNI_HASH_IV
 填好 `.env.local` 後，於根目錄執行：
 ```bash
 npm run setup                 # 驗證環境變數、檢查資料表、建立 uploads bucket
-npm run setup -- --migrate    # 另用 SUPABASE_DB_URL 自動跑完所有 SQL 遷移（含 RLS）
+npm run setup -- --migrate    # 另用 SUPABASE_DB_URL 自動執行 SQL 建置所有資料表（含 RLS）
 ```
 或手動於 Supabase SQL Editor 依序貼上 `db/*.sql`（最後跑 `db/enable_rls.sql`）。
 

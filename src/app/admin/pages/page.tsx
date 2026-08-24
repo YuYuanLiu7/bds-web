@@ -472,7 +472,7 @@ export default function AdminPagesPage() {
 
                 {/* Page Cover Upload */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">頁面主視覺 / 封面圖片</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">頁面主視覺 / 封面圖片 <span className="text-[9px] font-semibold text-slate-400/80 normal-case ml-1.5">(限制 4.5MB 以下)</span></label>
                   <div className="flex items-center space-x-3 bg-white p-3 rounded-xl border border-slate-200/80">
                     <div className="w-16 h-12 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
                       {formData.imageUrl ? (

@@ -8,14 +8,19 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 let client: SupabaseClient | null = null;
 
-/** 惰性建立：第一次使用時才讀取環境變數並建立 client（測試可先設定環境變數或替換實作） */
+/**
+ * 惰性建立：第一次使用時才讀取環境變數並建立 client（測試可先設定環境變數或替換實作）。
+ * 為了在沒有設定環境變數的情況下（例如本地 npm run build 或 CI/CD 環境中）也能編譯成功，
+ * 環境變數為空時使用佔位網址與金鑰，避免 Supabase SDK 拋出 initialization 錯誤。
+ */
 export function getSupabase(): SupabaseClient {
   if (!client) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
     const supabaseKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      '';
+      'placeholder-key-for-build-stage';
     client = createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: false,
