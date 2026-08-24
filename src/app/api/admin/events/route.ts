@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { parsePrice } from "@/lib/validate";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
       registration_url 
     } = body;
 
-    const parsedPrice = parseInt(price) || 0;
+    const parsedPrice = parsePrice(price);
     // Generate default display price if empty
     const finalPriceDisplay = price_display?.trim() || (parsedPrice === 0 ? '免費活動' : `NT$ ${parsedPrice.toLocaleString()}`);
 
@@ -95,7 +96,7 @@ export async function PUT(req: Request) {
       registration_url 
     } = body;
 
-    const parsedPrice = parseInt(price) || 0;
+    const parsedPrice = parsePrice(price);
     const finalPriceDisplay = price_display?.trim() || (parsedPrice === 0 ? '免費活動' : `NT$ ${parsedPrice.toLocaleString()}`);
 
     const { data, error } = await supabase

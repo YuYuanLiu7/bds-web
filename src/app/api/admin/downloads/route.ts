@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { parsePrice } from "@/lib/validate";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
       .from('downloads')
       .insert([{
         title, 
-        price: parseInt(price) || 0, 
+        price: parsePrice(price), 
         type, 
         description, 
         downloads_count: parseInt(downloads_count) || 0, 
@@ -63,7 +64,7 @@ export async function PUT(req: Request) {
       .from('downloads')
       .update({ 
         title, 
-        price: parseInt(price) || 0, 
+        price: parsePrice(price), 
         type, 
         description, 
         downloads_count: parseInt(downloads_count) || 0, 

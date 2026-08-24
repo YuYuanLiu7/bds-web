@@ -1,4 +1,5 @@
 import { sendContactEmail } from "@/lib/email";
+import { isValidEmail } from "@/lib/validate";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -24,8 +25,8 @@ export async function POST(req: Request) {
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
       return NextResponse.json({ error: "請填寫姓名、信箱與訊息內容" }, { status: 400 });
     }
-    // 簡單 email 格式檢查
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // 簡單 email 格式檢查（規則統一由 lib/validate 定義）
+    if (!isValidEmail(email)) {
       return NextResponse.json({ error: "電子郵件格式不正確" }, { status: 400 });
     }
     // 訊息長度上限，避免濫用

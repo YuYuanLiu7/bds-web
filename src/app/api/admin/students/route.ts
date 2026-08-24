@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/auth";
 import { grantCourses, revokeAllCourses } from "@/lib/entitlements";
+import { isValidPassword, hashPassword, emailTaken, MIN_PASSWORD_LENGTH } from "@/lib/validate";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 
 // 使用者資料列型別（部分欄位視資料庫遷移狀態而定，故皆為選填）
 interface UserRow {
@@ -87,23 +87,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "請填寫必要欄位 (姓名、信箱、密碼、角色)" }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: "密碼長度至少需要 6 位" }, { status: 400 });
+    if (!isValidPassword(password)) {
+      return NextResponse.json({ error: `密碼長度至少需要 ${MIN_PASSWORD_LENGTH} 位` }, { status: 400 });
     }
 
-    // 檢查信箱是否已存在
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingUser) {
+    // 檢查信箱是否已存在（規則統一由 lib/validate 定義）
+    if (await emailTaken(email)) {
       return NextResponse.json({ error: "此信箱已被註冊" }, { status: 400 });
     }
 
     // 加密密碼
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await hashPassword(password);
 
     // 構建寫入 users 的資料
     const insertData: UserWriteData = {
@@ -181,15 +175,8 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "缺漏必要資料" }, { status: 400 });
     }
 
-    // 檢查是否有同信箱的其他使用者
-    const { data: duplicateUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .neq('id', id)
-      .maybeSingle();
-
-    if (duplicateUser) {
+    // 檢查是否有同信箱的其他使用者（規則統一由 lib/validate 定義）
+    if (await emailTaken(email, id)) {
       return NextResponse.json({ error: "此信箱已被其他成員佔用" }, { status: 400 });
     }
 
@@ -215,8 +202,8 @@ export async function PUT(req: Request) {
     }
 
     // 如果有填寫密碼，則重新加密更新
-    if (password && password.trim().length >= 6) {
-      updateData.password_hash = await bcrypt.hash(password, 12);
+    if (password && isValidPassword(password)) {
+      updateData.password_hash = await hashPassword(password);
     }
 
     // A. 更新使用者主表
@@ -237,7 +224,7 @@ export async function PUT(req: Request) {
         email,
         role
       };
-      if (password && password.trim().length >= 6) {
+      if (password && isValidPassword(password)) {
         basicUpdate.password_hash = updateData.password_hash;
       }
 

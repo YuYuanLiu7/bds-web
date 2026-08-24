@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import bcrypt from 'bcryptjs';
+import { isValidEmail, isValidPassword, hashPassword, emailTaken, MIN_PASSWORD_LENGTH } from '@/lib/validate';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
@@ -17,37 +17,31 @@ export async function POST(req: Request) {
     }
 
     // Email 格式後端驗證（防止前端被繞過）
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) {
+    if (!isValidEmail(email)) {
       return NextResponse.json({ error: '電子郵件格式不正確' }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: '密碼長度至少需要 6 位' }, { status: 400 });
+    if (!isValidPassword(password)) {
+      return NextResponse.json({ error: `密碼長度至少需要 ${MIN_PASSWORD_LENGTH} 位` }, { status: 400 });
     }
 
     // 1. 檢查使用者是否已存在
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingUser) {
+    if (await emailTaken(email)) {
       return NextResponse.json({ error: '此 Email 已被註冊' }, { status: 400 });
     }
 
     // 2. 密碼加密
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await hashPassword(password);
 
     // 3. 建立新使用者
     const { data: newUser, error: createError } = await supabase
       .from('users')
       .insert([
-        { 
-          email, 
-          name, 
+        {
+          email,
+          name,
           password_hash: hashedPassword,
-          role: 'user' 
+          role: 'user'
         }
       ])
       .select()

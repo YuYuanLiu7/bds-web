@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { parsePrice } from "@/lib/validate";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
       .from('membership_plans')
       .insert([{
         title,
-        price: parseInt(price) || 0,
+        price: parsePrice(price),
         period: period || '月繳',
         description,
         features: Array.isArray(features) ? features : [],
@@ -70,7 +71,7 @@ export async function PUT(req: Request) {
       .from('membership_plans')
       .update({
         title,
-        price: parseInt(price) || 0,
+        price: parsePrice(price),
         period: period || '月繳',
         description,
         features: Array.isArray(features) ? features : [],

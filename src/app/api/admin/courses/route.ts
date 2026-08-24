@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { parsePrice } from "@/lib/validate";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
     const insertData: CourseWriteData = {
       title, 
       description, 
-      price: parseInt(price), 
+      price: parsePrice(price), 
       category, 
       thumbnail_url, 
       is_published: is_published !== false,
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
       const fallbackData: CourseWriteData = {
         title,
         description,
-        price: parseInt(price),
+        price: parsePrice(price),
         category,
         thumbnail_url,
         is_published: is_published !== false
@@ -85,7 +86,7 @@ export async function POST(req: Request) {
         const fallbackBareData: CourseWriteData = {
           title,
           description,
-          price: parseInt(price),
+          price: parsePrice(price),
           category,
           thumbnail_url,
           is_published: is_published !== false
@@ -133,7 +134,7 @@ export async function PUT(req: Request) {
     const updateData: CourseWriteData = {
       title, 
       description, 
-      price: parseInt(price), 
+      price: parsePrice(price), 
       category, 
       thumbnail_url,
       is_published: is_published !== false,
@@ -159,7 +160,7 @@ export async function PUT(req: Request) {
       const fallbackData: CourseWriteData = {
         title,
         description,
-        price: parseInt(price),
+        price: parsePrice(price),
         category,
         thumbnail_url,
         is_published: is_published !== false
@@ -178,7 +179,7 @@ export async function PUT(req: Request) {
         const fallbackBareData: CourseWriteData = {
           title,
           description,
-          price: parseInt(price),
+          price: parsePrice(price),
           category,
           thumbnail_url,
           is_published: is_published !== false
