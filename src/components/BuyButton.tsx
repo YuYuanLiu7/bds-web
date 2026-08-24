@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/components/Toast';
+import { submitPayuniForm } from '@/lib/payuni-client';
 
 interface BuyButtonProps {
   courseId: string;
@@ -31,22 +32,8 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
         return;
       }
 
-      // Create a hidden form and submit it to PayUni (UPP)
-      const form = document.createElement('form');
-      form.method = 'POST';
-      // UPP 端點由環境變數決定，正式上線設定 NEXT_PUBLIC_PAYUNI_UPP_URL 即可，無需改程式碼
-      form.action = process.env.NEXT_PUBLIC_PAYUNI_UPP_URL || 'https://sandbox-api.payuni.com.tw/api/upp';
-
-      Object.keys(params).forEach((key) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = params[key];
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      form.submit();
+      // 建立隱藏表單並送出至 PayUni（UPP）
+      submitPayuniForm(params);
     } catch (error) {
       console.error('Checkout failed:', error);
       toast.error('結帳失敗，請稍後再試。');

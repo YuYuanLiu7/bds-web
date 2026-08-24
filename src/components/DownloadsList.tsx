@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Download, ArrowRight, FileText, Layout, FileSpreadsheet, Archive, PlayCircle, X, Sparkles, CheckCircle2, Crown } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { submitPayuniForm } from '@/lib/payuni-client';
 
 interface DownloadProduct {
   id: string;
@@ -109,19 +110,8 @@ export default function DownloadsList({ downloads, primaryColor, isAdmin = false
         return;
       }
 
-      // 建立隱藏表單並 POST 至 PayUni（UPP）；端點由環境變數決定
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = process.env.NEXT_PUBLIC_PAYUNI_UPP_URL || 'https://sandbox-api.payuni.com.tw/api/upp';
-      Object.keys(params).forEach((key) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = params[key];
-        form.appendChild(input);
-      });
-      document.body.appendChild(form);
-      form.submit();
+      // 建立隱藏表單並送出至 PayUni（UPP）
+      submitPayuniForm(params);
     } catch (err) {
       console.error('Checkout failed:', err);
       toast.error('結帳失敗，請稍後再試。');

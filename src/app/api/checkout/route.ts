@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
-import { PayuniTool } from '@/lib/payuni';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { resolvePurchasable, createOrder, buildPayuniCheckout, PurchaseType } from '@/lib/purchases';
 
 // 結帳請求主體（金額一律以資料庫為準，此處僅用於指定品項與類型）
 interface CheckoutBody {
   courseId?: string;
   planId?: string;
   downloadId?: string;
-  type?: 'course' | 'membership' | 'download';
+  type?: PurchaseType;
 }
 
 export async function POST(req: Request) {
@@ -32,131 +32,39 @@ export async function POST(req: Request) {
 
     const body: CheckoutBody = await req.json();
     const { courseId, planId, downloadId, type = 'course' } = body;
+    const itemId = type === 'membership' ? planId : type === 'download' ? downloadId : courseId;
 
-    // 🔒 金額一律以資料庫為準，不信任前端傳入的 amount，避免竄改價格低買
-    let amount: number;
-    let prodDesc: string;
-    if (type === 'membership') {
-      const { data: plan, error: planErr } = await supabase
-        .from('membership_plans')
-        .select('price, title')
-        .eq('id', planId)
-        .single();
-      if (planErr || !plan) {
-        return NextResponse.json({ error: '找不到指定的會員方案' }, { status: 400 });
-      }
-      amount = plan.price;
-      prodDesc = `Subscribe to ${plan.title}`;
-    } else if (type === 'download') {
-      const { data: download, error: downloadErr } = await supabase
-        .from('downloads')
-        .select('price, title')
-        .eq('id', downloadId)
-        .single();
-      if (downloadErr || !download) {
-        return NextResponse.json({ error: '找不到指定的數位下載商品' }, { status: 400 });
-      }
-      amount = download.price;
-      prodDesc = `Purchase ${download.title}`;
-    } else {
-      const { data: course, error: courseErr } = await supabase
-        .from('courses')
-        .select('price, title')
-        .eq('id', courseId)
-        .single();
-      if (courseErr || !course) {
-        return NextResponse.json({ error: '找不到指定的課程' }, { status: 400 });
-      }
-      amount = course.price;
-      prodDesc = `Purchase ${course.title}`;
+    // 依購買類型解析品項（金額以資料庫為準，防止竄改價格低買）
+    const resolved = await resolvePurchasable(type, itemId);
+    if (!resolved.ok) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
     }
-
-    const PAYUNI_CONFIG = {
-      MerID,
-      HashKey,
-      HashIV,
-      ReturnURL: type === 'membership'
-        ? `${process.env.NEXTAUTH_URL}/membership`
-        : type === 'download'
-          ? `${process.env.NEXTAUTH_URL}/downloads`
-          : `${process.env.NEXTAUTH_URL}/courses/${courseId}`,
-      NotifyURL: `${process.env.NEXTAUTH_URL}/api/webhook/payuni`,
-    };
-
-    const tool = new PayuniTool(PAYUNI_CONFIG.HashKey, PAYUNI_CONFIG.HashIV);
+    const { item } = resolved;
 
     const merTradeNo = `BDS${Date.now()}`;
-    const timestamp = Math.floor(Date.now() / 1000);
 
-    // Record order in database
-    if (session?.user?.email) {
-      // Find user id by email
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', session.user.email)
-        .single();
-
-      if (userData) {
-        if (type === 'membership') {
-          try {
-            await supabase.from('orders').insert({
-              id: merTradeNo,
-              user_id: userData.id,
-              membership_plan_id: planId,
-              amount: amount,
-              status: 'pending'
-            });
-          } catch (dbErr) {
-            console.warn("DB insert membership order failed (table migration might not be executed yet):", dbErr);
-            // Fallback insert without membership_plan_id
-            await supabase.from('orders').insert({
-              id: merTradeNo,
-              user_id: userData.id,
-              amount: amount,
-              status: 'pending'
-            });
-          }
-        } else if (type === 'download') {
-          await supabase.from('orders').insert({
-            id: merTradeNo,
-            user_id: userData.id,
-            download_id: downloadId,
-            amount: amount,
-            status: 'pending'
-          });
-        } else {
-          await supabase.from('orders').insert({
-            id: merTradeNo,
-            user_id: userData.id,
-            course_id: courseId,
-            amount: amount,
-            status: 'pending'
-          });
-        }
-      }
+    // 建立 pending 訂單（依 email 找使用者）
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single();
+    if (userData) {
+      await createOrder(merTradeNo, userData.id, item.amount, item.orderFields);
     }
 
-    const encryptParams = {
-      MerID: PAYUNI_CONFIG.MerID,
-      MerTradeNo: merTradeNo,
-      TradeAmt: amount,
-      Timestamp: timestamp,
-      ProdDesc: prodDesc,
-      ReturnURL: PAYUNI_CONFIG.ReturnURL,
-      NotifyURL: PAYUNI_CONFIG.NotifyURL,
-      Version: '2.0',
-    };
-
-    const encryptInfo = tool.encrypt(encryptParams);
-    const hashInfo = tool.generateHash(encryptInfo);
-
-    return NextResponse.json({
-      MerID: PAYUNI_CONFIG.MerID,
-      Version: '2.0',
-      EncryptInfo: encryptInfo,
-      HashInfo: hashInfo,
-    });
+    return NextResponse.json(
+      buildPayuniCheckout({
+        merId: MerID,
+        hashKey: HashKey,
+        hashIV: HashIV,
+        merTradeNo,
+        amount: item.amount,
+        prodDesc: item.prodDesc,
+        returnUrl: `${process.env.NEXTAUTH_URL}${item.returnPath}`,
+        notifyUrl: `${process.env.NEXTAUTH_URL}/api/webhook/payuni`,
+      })
+    );
   } catch (error) {
     console.error('Checkout error:', error);
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
