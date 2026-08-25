@@ -131,6 +131,13 @@
       <p>① 影片檔很大、上傳要時間，工具<strong>可以中斷後續傳</strong>（重跑會自動略過已傳的），不怕斷線。<br>
       ② 需要 Bunny 影片庫的「上傳用 API Key」（<code class="inline">BUNNY_STREAM_API_KEY</code>，在 Bunny → Stream → 影片庫 → API），它跟播放防盜的金鑰是不同的東西。</p>
     </div>
+    <div class="box tip">
+      <p class="box-title">📎 資料夾裡的簡報/講義（.pptx、.pdf 等）怎麼辦？</p>
+      <p>影片工具<strong>只傳影片、會自動略過簡報</strong>（它們不是放 Bunny 的）。簡報是「課程教材」，用另一支工具批次上傳（傳到 Supabase，不需 Bunny 金鑰）：</p>
+<pre>node scripts/upload-materials.mjs "你的影片資料夾"            # 先掃描看 plan.csv
+node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上傳（可中斷續傳）</pre>
+      <p>上傳完給你 <code class="inline">materials-upload-result.csv</code>（每個教材對應的網址）。它會自動只挑 .pdf/.pptx/.ppt/.key/.doc/.docx/.xls/.xlsx/.zip，影片和圖片略過。之後到後台把網址貼進章節的「教材／附件」欄位。</p>
+    </div>
   </div>
 
   <div class="step">
@@ -250,7 +257,12 @@ node scripts/create-course-shells.mjs "你的CSV路徑" --commit   # 正式建�
 <pre>node scripts/bunny-upload.mjs "你的影片資料夾"                 # 先掃描看 plan.csv
 node scripts/bunny-upload.mjs "你的影片資料夾" --upload --limit 3   # 先傳 3 支測試
 node scripts/bunny-upload.mjs "你的影片資料夾" --upload        # 全部上傳（可中斷續傳）</pre>
-    <p style="font-size:15px;color:var(--ink-soft);">→ 依 <code class="inline">bunny-upload-result.csv</code> 到後台把影片網址貼進各課章節，補完內容後<strong>發佈課程</strong>。</p>
+    <p style="font-size:15px;color:var(--ink-soft);">→ 依 <code class="inline">bunny-upload-result.csv</code> 到後台把影片網址貼進各課章節。</p>
+
+    <h3>②-2 教材簡報批次上傳（.pptx/.pdf 等 → 傳 Supabase）</h3>
+<pre>node scripts/upload-materials.mjs "你的影片資料夾"             # 先掃描看 plan.csv
+node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 全部上傳（可中斷續傳）</pre>
+    <p style="font-size:15px;color:var(--ink-soft);">→ 依 <code class="inline">materials-upload-result.csv</code> 把教材網址貼進章節「教材／附件」欄位；補完內容後<strong>發佈課程</strong>。</p>
 
     <h3>③ 匯入 656 位學員 + 課程權限</h3>
 <pre>node scripts/import-students.mjs "你的CSV路徑"                 # 試跑：看課程標題對不對得上
