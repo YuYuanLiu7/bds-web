@@ -424,22 +424,28 @@
         <p class="sub"><span class="time-tag">約 15 分鐘</span></p>
       </div>
     </div>
+    <div class="box tip">
+      <p class="box-title">📖 先分清楚「網域」和「網站上線」是兩回事</p>
+      <p>這裡說的「<strong>你的網域</strong>」＝<strong>你買下來的那個域名</strong>（例如 <code class="inline">myschool.com</code>），跟網站有沒有上線<strong>完全無關</strong>。你一買下網域，它就存在、就能拿去 Resend 驗證了，<strong>不需要等網站架好</strong>。</p>
+      <p>舉例：假設你買的網域是 <code class="inline">myschool.com</code>，那寄件人就填 <code class="inline">no-reply@myschool.com</code>（<code class="inline">no-reply</code> 是自訂的、不用另外去申請這個信箱，Resend 驗證過網域後就能用）。</p>
+      <p>👉 <strong>還沒有自己的網域嗎？</strong>要收費賣課，建議先去買一個（GoDaddy、Cloudflare、Gandi 等都可）。買好之前，先照下面的「還在等驗證時怎麼先測」用沙盒地址測試即可，但<strong>別對外開放收客</strong>。</p>
+    </div>
     <ol class="dolist">
       <li>Resend → 左側 <strong>API Keys</strong> → <strong>Create</strong>，複製那把鑰匙。</li>
-      <li><strong>驗證你的網域</strong>（左側 <strong>Domains</strong>）→ 之後把寄件人設成 <code class="inline">no-reply@你的網址</code>。<span class="gate">對外收客前必做</span></li>
+      <li>左側 <strong>Domains</strong> → <strong>Add Domain</strong> → 輸入<strong>你買的網域</strong>（例如 <code class="inline">myschool.com</code>）→ 依畫面指示到你買網域的地方加上它給的 DNS 記錄 → 等變成 Verified。之後寄件人就設成 <code class="inline">no-reply@你的網域</code>。<span class="gate">對外收客前必做</span></li>
     </ol>
     <div class="box warn">
       <p class="box-title">⚠️ 這步不能跳過，否則新客戶會「註冊了卻無法登入」</p>
       <p>新客戶註冊後，系統會寄一封「驗證信」，客戶要點了才能登入。若寄件人還用預設的沙盒地址 <code class="inline">onboarding@resend.dev</code>，Resend <strong>只會把信寄到你自己</strong>、真正的客戶<strong>永遠收不到</strong>驗證信 → 就登不進去、買了也用不了。購買通知信、忘記密碼信也一樣收不到。</p>
-      <p><strong>所以：正式對外收客前，一定要驗證自家網域、把寄件人換成 <code class="inline">no-reply@你的網址</code>。</strong>（驗證要改網域 DNS、等它生效，早點做。）</p>
+      <p><strong>所以：正式對外收客前，一定要驗證自家網域、把寄件人換成 <code class="inline">no-reply@你的網域</code>（例如 <code class="inline">no-reply@myschool.com</code>）。</strong></p>
     </div>
     <div class="paste">
       <div class="label"><span>寄信鑰匙</span><span class="where">Resend → API Keys</span></div>
       <code>RESEND_API_KEY</code>
     </div>
     <div class="paste">
-      <div class="label"><span>寄件人信箱（驗證網域後填這個；正式站務必用自家網域）</span></div>
-<pre>RESEND_FROM_EMAIL = no-reply@你的網址</pre>
+      <div class="label"><span>寄件人信箱（驗證網域後填；例如網域是 myschool.com 就填 no-reply@myschool.com）</span></div>
+<pre>RESEND_FROM_EMAIL = no-reply@你的網域</pre>
     </div>
     <div class="paste">
       <div class="label"><span>測試收件信箱（網域還沒驗證好、想先測試時填你自己的信箱）</span><span class="where">用沙盒寄件人時，信只會寄到這裡</span></div>
@@ -485,7 +491,7 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
     </div>
     <div class="box tip">
       <p class="box-title">💡 不用手動填回呼網址</p>
-      <p>系統送出付款時會自動帶上回呼網址。若 PayUni 後台有 <em>Notify URL</em> 欄位要你填，就填 <code class="inline">https://你的網址/api/webhook/payuni</code>（網址等步驟 6 上線後才會有）。</p>
+      <p>系統送出付款時會自動帶上回呼網址。若 PayUni 後台有 <em>Notify URL</em> 欄位要你填，就填 <code class="inline">https://你的網站網址/api/webhook/payuni</code>（這裡指「網站上線後的網址」，步驟 6 部署完才會有；跟上面 Resend 的「網域」是不同東西）。</p>
     </div>
   </div>
 
@@ -537,7 +543,7 @@ BUNNY_STREAM_API_KEY       = ...   # 影片批次上傳用（另一把，見步�
 
 # --- 寄信 Resend（步驟 4）---
 RESEND_API_KEY             = ...
-RESEND_FROM_EMAIL          = no-reply@你的網址   # 正式收客務必用自家已驗證網域
+RESEND_FROM_EMAIL          = no-reply@你的網域   # 例：no-reply@myschool.com；正式收客務必用自家已驗證網域
 RESEND_TEST_RECIPIENT      = 你自己的信箱          # 網域還沒驗證好時的測試收件者
 CONTACT_TO_EMAIL           = 你的客服信箱
 ADMIN_ALERT_EMAIL          = 你收警示信的信箱        # 出錯通知（見步驟 9C），不填則用客服信箱

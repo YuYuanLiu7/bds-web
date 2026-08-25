@@ -184,7 +184,7 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
     </div></div>
     <div class="box warn">
       <p class="box-title">⏳ 寄信前兩個前提（都要滿足才 --send）</p>
-      <p>① <strong>寄件人網域</strong>：<code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（例如 <code class="inline">no-reply@你的網址</code>）。還在用沙盒地址的話工具會擋下。<span class="gate">要先驗證網域</span><br>
+      <p>① <strong>寄件人網域</strong>：<code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（用你買的域名，例如網域是 myschool.com 就填 <code class="inline">no-reply@myschool.com</code>；作法見《開站手冊》步驟 4）。還在用沙盒地址的話工具會擋下。<span class="gate">要先驗證網域</span><br>
       ② <strong>網址要先定案</strong>：信裡的「設定密碼」連結是用 <code class="inline">.env.local</code> 的 <code class="inline">NEXTAUTH_URL</code> 組出來的、效期 7 天。所以請<strong>先把 <code class="inline">NEXTAUTH_URL</code> 設成客戶最終會用的正式網址</strong>（<code class="inline">https://bds.fu-notes.com</code>）再 <code class="inline">--send</code>；否則連結會指到臨時網址，切換網域後可能失效。最穩的做法：<strong>把這步（--send）放到步驟 5 換好網域、確認新站能登入之後再做</strong>。</p>
     </div>
     <p><strong>先寄一封測試信給自己</strong>看版面（測試信只是預覽版型，<strong>裡面的連結點了不會真的能設密碼</strong>，正式 <code class="inline">--send</code> 才會產生有效連結）：</p>
