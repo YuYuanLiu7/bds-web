@@ -96,6 +96,17 @@
   <p class="eyebrow">搬家順序</p>
   <h2>照這 6 步做</h2>
 
+  <div class="box warn">
+    <p class="box-title">🖥️ 開始前：跑任何指令前，先完成這 4 件事</p>
+    <p>本手冊步驟 2～5 都要在<strong>電腦的終端機</strong>打 <code class="inline">node ...</code> 指令。第一次做之前，請先備妥（文末附錄「用之前先確認」有更詳細步驟）：</p>
+    <ol class="dolist">
+      <li><strong>把專案下載到你的電腦</strong>：<code class="inline">git clone</code> 你的 GitHub 專案（或解壓賣方給的檔），得到一個 <code class="inline">bds-web</code> 資料夾——後面所有指令都在這個資料夾裡跑。</li>
+      <li><strong>裝 Node.js</strong>（<a href="https://nodejs.org">nodejs.org</a> 下載 LTS 版），並在 <code class="inline">bds-web</code> 資料夾執行一次 <code class="inline">npm install</code>。</li>
+      <li><strong>建立 <code class="inline">.env.local</code></strong>：把 <code class="inline">.env.example</code> 複製改名為 <code class="inline">.env.local</code>，填入<strong>你自己新專案</strong>的金鑰（見附錄，含 Bunny 上傳金鑰 <code class="inline">BUNNY_STREAM_API_KEY</code>）。<strong>切勿沿用賣方舊檔</strong>，否則會灌到賣方的舊資料庫。</li>
+      <li><strong>從 Teachify 匯出學員 CSV</strong>：到 Teachify 後台匯出學員名單（需含 <code class="inline">Email</code> 與 <code class="inline">Attended courses</code> 欄位），存到電腦，記下路徑（下面指令的「你的CSV路徑」就是它）。</li>
+    </ol>
+  </div>
+
   <div class="step">
     <div class="step-head"><div class="step-num">1</div><div>
       <h2>先把新網站架好</h2>
@@ -132,7 +143,7 @@
     <pre>node scripts/create-course-shells.mjs "你的CSV路徑"</pre>
     <p>沒問題後正式建立：</p>
     <pre>node scripts/create-course-shells.mjs "你的CSV路徑" --commit</pre>
-    <p>它會自動建好這 <strong>26 門課的空殼</strong>（標題完全正確、狀態為「未發佈」）。接著你到後台 <code class="inline">/admin</code> 為每門課補上說明、把步驟 2 上傳的影片網址貼進章節，<strong>完成後記得按「發佈」</strong>課程才會對外顯示。</p>
+    <p>它會依 CSV 算出的門數自動建好空殼（<strong>本例約 26 門</strong>，實際以工具印出的數字為準；標題完全正確、狀態為「未發佈」）。接著你到後台 <code class="inline">/admin</code> 為每門課補上說明、把步驟 2 上傳的影片網址貼進章節（貼 <code class="inline">bunny-upload-result.csv</code> 裡的 <code class="inline">embed_url</code> 或 <code class="inline">bunny_guid</code> 皆可，系統都認得），<strong>完成後記得按「發佈」</strong>課程才會對外顯示。</p>
   </div>
 
   <div class="step">
@@ -140,9 +151,11 @@
       <h2>匯入學員與課程權限（自動）</h2>
       <p class="sub">656 位學員一次匯入，不用手打</p>
     </div></div>
-    <p><strong>先「試跑」看結果</strong>（不會寫入任何東西）：</p>
+    <p><strong>第一步：只看 CSV（最安全，不連資料庫）。</strong>先確認人數與課程清單讀得對：</p>
+    <pre>node scripts/import-students.mjs "你的CSV路徑" --preview</pre>
+    <p><strong>第二步：試跑</strong>（會連你的資料庫比對課程標題、但不寫入；此步需 <code class="inline">.env.local</code> 已設好）：</p>
     <pre>node scripts/import-students.mjs "你的CSV路徑"</pre>
-    <p>它會告訴你「26 種課程標題有幾種對上了、哪幾種還沒對上（打錯字或還沒建）」。<strong>全部對上</strong>後，正式匯入：</p>
+    <p>它會告訴你課程標題「有幾種對上了、哪幾種還沒對上（打錯字或還沒建）」。<strong>全部對上</strong>後，正式匯入：</p>
     <pre>node scripts/import-students.mjs "你的CSV路徑" --commit</pre>
     <div class="box good">
       <p class="box-title">✅ 完成後</p>
@@ -156,12 +169,13 @@
       <p class="sub">客戶點一下就能繼續用</p>
     </div></div>
     <div class="box warn">
-      <p class="box-title">⏳ 寄信前的前提</p>
-      <p>要真的寄到 656 位客戶，你的寄信設定 <code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（例如 <code class="inline">no-reply@你的網址</code>）。還在用預設沙盒地址的話，工具會擋下、只允許寄測試信給你自己。<span class="gate">要先驗證網域</span></p>
+      <p class="box-title">⏳ 寄信前兩個前提（都要滿足才 --send）</p>
+      <p>① <strong>寄件人網域</strong>：<code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（例如 <code class="inline">no-reply@你的網址</code>）。還在用沙盒地址的話工具會擋下。<span class="gate">要先驗證網域</span><br>
+      ② <strong>網址要先定案</strong>：信裡的「設定密碼」連結是用 <code class="inline">.env.local</code> 的 <code class="inline">NEXTAUTH_URL</code> 組出來的、效期 7 天。所以請<strong>先把 <code class="inline">NEXTAUTH_URL</code> 設成客戶最終會用的正式網址</strong>（<code class="inline">https://bds.fu-notes.com</code>）再 <code class="inline">--send</code>；否則連結會指到臨時網址，切換網域後可能失效。最穩的做法：<strong>把這步（--send）放到步驟 6 換好網域、確認新站能登入之後再做</strong>。</p>
     </div>
-    <p><strong>先寄一封測試信給自己</strong>看看信長怎樣：</p>
+    <p><strong>先寄一封測試信給自己</strong>看版面（測試信只是預覽版型，<strong>裡面的連結點了不會真的能設密碼</strong>，正式 <code class="inline">--send</code> 才會產生有效連結）：</p>
     <pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱@example.com</pre>
-    <p>沒問題後，<strong>正式寄給全部人</strong>（每封間隔 0.4 秒，自動避開寄信限制）：</p>
+    <p>兩個前提都滿足後，<strong>正式寄給全部人</strong>（每封間隔 0.4 秒，自動避開寄信限制）：</p>
     <pre>node scripts/send-invites.mjs "你的CSV路徑" --send</pre>
     <p>學員收到信 → 點按鈕 → 設定新密碼 → 用原本 Email 登入，課程權限都在。</p>
   </div>
@@ -200,8 +214,8 @@
   </div>
 
   <div class="box tip">
-    <p class="box-title">🆘 步驟 4、5 是電腦指令，不會用怎麼辦？</p>
-    <p>那兩支工具要在電腦終端機執行。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約半小時），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
+    <p class="box-title">🆘 步驟 2～5 都是電腦指令，不會用怎麼辦？</p>
+    <p>步驟 2～5 都要在電腦終端機執行 <code class="inline">node ...</code> 指令。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約 1 小時，含上傳影片），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
   </div>
 
   <hr>

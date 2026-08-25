@@ -316,6 +316,17 @@
       </div>
     </div>
 
+    <h3>2-0. 先把程式碼下載到你的電腦</h3>
+    <p>後面很多步驟（貼 SQL、之後搬家跑指令）都需要「打得開專案裡的檔案」。所以先把賣方給你的程式碼放到電腦上：</p>
+    <ul class="plain">
+      <li>拿到的是<strong>壓縮檔（zip）</strong>：解壓縮到一個好找的位置（例如桌面），得到一個 <code class="inline">bds-web</code> 資料夾。</li>
+      <li>拿到的是 <strong>GitHub 連結</strong>：最簡單是先做步驟 6-1（賣方把 repo 轉到你的 GitHub），再在你的 GitHub 頁面按 <strong>Code → Download ZIP</strong> 下載解壓；或若你會用終端機，<code class="inline">git clone</code> 下來。</li>
+    </ul>
+    <div class="box tip">
+      <p class="box-title">💡 記住這個資料夾位置</p>
+      <p>之後手冊只要說「<code class="inline">db/</code> 資料夾的某檔」或「跑 <code class="inline">node scripts/...</code> 指令」，都是指這個 <code class="inline">bds-web</code> 資料夾裡的東西。</p>
+    </div>
+
     <h3>2-1. 建立專案</h3>
     <ol class="dolist">
       <li>登入 Supabase → 按 <strong>New project</strong>（新專案）。</li>
@@ -325,7 +336,8 @@
     </ol>
 
     <h3>2-2. 建立資料表（把「空櫃子」擺好）</h3>
-    <p>左側點 <strong>SQL Editor</strong> → <strong>New query</strong>。接下來要把程式碼裡 <code class="inline">db/</code> 資料夾中的檔案，<strong>一個一個</strong>整份貼進去、各按一次 <strong>Run</strong>（右下角綠色按鈕）。<strong>順序很重要，照下面來：</strong></p>
+    <p>左側點 <strong>SQL Editor</strong> → <strong>New query</strong>。接下來要把 2-0 下載的專案 <code class="inline">db/</code> 資料夾中的檔案，<strong>一個一個</strong>整份貼進去、各按一次 <strong>Run</strong>（右下角綠色按鈕）。<strong>順序很重要，照下面來：</strong></p>
+    <p style="font-size:15px;color:var(--ink-soft);">怎麼打開這些檔？在 <code class="inline">bds-web/db</code> 資料夾裡找到該檔，用<strong>記事本</strong>（或任何文字編輯器）打開 → 全選（Ctrl+A）→ 複製（Ctrl+C）→ 貼到 SQL Editor。</p>
     <div class="paste">
       <div class="label"><span>依序貼上並各按 Run（每個都開一個 New query）</span></div>
 <pre>1.  db/init.sql                  ← 建立所有櫃子＋範例資料
@@ -502,7 +514,7 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
     <div class="paste">
       <div class="label"><span>要貼的全部設定（左邊名字、右邊你的值）</span></div>
 <pre># --- 網站基本 ---
-NEXTAUTH_URL              = （先貼 Netlify 給你的網址，綁自己網域後再改）
+NEXTAUTH_URL              = （這格先留空，等下面 Deploy 完拿到網址再回來補、重新部署）
 NEXTAUTH_SECRET           = （見下方「怎麼產生」）
 
 # --- 資料庫 Supabase（步驟 2）---
@@ -511,6 +523,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY  = ...
 SUPABASE_SERVICE_ROLE_KEY      = ...
 
 # --- 刷卡 PayUni（步驟 5）---
+# （若商家審核還沒過，這 4 格可先留空，網站其他功能照樣能上線；等步驟 5 拿到金鑰再回來補、重新部署）
 PAYUNI_MERID               = ...
 PAYUNI_HASH_KEY            = ...
 PAYUNI_HASH_IV             = ...
@@ -606,6 +619,10 @@ WHERE email = '你的信箱@example.com';</pre>
     <div class="box warn">
       <p class="box-title">⚠️ 為什麼一定要做</p>
       <p>免費版的資料庫<strong>約 7 天沒人使用就會「睡著」</strong>，睡著時客戶會遇到網站打不開或很慢。系統已內建一個「每 3 天自動戳一下」保持清醒的功能，但<strong>要你貼 2 個值它才會啟動</strong>。這步做完就一勞永逸、全自動。</p>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 這 2 個值就是步驟 2 抄過的那組</p>
+      <p>就是步驟 2 的 <code class="inline">NEXT_PUBLIC_SUPABASE_URL</code>（專案網址）和公開金鑰，值<strong>一模一樣</strong>；只是 GitHub 這裡的欄位名不帶 <code class="inline">NEXT_PUBLIC_</code> 前綴（叫 <code class="inline">SUPABASE_URL</code>／<code class="inline">SUPABASE_ANON_KEY</code>），不是別把新鑰匙，別緊張。</p>
     </div>
     <ol class="dolist">
       <li>到你的 GitHub 專案頁 → 上方 <strong>Settings</strong>（齒輪）→ 左側 <strong>Secrets and variables → Actions</strong>。</li>
