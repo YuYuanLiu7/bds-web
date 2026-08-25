@@ -230,7 +230,7 @@
     <ul class="plain">
       <li><strong>刷卡收錢（PayUni）</strong>：要送件給金流公司審核你的商家資格，通常等 <strong>幾個工作天</strong>。建議<strong>第一天就先去送件</strong>，一邊等一邊做其他步驟。</li>
       <li><strong>用自己的網址寄信</strong>：要改網域設定並等它生效（幾分鐘到幾小時）。先用系統預設的也能動。</li>
-      <li><strong>每日自動備份</strong>（步驟 9）：這步比較技術，<strong>建議找懂電腦的人幫你用一次就好</strong>，之後全自動。</li>
+      <li><strong>每日自動備份到 Google Drive</strong>（步驟 9B）：這步比較技術，<strong>建議找懂電腦的人幫你用一次就好</strong>，之後全自動。（注意：步驟 9A 的「保活」不難、請務必自己做。）</li>
     </ul>
   </div>
 
@@ -246,7 +246,7 @@
       <li><a href="#s6">把網站放上線（Netlify）</a></li>
       <li><a href="#s7">建立你的管理員帳號</a></li>
       <li><a href="#s8">開門收客前的安全檢查（很重要）</a></li>
-      <li><a href="#s9">進階：自動備份（找人幫一次）</a></li>
+      <li><a href="#s9">開啟保活（必做）＋自動備份（選配）</a></li>
       <li><a href="#daily">上線後的日常操作</a></li>
     </ol>
   </nav>
@@ -562,6 +562,7 @@ WHERE email = '你的信箱@example.com';</pre>
       <li>網址填對：<code class="inline">NEXTAUTH_URL</code> 已改成你真正的網址（不是預設的假網址）。</li>
       <li>真卡實測：用一張真卡買一筆最便宜的商品，確認「付款成功 → 自動開通 → 收到通知信」整條走得通，再退刷。</li>
       <li>換成你的品牌：後台「設定」把站名、Logo、主色、聯絡信箱、FAQ、公告改成你自己的；刪掉範例課程與範例訂單。</li>
+      <li>保活已開：確認步驟 9A 的保活已設定並測試成功（否則網站閒置一週資料庫會睡著）。</li>
     </ul>
     <div class="box tip">
       <p class="box-title">💡 賣方已附一份「上線前清單」</p>
@@ -569,20 +570,61 @@ WHERE email = '你的信箱@example.com';</pre>
     </div>
   </div>
 
-  <p class="eyebrow" id="s9">步驟 9（進階，可晚點做）</p>
+  <p class="eyebrow" id="s9">步驟 9</p>
   <div class="step">
     <div class="step-head">
-      <div class="step-num">9</div>
+      <div class="step-num">9A</div>
       <div>
-        <h2>自動備份與防休眠</h2>
-        <p class="sub"><span class="time-tag">約 30 分鐘</span> <span class="gate">建議找人幫一次</span></p>
+        <h2>開啟「保活」—— 這步請務必做</h2>
+        <p class="sub"><span class="time-tag">約 5 分鐘</span>　很簡單，只是貼 2 個值</p>
       </div>
     </div>
-    <p>這是整份手冊<strong>唯一比較技術</strong>的一步——設定每天自動把資料庫備份到你的 Google Drive，並避免免費資料庫因太久沒人用而「睡著」。</p>
     <div class="box warn">
-      <p class="box-title">⏳ 我的建議</p>
-      <p>這步<strong>找一位懂電腦的朋友或工程師幫你設定一次</strong>（約半小時），之後就全自動、不用再管。專案裡的 <code class="inline">SETUP-GUIDE.md</code> 步驟 8、9 有完整的技術指令，直接給他看即可。</p>
-      <p>還沒設定也沒關係：系統本身<strong>已內建每天備份成一份檔案（保留 90 天）</strong>，不會讓你資料完全沒保障。Google Drive 備份是「加保險」。</p>
+      <p class="box-title">⚠️ 為什麼一定要做</p>
+      <p>免費版的資料庫<strong>約 7 天沒人使用就會「睡著」</strong>，睡著時客戶會遇到網站打不開或很慢。系統已內建一個「每 3 天自動戳一下」保持清醒的功能，但<strong>要你貼 2 個值它才會啟動</strong>。這步做完就一勞永逸、全自動。</p>
+    </div>
+    <ol class="dolist">
+      <li>到你的 GitHub 專案頁 → 上方 <strong>Settings</strong>（齒輪）→ 左側 <strong>Secrets and variables → Actions</strong>。</li>
+      <li>按綠色 <strong>New repository secret</strong>，新增第一個：
+        <div class="paste">
+          <div class="label"><span>Name 填這個</span></div>
+<pre>SUPABASE_URL</pre>
+        </div>
+        <div class="paste">
+          <div class="label"><span>Value 貼你的專案網址（步驟 2 抄的那個）</span></div>
+<pre>https://xxxx.supabase.co</pre>
+        </div>
+      </li>
+      <li>再按一次 <strong>New repository secret</strong>，新增第二個：
+        <div class="paste">
+          <div class="label"><span>Name 填這個</span></div>
+<pre>SUPABASE_ANON_KEY</pre>
+        </div>
+        <div class="paste">
+          <div class="label"><span>Value 貼你的公開金鑰（Publishable key，步驟 2 抄的）</span></div>
+<pre>eyJ....（一長串）</pre>
+        </div>
+      </li>
+      <li>到專案上方 <strong>Actions</strong> 分頁 → 左側點 <strong>「Supabase 保活（防免費版休眠）」</strong> → 右側 <strong>Run workflow</strong> 跑一次測試。看到綠色打勾、日誌顯示 <code class="inline">回應碼：200</code> 就成功了。之後每 3 天自動跑，不用再管。</li>
+    </ol>
+    <div class="box good">
+      <p class="box-title">✅ 完成後</p>
+      <p>你的資料庫不會再因為沒人來而睡著，客戶隨時打開都順暢。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">9B</div>
+      <div>
+        <h2>每日備份到 Google Drive（選配，進階）</h2>
+        <p class="sub"><span class="time-tag">約 30 分鐘</span> <span class="gate">可晚點做／找人幫一次</span></p>
+      </div>
+    </div>
+    <p>設定每天自動把資料庫備份到你的 Google Drive，多一層保險。</p>
+    <div class="box tip">
+      <p class="box-title">💡 這步可以晚點做</p>
+      <p>系統本身<strong>已內建每天備份成一份檔案（保留 90 天）</strong>，所以你的資料不會完全沒保障。Google Drive 備份是「加保險」，比較技術，<strong>建議找懂電腦的人幫你設定一次</strong>（約半小時），之後全自動。專案裡的 <code class="inline">SETUP-GUIDE.md</code> 步驟 8 有完整技術指令，直接給他看即可。</p>
     </div>
   </div>
 
