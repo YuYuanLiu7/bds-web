@@ -94,11 +94,11 @@
   </div>
 
   <p class="eyebrow">搬家順序</p>
-  <h2>照這 6 步做</h2>
+  <h2>照這 5 步做</h2>
 
   <div class="box warn">
     <p class="box-title">🖥️ 開始前：跑任何指令前，先完成這 4 件事</p>
-    <p>本手冊步驟 2～5 都要在<strong>電腦的終端機</strong>打 <code class="inline">node ...</code> 指令。第一次做之前，請先備妥（文末附錄「用之前先確認」有更詳細步驟）：</p>
+    <p>本手冊步驟 2～4 都要在<strong>電腦的終端機</strong>打 <code class="inline">node ...</code> 指令。第一次做之前，請先備妥（文末附錄「用之前先確認」有更詳細步驟）：</p>
     <ol class="dolist">
       <li><strong>把專案下載到你的電腦</strong>：<code class="inline">git clone</code> 你的 GitHub 專案（或解壓賣方給的檔），得到一個 <code class="inline">bds-web</code> 資料夾——後面所有指令都在這個資料夾裡跑。</li>
       <li><strong>裝 Node.js</strong>（<a href="https://nodejs.org">nodejs.org</a> 下載 LTS 版），並在 <code class="inline">bds-web</code> 資料夾執行一次 <code class="inline">npm install</code>。</li>
@@ -117,44 +117,51 @@
 
   <div class="step">
     <div class="step-head"><div class="step-num">2</div><div>
-      <h2>把影片批次上傳到 Bunny（自動工具）</h2>
-      <p class="sub">你手上有原始影片檔，這步就沒問題</p>
+      <h2>把課程內容搬進來</h2>
+      <p class="sub">建立課程 → 上傳影片與教材 → 貼進章節 → 發佈</p>
     </div></div>
-    <p style="font-size:15px;color:var(--ink-soft);">（步驟 2 上傳影片與步驟 3 建立課程，<strong>先後順序沒差、互不影響</strong>；等兩者都好了，再把影片網址貼進課程章節即可。文末速查表為方便起見先列建課。）</p>
-    <p>把影片檔放進一個資料夾（<strong>建議：一個子資料夾一門課、檔名就是章節名</strong>，這樣對應最準）。然後<strong>先掃描看看</strong>（不會上傳、不用金鑰）：</p>
+    <p>這一步把 Teachify 上的課程整包搬過來。裡面有 4 個小步，照順序做最順。</p>
+
+    <h3>2-1. 自動建立課程空殼（標題保證一致）</h3>
+    <p>學員權限是「用課程標題對應」的，標題必須跟 Teachify 完全一致。用工具照 CSV 自動建好，就不會打錯字。先試跑看會建哪些（不寫入）：</p>
+    <pre>node scripts/create-course-shells.mjs "你的CSV路徑"</pre>
+    <p>沒問題後正式建立：</p>
+    <pre>node scripts/create-course-shells.mjs "你的CSV路徑" --commit</pre>
+    <p>它會依 CSV 算出的門數自動建好空殼（<strong>本例約 26 門</strong>，實際以工具印出的數字為準；標題完全正確、狀態為「未發佈」）。</p>
+
+    <h3>2-2. 批次上傳影片到 Bunny</h3>
+    <p>把影片檔放進一個資料夾（<strong>你的擺法「一個資料夾一門課」正好最適合</strong>；檔名不必精準，工具只拿它當「建議的章節名」）。先掃描看看（不上傳、不用金鑰）：</p>
     <pre>node scripts/bunny-upload.mjs "你的影片資料夾"</pre>
-    <p>它會產生一份 <code class="inline">bunny-upload-plan.csv</code>，列出找到幾支、以及「猜的課程/章節」。看一下對不對，然後正式上傳（可先加 <code class="inline">--limit 3</code> 傳 3 支測試）：</p>
+    <p>看 <code class="inline">bunny-upload-plan.csv</code> 抓到的檔對不對，然後正式上傳（可先加 <code class="inline">--limit 3</code> 傳 3 支測試）：</p>
     <pre>node scripts/bunny-upload.mjs "你的影片資料夾" --upload</pre>
-    <p>上傳完會給你 <code class="inline">bunny-upload-result.csv</code>——每支影片對應的 Bunny 網址，之後步驟 3 貼進章節時照這張表即可。</p>
+    <p>完成給你 <code class="inline">bunny-upload-result.csv</code>（每支影片的 Bunny 網址）。</p>
     <div class="box warn">
       <p class="box-title">⏳ 兩個提醒</p>
-      <p>① 影片檔很大、上傳要時間，工具<strong>可以中斷後續傳</strong>（重跑會自動略過已傳的），不怕斷線。<br>
-      ② 需要 Bunny 影片庫的「上傳用 API Key」（<code class="inline">BUNNY_STREAM_API_KEY</code>，在 Bunny → Stream → 影片庫 → API），它跟播放防盜的金鑰是不同的東西。</p>
+      <p>① 影片檔大、上傳要時間，工具<strong>可中斷後續傳</strong>（重跑自動略過已傳的），不怕斷線。<br>
+      ② 需要 Bunny「上傳用 API Key」（<code class="inline">BUNNY_STREAM_API_KEY</code>，在 Bunny → Stream → 影片庫 → API），跟播放防盜金鑰是不同的兩把。</p>
     </div>
-    <div class="box tip">
-      <p class="box-title">📎 資料夾裡的簡報/講義（.pptx、.pdf 等）怎麼辦？</p>
-      <p>影片工具<strong>只傳影片、會自動略過簡報</strong>（它們不是放 Bunny 的）。簡報是「課程教材」，用另一支工具批次上傳（傳到 Supabase，不需 Bunny 金鑰）：</p>
-<pre>node scripts/upload-materials.mjs "你的影片資料夾"            # 先掃描看 plan.csv
+
+    <h3>2-3. 批次上傳教材簡報</h3>
+    <p>章節裡的簡報/講義（.pptx、.pdf 等）不是放 Bunny，用另一支工具傳到 Supabase（不需 Bunny 金鑰）。放在同一個影片資料夾即可，它會<strong>自動只挑文件、略過影片和圖片</strong>：</p>
+    <pre>node scripts/upload-materials.mjs "你的影片資料夾"             # 先掃描看 plan.csv
 node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上傳（可中斷續傳）</pre>
-      <p>上傳完給你 <code class="inline">materials-upload-result.csv</code>（每個教材對應的網址）。它會自動只挑 .pdf/.pptx/.ppt/.key/.doc/.docx/.xls/.xlsx/.zip，影片和圖片略過。之後到後台把網址貼進章節的「教材／附件」欄位。</p>
+    <p>完成給你 <code class="inline">materials-upload-result.csv</code>（每個教材的網址）。</p>
+
+    <h3>2-4. 貼進章節、發佈課程</h3>
+    <p>到後台 <code class="inline">/admin</code>，為每門課補上說明，並依兩張對照表把網址貼進各章節：</p>
+    <ul class="plain">
+      <li>影片：貼 <code class="inline">bunny-upload-result.csv</code> 的 <code class="inline">embed_url</code> 或 <code class="inline">bunny_guid</code>（兩種系統都認得）進「影片網址」。</li>
+      <li>教材：貼 <code class="inline">materials-upload-result.csv</code> 的網址進章節「教材／附件」。</li>
+    </ul>
+    <p><strong>每門課補完後記得按「發佈」</strong>，課程才會對外顯示。</p>
+    <div class="box tip">
+      <p class="box-title">💡 這一步的手動部分</p>
+      <p>「哪支影片/教材屬於哪門課的哪一章」只有你知道，所以「貼進章節」這段是手動照對照表貼。工具已幫你把上傳和命名都做完，不會漏、不會錯傳，只剩貼上。</p>
     </div>
   </div>
 
   <div class="step">
     <div class="step-head"><div class="step-num">3</div><div>
-      <h2>自動建立課程空殼（標題保證一致）</h2>
-      <p class="sub">這是讓學員權限對得上的關鍵，改用工具就不會打錯字</p>
-    </div></div>
-    <p>學員權限是「用課程標題對應」的，所以標題必須跟 Teachify 完全一致。與其手動建 26 門、還怕打錯，<strong>直接用工具照 CSV 自動建好空殼</strong>：</p>
-    <p>先試跑看會建哪些（不寫入）：</p>
-    <pre>node scripts/create-course-shells.mjs "你的CSV路徑"</pre>
-    <p>沒問題後正式建立：</p>
-    <pre>node scripts/create-course-shells.mjs "你的CSV路徑" --commit</pre>
-    <p>它會依 CSV 算出的門數自動建好空殼（<strong>本例約 26 門</strong>，實際以工具印出的數字為準；標題完全正確、狀態為「未發佈」）。接著你到後台 <code class="inline">/admin</code> 為每門課補上說明、把步驟 2 上傳的影片網址貼進章節（貼 <code class="inline">bunny-upload-result.csv</code> 裡的 <code class="inline">embed_url</code> 或 <code class="inline">bunny_guid</code> 皆可，系統都認得），<strong>完成後記得按「發佈」</strong>課程才會對外顯示。</p>
-  </div>
-
-  <div class="step">
-    <div class="step-head"><div class="step-num">4</div><div>
       <h2>匯入學員與課程權限（自動）</h2>
       <p class="sub">656 位學員一次匯入，不用手打</p>
     </div></div>
@@ -171,14 +178,14 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
   </div>
 
   <div class="step">
-    <div class="step-head"><div class="step-num">5</div><div>
+    <div class="step-head"><div class="step-num">4</div><div>
       <h2>寄「設定新密碼」信給全體學員（自動）</h2>
       <p class="sub">客戶點一下就能繼續用</p>
     </div></div>
     <div class="box warn">
       <p class="box-title">⏳ 寄信前兩個前提（都要滿足才 --send）</p>
       <p>① <strong>寄件人網域</strong>：<code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（例如 <code class="inline">no-reply@你的網址</code>）。還在用沙盒地址的話工具會擋下。<span class="gate">要先驗證網域</span><br>
-      ② <strong>網址要先定案</strong>：信裡的「設定密碼」連結是用 <code class="inline">.env.local</code> 的 <code class="inline">NEXTAUTH_URL</code> 組出來的、效期 7 天。所以請<strong>先把 <code class="inline">NEXTAUTH_URL</code> 設成客戶最終會用的正式網址</strong>（<code class="inline">https://bds.fu-notes.com</code>）再 <code class="inline">--send</code>；否則連結會指到臨時網址，切換網域後可能失效。最穩的做法：<strong>把這步（--send）放到步驟 6 換好網域、確認新站能登入之後再做</strong>。</p>
+      ② <strong>網址要先定案</strong>：信裡的「設定密碼」連結是用 <code class="inline">.env.local</code> 的 <code class="inline">NEXTAUTH_URL</code> 組出來的、效期 7 天。所以請<strong>先把 <code class="inline">NEXTAUTH_URL</code> 設成客戶最終會用的正式網址</strong>（<code class="inline">https://bds.fu-notes.com</code>）再 <code class="inline">--send</code>；否則連結會指到臨時網址，切換網域後可能失效。最穩的做法：<strong>把這步（--send）放到步驟 5 換好網域、確認新站能登入之後再做</strong>。</p>
     </div>
     <p><strong>先寄一封測試信給自己</strong>看版面（測試信只是預覽版型，<strong>裡面的連結點了不會真的能設密碼</strong>，正式 <code class="inline">--send</code> 才會產生有效連結）：</p>
     <pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱@example.com</pre>
@@ -188,12 +195,12 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
   </div>
 
   <div class="step">
-    <div class="step-head"><div class="step-num">6</div><div>
+    <div class="step-head"><div class="step-num">5</div><div>
       <h2>把網址切到新網站</h2>
       <p class="sub">客戶用同一個網址無縫接軌</p>
     </div></div>
     <ol class="dolist">
-      <li><strong>先在新網站的臨時網址上把 1～5 步全部測好</strong>（登入、看課、金流都正常）。</li>
+      <li><strong>先在新網站的臨時網址上把 1～4 步全部測好</strong>（登入、看課、金流都正常）。</li>
       <li>確認無誤後，到你的<strong>網域管理處</strong>（買 <code class="inline">fu-notes.com</code> 的地方），把 <code class="inline">bds.fu-notes.com</code> 的指向從 Teachify 改到 Netlify（Netlify 的 Domain 設定會給你要填的值）。</li>
       <li>同時把新網站的 <code class="inline">NEXTAUTH_URL</code> 改成 <code class="inline">https://bds.fu-notes.com</code>，重新部署。</li>
       <li>切換後有幾分鐘～幾小時的生效時間，建議選離峰時段做。</li>
@@ -221,8 +228,8 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
   </div>
 
   <div class="box tip">
-    <p class="box-title">🆘 步驟 2～5 都是電腦指令，不會用怎麼辦？</p>
-    <p>步驟 2～5 都要在電腦終端機執行 <code class="inline">node ...</code> 指令。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約 1 小時，含上傳影片），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
+    <p class="box-title">🆘 步驟 2～4 都是電腦指令，不會用怎麼辦？</p>
+    <p>步驟 2～4 都要在電腦終端機執行 <code class="inline">node ...</code> 指令。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約 1 小時，含上傳影片），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
   </div>
 
   <hr>
@@ -273,7 +280,7 @@ node scripts/import-students.mjs "你的CSV路徑" --commit        # 正式匯�
 node scripts/send-invites.mjs "你的CSV路徑" --send             # 正式寄給全部人</pre>
     <p style="font-size:15px;color:var(--ink-soft);">→ 寄全體前，<code class="inline">RESEND_FROM_EMAIL</code> 必須是已驗證的自家網域，否則工具會擋下。</p>
 
-    <h3>⑤ 最後：把網址切到新站（見上方步驟 6）</h3>
+    <h3>⑤ 最後：把網址切到新站（見上方步驟 5）</h3>
     <p style="font-size:15px;color:var(--ink-soft);">全部測好後，才把 <code class="inline">bds.fu-notes.com</code> 從 Teachify 改指到 Netlify。</p>
 
     <div class="box good">
@@ -283,7 +290,7 @@ node scripts/send-invites.mjs "你的CSV路徑" --send             # 正式寄�
   </div>
 
   <div class="footer">
-    <p>Teachify 搬家手冊　·　照 1→6 步＋附錄指令做　·　遇到 <span class="gate">要等 / 要幫忙</span> 就先做別的</p>
+    <p>Teachify 搬家手冊　·　照 1→5 步＋附錄指令做　·　遇到 <span class="gate">要等 / 要幫忙</span> 就先做別的</p>
   </div>
 
 </div>
