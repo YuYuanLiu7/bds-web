@@ -18,7 +18,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+// 容錯：NEXTAUTH_URL 若未設定或被填成非網址（常見的部署設定失誤），
+// 退回本機預設值，避免 metadataBase 的 new URL() 在建置時整包崩潰。
+function resolveSiteUrl(): string {
+  const raw = (process.env.NEXTAUTH_URL || "").trim();
+  try {
+    return new URL(raw).toString().replace(/\/$/, "");
+  } catch {
+    if (raw) console.warn(`[layout] NEXTAUTH_URL 不是有效網址（${raw}），暫用 http://localhost:3000。請於環境變數填入正確網址。`);
+    return "http://localhost:3000";
+  }
+}
+const siteUrl = resolveSiteUrl();
 const siteName = "BDS By Doing So";
 const siteDescription =
   "專注於硬體、半導體、醫材產業的業務開發與銷售課程，助您提升職場競爭力。";

@@ -522,11 +522,18 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
 
     <h3>6-3. 把所有鑰匙貼進去</h3>
     <p>進 <strong>Project configuration → Environment variables</strong>。把前面各步驟抄下的值全部加進來（有「Import from a .env file」可整份貼更快）。完整清單如下：</p>
+    <div class="box warn">
+      <p class="box-title">⚠️ 重要：只填「值」，不要把括號裡的說明文字打進去</p>
+      <p>下面每行 <code class="inline">=</code> 右邊若是「括號說明」，那是<strong>叫你填自己的值</strong>，不是要你照打。標「留空」的欄位，就整格<strong>空白</strong>（連說明都別輸入）。<br>
+      例：<code class="inline">NEXTAUTH_URL</code> 這格先<strong>整格空白</strong>——別把「這格先留空…」這句話貼進去，否則部署會失敗。</p>
+    </div>
     <div class="paste">
-      <div class="label"><span>要貼的全部設定（左邊名字、右邊你的值）</span></div>
+      <div class="label"><span>要貼的全部設定（左邊名字、右邊填你自己的值）</span></div>
 <pre># --- 網站基本 ---
-NEXTAUTH_URL              = （這格先留空，等下面 Deploy 完拿到網址再回來補、重新部署）
-NEXTAUTH_SECRET           = （見下方「怎麼產生」）
+# NEXTAUTH_URL：先「整格空白」，等下面 Deploy 完拿到網址再回來補、重新部署
+NEXTAUTH_URL              =
+# NEXTAUTH_SECRET：填你產生的隨機亂碼（見下方「怎麼產生」）
+NEXTAUTH_SECRET           =
 
 # --- 資料庫 Supabase（步驟 2）---
 NEXT_PUBLIC_SUPABASE_URL       = ...

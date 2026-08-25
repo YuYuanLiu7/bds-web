@@ -6,6 +6,18 @@ import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
 import { rateLimit } from "@/lib/rate-limit";
 
+// 防呆：NEXTAUTH_URL 被填成「非網址」時（常見的部署設定失誤，例如把說明文字貼進去），
+// NextAuth 初始化會以它 new URL() 而讓整個建置崩潰。這裡在載入時先檢查，
+// 值不合法就移除，讓 NextAuth 改由請求主機自動推斷（部署後填入正確值即恢復正常）。
+if (process.env.NEXTAUTH_URL) {
+  try {
+    new URL(process.env.NEXTAUTH_URL);
+  } catch {
+    console.warn(`[auth] NEXTAUTH_URL 不是有效網址，已暫時忽略：${process.env.NEXTAUTH_URL}`);
+    delete process.env.NEXTAUTH_URL;
+  }
+}
+
 // 擴充 NextAuth 既有型別，補上本專案使用到的 id 與 role 欄位，
 // 取代原本散落的 `as any`，維持登入流程行為不變
 interface AppUser extends Omit<User, "id"> {
