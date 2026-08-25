@@ -1,0 +1,35 @@
+name: 網站健康檢查（出錯自動通知）
+
+# 每小時對正式網站做一次輕量檢查：打公開課程 API，回應非 2xx 就讓這個 job「失敗」。
+# GitHub 預設會在排程 workflow「失敗」時寄 Email 通知 repo 擁有者，
+# 等於系統掛掉（網站當機／資料庫睡著／部署壞掉）時你會收到通知，不必等客訴。
+#
+# 需在 GitHub repo → Settings → Secrets and variables → Actions 設定：
+#   SITE_URL   你的正式網址（例如 https://bds.fu-notes.com）
+# 未設定時本檢查會自動略過（不會誤報失敗）。
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # 每小時整點
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢查網站是否正常回應
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "尚未設定 SITE_URL secret，略過健康檢查。"; exit 0
+          fi
+          BASE="${SITE_URL%/}"
+          echo "檢查：$BASE/api/courses"
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BASE/api/courses")
+          echo "回應碼：$code"
+          # 2xx / 3xx 視為正常；其餘（含連不上的 000）視為異常 → job 失敗 → GitHub 寄信通知
+          case "$code" in
+            2*|3*) echo "網站正常。" ;;
+            *) echo "::error::網站健康檢查失敗，回應碼 $code（網站可能當機、資料庫睡著或部署異常）"; exit 1 ;;
+          esac

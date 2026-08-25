@@ -540,6 +540,7 @@ RESEND_API_KEY             = ...
 RESEND_FROM_EMAIL          = no-reply@你的網址   # 正式收客務必用自家已驗證網域
 RESEND_TEST_RECIPIENT      = 你自己的信箱          # 網域還沒驗證好時的測試收件者
 CONTACT_TO_EMAIL           = 你的客服信箱
+ADMIN_ALERT_EMAIL          = 你收警示信的信箱        # 出錯通知（見步驟 9C），不填則用客服信箱
 
 # --- 安全開關（正式站務必是 false）---
 ENABLE_PAYMENT_SIMULATION  = false</pre>
@@ -690,6 +691,40 @@ WHERE email = '你的信箱@example.com';</pre>
     <div class="box tip">
       <p class="box-title">💡 Google Drive 那層可以晚點做（進階）</p>
       <p>把備份「另存一份到 Google Drive」比較技術（要設 rclone），<strong>建議找懂電腦的人幫你設定一次</strong>，專案裡的 <code class="inline">SETUP-GUIDE.md</code> 步驟 8 有完整指令。只要上面的 <code class="inline">SUPABASE_DB_URL</code> 設好了，GitHub 檔案那層備份就已經在保護你了，Google Drive 是再加一層。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">9C</div>
+      <div>
+        <h2>開啟「出錯自動通知」（建議做，5 分鐘）</h2>
+        <p class="sub">系統半夜壞了主動通知你，不用等客戶客訴</p>
+      </div>
+    </div>
+    <p>兩層通知，都免費、免額外帳號：</p>
+
+    <h3>① 網站當機通知（用 GitHub）</h3>
+    <p>系統每小時自動戳一次你的網站，若打不開（當機／資料庫睡著／部署壞掉），GitHub 會自動寄信通知你。只要再加 1 個 secret：</p>
+    <div class="paste">
+      <div class="label"><span>GitHub → Settings → Secrets and variables → Actions，Name 填這個</span></div>
+<pre>SITE_URL</pre>
+    </div>
+    <div class="paste">
+      <div class="label"><span>Value 貼你的正式網址</span></div>
+<pre>https://bds.fu-notes.com</pre>
+    </div>
+    <p style="font-size:15px;color:var(--ink-soft);">（確認 GitHub 帳號的 Email 通知有開：GitHub 預設會在排程工作「失敗」時寄信給你，等於網站掛掉就收到通知。）</p>
+
+    <h3>② 金流開通失敗通知（用 Resend）</h3>
+    <p>最怕的狀況是「客戶付了錢，但系統沒開通」。發生時系統會<strong>主動寄一封警示信給你</strong>去手動補開通。在 Netlify 環境變數加一個信箱即可（不加則退回用你的客服信箱）：</p>
+    <div class="paste">
+      <div class="label"><span>Netlify 環境變數</span></div>
+<pre>ADMIN_ALERT_EMAIL = 你要收警示信的信箱</pre>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 想要更專業的錯誤追蹤（選配）</p>
+      <p>若之後想升級成「每一個程式錯誤都記錄＋分析」，可接免費的 <a href="https://sentry.io">Sentry</a>（有免費額度）；或用 <a href="https://uptimerobot.com">UptimeRobot</a> 免費版做更密集（每 5 分鐘）的當機監控。這兩個要另外註冊帳號，屬進階加值，不做也不影響上面兩層基本通知。</p>
     </div>
   </div>
 

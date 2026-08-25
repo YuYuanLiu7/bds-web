@@ -540,3 +540,43 @@ URL: ${resetUrl}
     return false;
   }
 }
+
+/**
+ * 寄送「系統警示信」給站方（例如：付款成功但權益開通失敗，需人工補開通）。
+ * 收件者：ADMIN_ALERT_EMAIL → CONTACT_TO_EMAIL → RESEND_TEST_RECIPIENT（擇一存在者）。
+ * 未設定 RESEND_API_KEY 或收件者時，僅記錄 log 不中斷（回傳 false）。
+ */
+export async function sendAdminAlert(subject: string, message: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const to =
+    process.env.ADMIN_ALERT_EMAIL ||
+    process.env.CONTACT_TO_EMAIL ||
+    process.env.RESEND_TEST_RECIPIENT;
+
+  if (!apiKey || !to) {
+    console.warn(`[Admin Alert] 未設定 RESEND_API_KEY 或收件信箱，警示僅記錄於 log：${subject} — ${message}`);
+    return false;
+  }
+
+  const safe = (s: string) => s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const html = `
+    <div style="font-family:sans-serif;color:#334155;max-width:600px;margin:0 auto;">
+      <h2 style="color:#a8560a;">⚠️ BDS 系統警示</h2>
+      <p style="font-weight:700;">${safe(subject)}</p>
+      <div style="margin-top:12px;padding:16px;background:#fbf0e0;border:1px solid #f0d3a8;border-radius:12px;white-space:pre-line;font-size:14px;">${safe(message)}</div>
+      <p style="margin-top:16px;font-size:12px;color:#94a3b8;">本信由 BDS 系統於發生需人工處理的狀況時自動發出（台北時間 ${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}）。</p>
+    </div>`;
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ from: `BDS 系統警示 <${fromEmail}>`, to: [to], subject: `【BDS 系統警示】${subject}`, html }),
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('[Admin Alert] 寄送警示信失敗:', error);
+    return false;
+  }
+}

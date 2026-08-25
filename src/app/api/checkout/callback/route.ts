@@ -1,5 +1,6 @@
 import { PayuniTool } from '@/lib/payuni';
 import { getOrder, markOrderPaid, markOrderFailed, fulfillOrder } from '@/lib/purchases';
+import { sendAdminAlert } from '@/lib/email';
 import crypto from 'crypto';
 
 // PayUni 付款結果回呼（Webhook）：驗章 → 校驗訂單 → 原子標記 paid → 履約。
@@ -86,10 +87,16 @@ export async function POST(req: Request) {
       await fulfillOrder(order);
       console.log('Payment success and access granted:', merTradeNo);
     } catch (fulfillErr) {
+      const detail = fulfillErr instanceof Error ? fulfillErr.message : String(fulfillErr);
       console.error(
         `[需人工處理] 訂單 ${merTradeNo} 已付款(paid)但權益開通失敗，請至後台手動補開通：`,
         fulfillErr
       );
+      // 主動寄警示信給站方，不必等客訴（寄信失敗不影響回應）
+      await sendAdminAlert(
+        '訂單已付款但開通失敗，需人工補開通',
+        `訂單編號：${merTradeNo}\n狀態：已收款(paid)，但自動開通權益失敗。\n錯誤：${detail}\n\n請至後台為該學員手動開通對應課程/會員。`
+      ).catch(() => {});
     }
     return new Response('SUCCESS');
   } catch (error) {
