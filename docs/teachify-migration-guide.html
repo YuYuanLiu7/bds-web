@@ -109,6 +109,7 @@
       <h2>把影片批次上傳到 Bunny（自動工具）</h2>
       <p class="sub">你手上有原始影片檔，這步就沒問題</p>
     </div></div>
+    <p style="font-size:15px;color:var(--ink-soft);">（步驟 2 上傳影片與步驟 3 建立課程，<strong>先後順序沒差、互不影響</strong>；等兩者都好了，再把影片網址貼進課程章節即可。文末速查表為方便起見先列建課。）</p>
     <p>把影片檔放進一個資料夾（<strong>建議：一個子資料夾一門課、檔名就是章節名</strong>，這樣對應最準）。然後<strong>先掃描看看</strong>（不會上傳、不用金鑰）：</p>
     <pre>node scripts/bunny-upload.mjs "你的影片資料夾"</pre>
     <p>它會產生一份 <code class="inline">bunny-upload-plan.csv</code>，列出找到幾支、以及「猜的課程/章節」。看一下對不對，然後正式上傳（可先加 <code class="inline">--limit 3</code> 傳 3 支測試）：</p>
@@ -208,10 +209,17 @@
   <p class="eyebrow">附錄</p>
   <h2>指令速查表（搬家當天照順序複製貼上）</h2>
   <div class="box tip">
-    <p class="box-title">📌 用之前先確認</p>
-    <p>① 這些指令都在<strong>電腦的終端機</strong>、且切到專案的 <code class="inline">bds-web</code> 資料夾裡執行。<br>
-    ② 專案裡要先有一份填好的 <code class="inline">.env.local</code>（Supabase、Bunny、Resend 等鑰匙，見《開站手冊》）。<br>
-    ③ 把 <code class="inline">你的CSV路徑</code> 換成實際檔案位置，例如 <code class="inline">"../BDS-students-2026-08-24.csv"</code>。</p>
+    <p class="box-title">📌 用之前先確認（第一次跑一定要看）</p>
+    <p><strong>① 裝好 Node.js 並安裝套件。</strong>先到 <a href="https://nodejs.org">nodejs.org</a> 下載安裝 Node.js（選 LTS 版）。然後開終端機、切到 <code class="inline">bds-web</code> 資料夾，執行一次：</p>
+<pre>npm install</pre>
+    <p>（這會安裝腳本用到的套件。沒做的話，一跑就會噴 <code class="inline">Cannot find module</code> 而失敗。）</p>
+    <p><strong>② 在 bds-web 資料夾建立 <code class="inline">.env.local</code>，填「你自己」的鑰匙。</strong>把專案裡的 <code class="inline">.env.example</code> 複製一份、改名為 <code class="inline">.env.local</code>，填入<strong>你自己新建的 Supabase 專案</strong>金鑰（<code class="inline">NEXT_PUBLIC_SUPABASE_URL</code>、<code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>），以及 <code class="inline">NEXTAUTH_URL</code>、Resend（<code class="inline">RESEND_API_KEY</code>、<code class="inline">RESEND_FROM_EMAIL</code>）、Bunny 的鑰匙。</p>
+    <div class="box warn" style="margin:10px 0 0;">
+      <p class="box-title">⚠️ 千萬別直接沿用賣方交給你的舊 <code class="inline">.env.local</code></p>
+      <p>裡面是賣方的舊鑰匙，會連到<strong>賣方的舊資料庫</strong>，把課程和 656 位學員灌錯地方。一定要換成你自己新專案的鑰匙。</p>
+    </div>
+    <p style="margin-top:12px;"><strong>③ 影片上傳要多一把鑰匙。</strong>步驟 2 的 <code class="inline">bunny-upload.mjs</code> 需要 <code class="inline">BUNNY_STREAM_API_KEY</code>（Bunny → Stream → 影片庫 → <strong>API</strong> 分頁，和播放防盜金鑰不同），記得也填進 <code class="inline">.env.local</code>。</p>
+    <p><strong>④ 路徑替換：</strong>把指令裡的 <code class="inline">你的CSV路徑</code> 換成實際位置，例如 <code class="inline">"../BDS-students-2026-08-24.csv"</code>。</p>
   </div>
 
   <div class="step">

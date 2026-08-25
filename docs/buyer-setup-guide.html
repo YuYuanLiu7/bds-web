@@ -340,7 +340,7 @@
     </div>
     <div class="box tip">
       <p class="box-title">💡 想更省事？（給願意開一次終端機的人）</p>
-      <p>賣方或工程師可以在電腦上跑一行指令 <code class="inline">npm run setup -- --migrate</code>，自動把上面 5 個檔一次跑完。做不到就用上面的手動貼上法，一樣的結果。</p>
+      <p>賣方或工程師可以在電腦上跑一行指令 <code class="inline">npm run setup -- --migrate</code>，自動把上面 5 個檔一次跑完（此法需先在 <code class="inline">.env.local</code> 設定 <code class="inline">SUPABASE_DB_URL</code> 連線字串）。做不到就用上面的手動貼上法，一樣的結果。</p>
     </div>
 
     <h3>2-3. 拿 3 把鑰匙（等一下要貼到上線平台）</h3>
@@ -381,16 +381,24 @@
     </div>
     <ol class="dolist">
       <li>Bunny → <strong>Stream</strong> → 建一個 <strong>Video Library</strong>（影片庫）。</li>
-      <li>進這個影片庫的 <strong>Security</strong> 分頁，打開 <strong>Embed View Token Authentication</strong>（這就是「防盜開關」）。</li>
-      <li>抄下這 2 個值：</li>
+      <li>進這個影片庫的 <strong>Security</strong> 分頁，打開 <strong>Embed View Token Authentication</strong>（這就是「防盜開關」，一定要打開防盜才會生效）。</li>
+      <li>抄下這 <strong>3 個值</strong>：</li>
     </ol>
     <div class="paste">
       <div class="label"><span>① 影片庫 ID（一串數字）</span><span class="where">影片庫 → API 分頁</span></div>
       <code>BUNNY_STREAM_LIBRARY_ID</code>
     </div>
     <div class="paste">
-      <div class="label"><span>② 防盜金鑰 ⚠️ 機密</span><span class="where">影片庫 → Security 分頁</span></div>
+      <div class="label"><span>② 防盜金鑰 ⚠️ 機密（播放防盜用）</span><span class="where">影片庫 → Security 分頁</span></div>
       <code>BUNNY_TOKEN_AUTH_KEY</code>
+    </div>
+    <div class="paste">
+      <div class="label"><span>③ 上傳用 API 金鑰 ⚠️ 機密（批次上傳影片才需要）</span><span class="where">影片庫 → API 分頁的 AccessKey</span></div>
+      <code>BUNNY_STREAM_API_KEY</code>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 ② 和 ③ 是不同的兩把鑰匙</p>
+      <p>② 在 <strong>Security</strong> 分頁（給播放防盜用）；③ 在 <strong>API</strong> 分頁（給《搬家手冊》批次上傳影片用）。名字很像，別搞混或以為填過了。</p>
     </div>
     <p>之後在後台新增課程章節時，「影片網址」欄位貼該影片的網址或編號，系統會自動加防盜。</p>
   </div>
@@ -406,19 +414,32 @@
     </div>
     <ol class="dolist">
       <li>Resend → 左側 <strong>API Keys</strong> → <strong>Create</strong>，複製那把鑰匙。</li>
-      <li>（建議、但可晚點做 <span class="gate">要等生效</span>）左側 <strong>Domains</strong> 驗證你的網域，之後就能用 <code class="inline">no-reply@你的網址</code> 當寄件人。還沒用自己網域前，先照下面填法一樣能動。</li>
+      <li><strong>驗證你的網域</strong>（左側 <strong>Domains</strong>）→ 之後把寄件人設成 <code class="inline">no-reply@你的網址</code>。<span class="gate">對外收客前必做</span></li>
     </ol>
+    <div class="box warn">
+      <p class="box-title">⚠️ 這步不能跳過，否則新客戶會「註冊了卻無法登入」</p>
+      <p>新客戶註冊後，系統會寄一封「驗證信」，客戶要點了才能登入。若寄件人還用預設的沙盒地址 <code class="inline">onboarding@resend.dev</code>，Resend <strong>只會把信寄到你自己</strong>、真正的客戶<strong>永遠收不到</strong>驗證信 → 就登不進去、買了也用不了。購買通知信、忘記密碼信也一樣收不到。</p>
+      <p><strong>所以：正式對外收客前，一定要驗證自家網域、把寄件人換成 <code class="inline">no-reply@你的網址</code>。</strong>（驗證要改網域 DNS、等它生效，早點做。）</p>
+    </div>
     <div class="paste">
       <div class="label"><span>寄信鑰匙</span><span class="where">Resend → API Keys</span></div>
       <code>RESEND_API_KEY</code>
     </div>
     <div class="paste">
-      <div class="label"><span>寄件人信箱（還沒驗證網域就先填這個沙盒地址）</span><span class="where">先用預設值</span></div>
-<pre>RESEND_FROM_EMAIL = onboarding@resend.dev</pre>
+      <div class="label"><span>寄件人信箱（驗證網域後填這個；正式站務必用自家網域）</span></div>
+<pre>RESEND_FROM_EMAIL = no-reply@你的網址</pre>
+    </div>
+    <div class="paste">
+      <div class="label"><span>測試收件信箱（網域還沒驗證好、想先測試時填你自己的信箱）</span><span class="where">用沙盒寄件人時，信只會寄到這裡</span></div>
+<pre>RESEND_TEST_RECIPIENT = 你自己的信箱@example.com</pre>
     </div>
     <div class="paste">
       <div class="label"><span>聯絡表單的收件信箱（填你自己的客服信箱）</span></div>
 <pre>CONTACT_TO_EMAIL = 你的客服信箱@example.com</pre>
+    </div>
+    <div class="box tip">
+      <p class="box-title">💡 還在等網域驗證時怎麼先測？</p>
+      <p>可暫時 <code class="inline">RESEND_FROM_EMAIL = onboarding@resend.dev</code> 並填上面的 <code class="inline">RESEND_TEST_RECIPIENT</code>，此時所有信只會寄到你自己的信箱（方便看信長怎樣）。但這只是測試用，<strong>對外收客前務必換成自家網域</strong>。</p>
     </div>
   </div>
 
@@ -498,11 +519,13 @@ NEXT_PUBLIC_PAYUNI_MERID   = ...
 
 # --- 影片 Bunny（步驟 3）---
 BUNNY_STREAM_LIBRARY_ID    = ...
-BUNNY_TOKEN_AUTH_KEY       = ...
+BUNNY_TOKEN_AUTH_KEY       = ...   # 播放防盜用
+BUNNY_STREAM_API_KEY       = ...   # 影片批次上傳用（另一把，見步驟 3）
 
 # --- 寄信 Resend（步驟 4）---
 RESEND_API_KEY             = ...
-RESEND_FROM_EMAIL          = onboarding@resend.dev
+RESEND_FROM_EMAIL          = no-reply@你的網址   # 正式收客務必用自家已驗證網域
+RESEND_TEST_RECIPIENT      = 你自己的信箱          # 網域還沒驗證好時的測試收件者
 CONTACT_TO_EMAIL           = 你的客服信箱
 
 # --- 安全開關（正式站務必是 false）---
@@ -560,6 +583,7 @@ WHERE email = '你的信箱@example.com';</pre>
       <li>安全開關關好：Netlify 設定裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
       <li>金流換正式：確認商家審核通過後，把 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 換成正式端點、金鑰換成正式那組，重新部署。</li>
       <li>網址填對：<code class="inline">NEXTAUTH_URL</code> 已改成你真正的網址（不是預設的假網址）。</li>
+      <li>寄信正常（很重要）：<code class="inline">RESEND_FROM_EMAIL</code> 已改成自家已驗證網域（不是 <code class="inline">onboarding@resend.dev</code>）。實測：用<strong>另一個</strong>信箱到 <code class="inline">/signup</code> 註冊 → 該信箱能收到「驗證信」→ 點了能成功登入。收不到＝客戶也會收不到、無法登入。</li>
       <li>真卡實測：用一張真卡買一筆最便宜的商品，確認「付款成功 → 自動開通 → 收到通知信」整條走得通，再退刷。</li>
       <li>換成你的品牌：後台「設定」把站名、Logo、主色、聯絡信箱、FAQ、公告改成你自己的；刪掉範例課程與範例訂單。</li>
       <li>保活已開：確認步驟 9A 的保活已設定並測試成功（否則網站閒置一週資料庫會睡著）。</li>
@@ -611,6 +635,11 @@ WHERE email = '你的信箱@example.com';</pre>
       <p class="box-title">✅ 完成後</p>
       <p>你的資料庫不會再因為沒人來而睡著，客戶隨時打開都順暢。</p>
     </div>
+    <div class="box warn">
+      <p class="box-title">🗓️ 每兩個月要看一眼（GitHub 的規定）</p>
+      <p>GitHub 有個規則：如果這個專案<strong>連續約 60 天沒有任何變更</strong>，它會自動把「保活」「備份」這類排程<strong>停用</strong>（不會通知你）。停用後資料庫又會開始會睡著。<br>
+      解法很簡單：<strong>每隔一兩個月登入 GitHub → Actions 分頁看一眼</strong>，若看到 workflow 被停用（有 <em>Enable workflow</em> 按鈕），按一下重新啟用即可。（或請幫你設定的工程師加一個自動保持活躍的小機制。）</p>
+    </div>
   </div>
 
   <div class="step">
@@ -621,10 +650,23 @@ WHERE email = '你的信箱@example.com';</pre>
         <p class="sub"><span class="time-tag">約 30 分鐘</span> <span class="gate">可晚點做／找人幫一次</span></p>
       </div>
     </div>
-    <p>設定每天自動把資料庫備份到你的 Google Drive，多一層保險。</p>
+    <p>設定每天自動備份你的資料庫。備份有兩層：一層存成 GitHub 的檔案（保留 90 天），一層另外存到你的 Google Drive。</p>
+    <div class="box warn">
+      <p class="box-title">⚠️ 備份不是「零設定就有」——要先貼 1 個值它才會跑</p>
+      <p>備份需要能連到資料庫的「連線字串」。請比照 9A，到 GitHub → <strong>Settings → Secrets and variables → Actions</strong> 再新增一個 secret：</p>
+      <div class="paste">
+        <div class="label"><span>Name 填這個</span></div>
+<pre>SUPABASE_DB_URL</pre>
+      </div>
+      <div class="paste">
+        <div class="label"><span>Value 貼資料庫連線字串（把 [YOUR-PASSWORD] 換成步驟 2-1 的密碼）</span><span class="where">Supabase → Connect → Connection string (URI)</span></div>
+<pre>postgresql://postgres:你的密碼@db.xxxx.supabase.co:5432/postgres</pre>
+      </div>
+      <p>設好後，到 <strong>Actions</strong> 分頁點 <strong>「每日資料庫備份」</strong> → <strong>Run workflow</strong> 跑一次，看到綠色打勾、且在該次紀錄下方 <strong>Artifacts</strong> 出現 <code class="inline">db-backup</code> 檔，才代表備份真的有生效。<strong>沒設這個值的話，備份會失敗、你其實一份都沒有。</strong></p>
+    </div>
     <div class="box tip">
-      <p class="box-title">💡 這步可以晚點做</p>
-      <p>系統本身<strong>已內建每天備份成一份檔案（保留 90 天）</strong>，所以你的資料不會完全沒保障。Google Drive 備份是「加保險」，比較技術，<strong>建議找懂電腦的人幫你設定一次</strong>（約半小時），之後全自動。專案裡的 <code class="inline">SETUP-GUIDE.md</code> 步驟 8 有完整技術指令，直接給他看即可。</p>
+      <p class="box-title">💡 Google Drive 那層可以晚點做（進階）</p>
+      <p>把備份「另存一份到 Google Drive」比較技術（要設 rclone），<strong>建議找懂電腦的人幫你設定一次</strong>，專案裡的 <code class="inline">SETUP-GUIDE.md</code> 步驟 8 有完整指令。只要上面的 <code class="inline">SUPABASE_DB_URL</code> 設好了，GitHub 檔案那層備份就已經在保護你了，Google Drive 是再加一層。</p>
     </div>
   </div>
 
