@@ -106,31 +106,32 @@
 
   <div class="step">
     <div class="step-head"><div class="step-num">2</div><div>
-      <h2>把影片上傳到 Bunny</h2>
+      <h2>把影片批次上傳到 Bunny（自動工具）</h2>
       <p class="sub">你手上有原始影片檔，這步就沒問題</p>
     </div></div>
-    <ol class="dolist">
-      <li>把每一支課程影片的<strong>原始檔</strong>上傳到 Bunny 的影片庫。</li>
-      <li>之後在後台建立課程章節時，把影片網址貼進「影片網址」欄位。</li>
-    </ol>
+    <p>把影片檔放進一個資料夾（<strong>建議：一個子資料夾一門課、檔名就是章節名</strong>，這樣對應最準）。然後<strong>先掃描看看</strong>（不會上傳、不用金鑰）：</p>
+    <pre>node scripts/bunny-upload.mjs "你的影片資料夾"</pre>
+    <p>它會產生一份 <code class="inline">bunny-upload-plan.csv</code>，列出找到幾支、以及「猜的課程/章節」。看一下對不對，然後正式上傳（可先加 <code class="inline">--limit 3</code> 傳 3 支測試）：</p>
+    <pre>node scripts/bunny-upload.mjs "你的影片資料夾" --upload</pre>
+    <p>上傳完會給你 <code class="inline">bunny-upload-result.csv</code>——每支影片對應的 Bunny 網址，之後步驟 3 貼進章節時照這張表即可。</p>
     <div class="box warn">
-      <p class="box-title">⏳ 這步最花時間</p>
-      <p>影片檔通常很大，上傳要時間。建議<strong>分批進行</strong>，網路穩一點的環境做。</p>
+      <p class="box-title">⏳ 兩個提醒</p>
+      <p>① 影片檔很大、上傳要時間，工具<strong>可以中斷後續傳</strong>（重跑會自動略過已傳的），不怕斷線。<br>
+      ② 需要 Bunny 影片庫的「上傳用 API Key」（<code class="inline">BUNNY_STREAM_API_KEY</code>，在 Bunny → Stream → 影片庫 → API），它跟播放防盜的金鑰是不同的東西。</p>
     </div>
   </div>
 
   <div class="step">
     <div class="step-head"><div class="step-num">3</div><div>
-      <h2>在後台建立課程 —— 標題要一模一樣 ⚠️</h2>
-      <p class="sub">這是讓學員權限對得上的關鍵</p>
+      <h2>自動建立課程空殼（標題保證一致）</h2>
+      <p class="sub">這是讓學員權限對得上的關鍵，改用工具就不會打錯字</p>
     </div></div>
-    <p>到後台 <code class="inline">/admin</code> 建立課程。<strong>課程標題必須跟 Teachify 上完全相同</strong>（連 <code class="inline">｜</code>、<code class="inline">《》</code>、Vol. 編號都要一樣），因為匯入工具是「用標題對應」誰能看哪門課。</p>
-    <div class="box tip">
-      <p class="box-title">💡 最保險的做法</p>
-      <p>執行下面這行，工具會印出<strong>你的名單裡出現的所有課程標題</strong>，直接複製這些標題去建立課程，就不會打錯字：</p>
-      <pre>node scripts/import-students.mjs "你的CSV路徑" --preview</pre>
-      <p>（你的名單目前含 <strong>26 種課程</strong>、<strong>656 位學員</strong>。至少要先把這 26 門建好。）</p>
-    </div>
+    <p>學員權限是「用課程標題對應」的，所以標題必須跟 Teachify 完全一致。與其手動建 26 門、還怕打錯，<strong>直接用工具照 CSV 自動建好空殼</strong>：</p>
+    <p>先試跑看會建哪些（不寫入）：</p>
+    <pre>node scripts/create-course-shells.mjs "你的CSV路徑"</pre>
+    <p>沒問題後正式建立：</p>
+    <pre>node scripts/create-course-shells.mjs "你的CSV路徑" --commit</pre>
+    <p>它會自動建好這 <strong>26 門課的空殼</strong>（標題完全正確、狀態為「未發佈」）。接著你到後台 <code class="inline">/admin</code> 為每門課補上說明、把步驟 2 上傳的影片網址貼進章節，<strong>完成後記得按「發佈」</strong>課程才會對外顯示。</p>
   </div>
 
   <div class="step">
