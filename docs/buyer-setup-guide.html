@@ -591,6 +591,12 @@ WHERE email = '你的信箱@example.com';</pre>
         <p class="sub"><span class="time-tag">約 20 分鐘</span>　開始收真錢之前，這幾項一定要確認</p>
       </div>
     </div>
+    <div class="box tip">
+      <p class="box-title">⚡ 先跑「一鍵驗收」，讓電腦幫你檢查一遍</p>
+      <p>在專案 <code class="inline">bds-web</code> 資料夾（需先照《搬家手冊》附錄裝好 Node＋<code class="inline">npm install</code>）執行：</p>
+<pre>npm run verify</pre>
+      <p>它會自動體檢：環境變數、資料庫 17 張表、限流函式、圖片空間、管理員帳號、線上網站是否活著——全程<strong>唯讀、不會改任何東西</strong>。看到「全部必要項目通過！」就代表地基沒問題；有紅色 ✗ 會直接告訴你缺什麼、怎麼補。下面的清單則是這支工具檢查不到、需要你「親手實測」的部分。</p>
+    </div>
     <ul class="plain">
       <li>資料保護鎖有打開：確定步驟 2 的 <code class="inline">db/enable_rls.sql</code> 有跑過（最後一個）。</li>
       <li>安全開關關好：Netlify 設定裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
