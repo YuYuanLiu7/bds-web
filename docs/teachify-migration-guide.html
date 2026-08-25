@@ -203,8 +203,53 @@
     <p>那兩支工具要在電腦終端機執行。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約半小時），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
   </div>
 
+  <hr>
+
+  <p class="eyebrow">附錄</p>
+  <h2>指令速查表（搬家當天照順序複製貼上）</h2>
+  <div class="box tip">
+    <p class="box-title">📌 用之前先確認</p>
+    <p>① 這些指令都在<strong>電腦的終端機</strong>、且切到專案的 <code class="inline">bds-web</code> 資料夾裡執行。<br>
+    ② 專案裡要先有一份填好的 <code class="inline">.env.local</code>（Supabase、Bunny、Resend 等鑰匙，見《開站手冊》）。<br>
+    ③ 把 <code class="inline">你的CSV路徑</code> 換成實際檔案位置，例如 <code class="inline">"../BDS-students-2026-08-24.csv"</code>。</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><div class="step-num">▸</div><div>
+      <h2>依序執行</h2>
+      <p class="sub">每一步都「先試跑、再正式做」，確認數字對了才加 --commit / --upload / --send</p>
+    </div></div>
+
+    <h3>① 建立 26 門課空殼（標題保證正確）</h3>
+<pre>node scripts/create-course-shells.mjs "你的CSV路徑"            # 先試跑看清單
+node scripts/create-course-shells.mjs "你的CSV路徑" --commit   # 正式建立</pre>
+
+    <h3>② 影片批次上傳 Bunny（→ 產生對照表）</h3>
+<pre>node scripts/bunny-upload.mjs "你的影片資料夾"                 # 先掃描看 plan.csv
+node scripts/bunny-upload.mjs "你的影片資料夾" --upload --limit 3   # 先傳 3 支測試
+node scripts/bunny-upload.mjs "你的影片資料夾" --upload        # 全部上傳（可中斷續傳）</pre>
+    <p style="font-size:15px;color:var(--ink-soft);">→ 依 <code class="inline">bunny-upload-result.csv</code> 到後台把影片網址貼進各課章節，補完內容後<strong>發佈課程</strong>。</p>
+
+    <h3>③ 匯入 656 位學員 + 課程權限</h3>
+<pre>node scripts/import-students.mjs "你的CSV路徑"                 # 試跑：看課程標題對不對得上
+node scripts/import-students.mjs "你的CSV路徑" --commit        # 正式匯入</pre>
+
+    <h3>④ 寄「設定新密碼」信給全體學員</h3>
+<pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱     # 先寄一封測試給自己
+node scripts/send-invites.mjs "你的CSV路徑" --send             # 正式寄給全部人</pre>
+    <p style="font-size:15px;color:var(--ink-soft);">→ 寄全體前，<code class="inline">RESEND_FROM_EMAIL</code> 必須是已驗證的自家網域，否則工具會擋下。</p>
+
+    <h3>⑤ 最後：把網址切到新站（見上方步驟 6）</h3>
+    <p style="font-size:15px;color:var(--ink-soft);">全部測好後，才把 <code class="inline">bds.fu-notes.com</code> 從 Teachify 改指到 Netlify。</p>
+
+    <div class="box good">
+      <p class="box-title">✅ 順序邏輯</p>
+      <p>先有課（①）→ 影片就位（②）→ 灌人和權限（③）→ 通知客戶（④）→ 換網址（⑤）。順序別跳，權限才對得上。</p>
+    </div>
+  </div>
+
   <div class="footer">
-    <p>Teachify 搬家手冊　·　照 1→6 順序做　·　遇到 <span class="gate">要等 / 要幫忙</span> 就先做別的</p>
+    <p>Teachify 搬家手冊　·　照 1→6 步＋附錄指令做　·　遇到 <span class="gate">要等 / 要幫忙</span> 就先做別的</p>
   </div>
 
 </div>
