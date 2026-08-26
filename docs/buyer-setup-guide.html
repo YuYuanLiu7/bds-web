@@ -722,9 +722,9 @@ WHERE email = '你的信箱@example.com';</pre>
       <p>你的資料庫不會再因為沒人來而睡著，客戶隨時打開都順暢。</p>
     </div>
     <div class="box warn">
-      <p class="box-title">🗓️ 每兩個月要看一眼（GitHub 的規定）</p>
-      <p>GitHub 有個規則：如果這個專案<strong>連續約 60 天沒有任何變更</strong>，它會自動把「保活」「備份」這類排程<strong>停用</strong>（不會通知你）。停用後資料庫又會開始會睡著。<br>
-      解法很簡單：<strong>每隔一兩個月登入 GitHub → Actions 分頁看一眼</strong>，若看到 workflow 被停用（有 <em>Enable workflow</em> 按鈕），按一下重新啟用即可。（或請幫你設定的工程師加一個自動保持活躍的小機制。）</p>
+      <p class="box-title">🗓️ 這個系統已幫你自動處理（了解即可）</p>
+      <p>GitHub 有個規則：專案<strong>連續約 60 天沒有任何變更</strong>，會自動把排程（保活/備份/健康檢查）停用。<strong>本系統已內建一個「自動保活」排程，每 10 天自動更動一次讓專案保持活躍</strong>，所以正常情況你<strong>不用手動處理</strong>。<br>
+      備援起見，若哪天想確認，可到 GitHub → <strong>Actions</strong> 看一眼；萬一看到 workflow 被停用（有 <em>Enable workflow</em> 按鈕），按一下重新啟用即可。</p>
     </div>
   </div>
 
@@ -821,7 +821,7 @@ WHERE email = '你的信箱@example.com';</pre>
   <div class="box warn">
     <p class="box-title">🗓️ 定期要做的（設進手機行事曆最保險）</p>
     <ul class="plain">
-      <li><strong>每 1～2 個月</strong>：到 GitHub → <strong>Actions</strong> 看一眼。若「保活」「備份」「健康檢查」被標成停用（GitHub 規定 60 天沒更動就自動停），按一下 <em>Enable workflow</em> 重新開啟。</li>
+      <li><strong>排程維持啟用</strong>：系統已內建「自動保活」每 10 天更動一次，正常不用管；偶爾想確認可到 GitHub → <strong>Actions</strong> 看一眼，若有被停用就按 <em>Enable workflow</em>。</li>
       <li><strong>每年</strong>：<strong>網域續約</strong>（在你買網域的地方）。忘了續，網站會整個消失——這是最常見的意外，建議開自動續約。</li>
       <li><strong>偶爾</strong>：確認每日備份有在跑（GitHub → Actions →「每日資料庫備份」→ 最近一次有綠勾、Artifacts 有檔）。</li>
     </ul>

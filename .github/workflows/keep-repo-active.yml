@@ -1,0 +1,37 @@
+name: 自動保持 repo 活躍（避免排程被 GitHub 停用）
+
+# GitHub 規定：repo 連續約 60 天沒有任何「更動（commit）」，會自動停用所有排程 workflow
+# （保活、每日備份、健康檢查都會被停）。排程「自己跑」不算更動。
+# 這個 workflow 每 10 天自動做一次極小的 commit（更新一個時間戳檔案），
+# 讓 repo 始終保持活躍，排程就不會被停用——擁有者不必再手動處理。
+#
+# 說明：以內建的 GITHUB_TOKEN 推送；此類推送不會再觸發其他 workflow（GitHub 防迴圈設計），
+# 但會被視為 repo 活動、重置 60 天計時。
+
+on:
+  schedule:
+    - cron: '0 4 */10 * *'   # 每 10 天一次（遠小於 60 天）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 更新時間戳並提交
+        run: |
+          set -euo pipefail
+          mkdir -p .github
+          date -u +"最後自動保活：%Y-%m-%dT%H:%M:%SZ" > .github/last-keepalive.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/last-keepalive.txt
+          if git diff --cached --quiet; then
+            echo "無變更，略過。"
+          else
+            git commit -m "chore: 自動保活提交，維持排程啟用 [skip ci]"
+            git push
+          fi
