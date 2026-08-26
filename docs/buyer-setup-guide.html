@@ -812,6 +812,59 @@ WHERE email = '你的信箱@example.com';</pre>
     <p>技術性的步驟（2、6、9）如果自己弄不出來，<strong>可以請工程師幫你做「一次性」設定</strong>——設定好之後，上架課程、改內容這些日常事，你自己就能完全掌握。這份手冊也可以直接轉給幫你的人看。</p>
   </div>
 
+  <hr>
+
+  <p class="eyebrow">長期維護</p>
+  <h2>網站顧好，其實只有幾件事</h2>
+  <p class="lead">這套系統跑在幾個「免費方案 + 第三方服務」上，所以<strong>不是「裝完永遠不用理」，但要顧的東西很少</strong>。把下面看一遍，設幾個提醒就好。</p>
+
+  <div class="box warn">
+    <p class="box-title">🗓️ 定期要做的（設進手機行事曆最保險）</p>
+    <ul class="plain">
+      <li><strong>每 1～2 個月</strong>：到 GitHub → <strong>Actions</strong> 看一眼。若「保活」「備份」「健康檢查」被標成停用（GitHub 規定 60 天沒更動就自動停），按一下 <em>Enable workflow</em> 重新開啟。</li>
+      <li><strong>每年</strong>：<strong>網域續約</strong>（在你買網域的地方）。忘了續，網站會整個消失——這是最常見的意外，建議開自動續約。</li>
+      <li><strong>偶爾</strong>：確認每日備份有在跑（GitHub → Actions →「每日資料庫備份」→ 最近一次有綠勾、Artifacts 有檔）。</li>
+    </ul>
+  </div>
+
+  <div class="box tip">
+    <p class="box-title">🔔 系統會主動通知你嗎？（誠實說）</p>
+    <p><strong>部分會、部分要自己留意。</strong></p>
+    <ul class="plain">
+      <li>✅ <strong>網站掛掉</strong>：若你設了步驟 9C 的健康檢查，掛掉時 GitHub 會寄信給你。</li>
+      <li>✅ <strong>付款成功卻沒開通</strong>：系統會主動寄警示信（步驟 9C）。</li>
+      <li>⚠️ <strong>免費額度快用完</strong>：<strong>我們系統不會通知</strong>，但各家服務商通常會<strong>自己寄 email</strong> 提醒你，也會出現下面說的「症狀」。所以請把註冊這些服務的信箱顧好、別漏看它們的信。</li>
+    </ul>
+  </div>
+
+  <h3>免費額度用完會怎樣？何時要升級付費？</h3>
+  <div class="tablewrap">
+    <table>
+      <tr><th>服務</th><th>免費大概到哪、用完的「症狀」</th><th>怎麼看用量 / 何時升級</th></tr>
+      <tr><td><strong>Resend 寄信</strong></td><td>免費約每月 3,000 封、每天 100 封。用完時<strong>信寄不出去</strong>——新客戶收不到驗證信＝<strong>無法登入</strong>（很有感）。</td><td>Resend 後台看用量；學員多、寄信量大時升級付費方案。</td></tr>
+      <tr><td><strong>Supabase 資料庫</strong></td><td>免費約 500MB 資料、儲存與流量有限；超過時讀寫會變慢或被擋。</td><td>Supabase 後台 → Usage 看用量；學員/資料成長到接近上限就升級。</td></tr>
+      <tr><td><strong>Netlify 網站</strong></td><td>免費有流量/建置額度；爆量時網站會被限流（變慢或暫時打不開）。</td><td>Netlify 後台看用量；流量大再升級。</td></tr>
+      <tr><td><strong>Bunny 影片</strong></td><td><strong>這個本來就不是免費的</strong>——按影片儲存與觀看流量計費（費用通常不高，但<strong>要綁定付款方式，會實際扣款</strong>）。</td><td>Bunny 後台看帳單；隨觀看量成長費用會增加，屬正常營運成本。</td></tr>
+    </table>
+  </div>
+  <p style="font-size:15px;color:var(--ink-soft);">（實際數字以各家官網公告為準，方案偶爾會變。重點是：<strong>學員/流量成長 = 早晚要把幾個服務升級成付費</strong>，這是生意做起來的正常成本，不是壞掉。）</p>
+
+  <h3>常見狀況，先自己檢查這裡</h3>
+  <div class="tablewrap">
+    <table>
+      <tr><th>症狀</th><th>先看哪裡</th></tr>
+      <tr><td>整個網站打不開</td><td>① Netlify 最近一次部署是否成功　② Supabase 是否在（免費版睡著了→保活有沒有在跑）　③ 網域是否過期</td></tr>
+      <tr><td>客戶說沒收到驗證信/通知信</td><td>Resend：額度是否用完、寄件網域是否還是 Verified</td></tr>
+      <tr><td>影片播不出來</td><td>Bunny：帳戶是否欠費、該影片是否還在、防盜開關是否還開著</td></tr>
+      <tr><td>刷卡失敗</td><td>PayUni：是否已換成正式金鑰與正式端點、商店狀態是否正常</td></tr>
+    </table>
+  </div>
+
+  <div class="box tip">
+    <p class="box-title">🛟 需要長期有人罩？</p>
+    <p>以上多數是「偶爾看一眼」的小事。若你希望有人幫你盯監控、處理狀況、做升級，可考慮跟賣方談<strong>長期維護方案</strong>——把這些交給人，你只要專心經營課程。</p>
+  </div>
+
   <div class="footer">
     <p>BDS 開站手冊　·　照順序做、遇到 <span class="gate" style="margin:0">要等 / 要幫忙</span> 就先做別的　·　祝開站順利 🚀</p>
   </div>
