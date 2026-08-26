@@ -1,5 +1,16 @@
 import type { NextConfig } from "next";
 
+// 容錯防呆：若環境變數 NEXTAUTH_URL 包含中文說明或非合法 URL（例如部署時誤把說明文字貼入），
+// 先行清理，避免 NextAuth / Next.js 在載入時 `new URL()` 拋出 Invalid URL 崩潰。
+if (process.env.NEXTAUTH_URL) {
+  try {
+    new URL(process.env.NEXTAUTH_URL);
+  } catch {
+    console.warn(`[next.config] Invalid NEXTAUTH_URL detected, removing: ${process.env.NEXTAUTH_URL}`);
+    delete process.env.NEXTAUTH_URL;
+  }
+}
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
