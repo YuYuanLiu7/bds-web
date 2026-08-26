@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>售後服務範圍說明</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground:#f5f7fb; --surface:#fff; --surface-2:#eef2f9; --ink:#1a2130; --ink-soft:#55607a;
+    --line:#dde3ee; --brand:#21448e; --brand-soft:#e7edf8; --brand-ink:#21448e;
+    --good:#1c7a45; --good-soft:#e5f3ea; --warn:#a8560a; --warn-soft:#fbf0e0; --warn-line:#f0d3a8; --maxw:760px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0e131d; --surface:#161d2b; --surface-2:#1e2637; --ink:#e7ecf6; --ink-soft:#9aa7c0;
+      --line:#2b3446; --brand:#8fb0e6; --brand-soft:#1c2a44; --brand-ink:#bcd0f2;
+      --good:#6cc78d; --good-soft:#16281d; --warn:#e6a95a; --warn-soft:#2e2416; --warn-line:#4a3a20;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0e131d; --surface:#161d2b; --surface-2:#1e2637; --ink:#e7ecf6; --ink-soft:#9aa7c0;
+    --line:#2b3446; --brand:#8fb0e6; --brand-soft:#1c2a44; --brand-ink:#bcd0f2;
+    --good:#6cc78d; --good-soft:#16281d; --warn:#e6a95a; --warn-soft:#2e2416; --warn-line:#4a3a20;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif; font-size:16px; line-height:1.8; }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 20px 80px; }
+  header.hero { background:linear-gradient(160deg,#21448e 0%,#16305f 100%); color:#fff; padding:44px 20px 36px; text-align:center; }
+  .kicker { font-size:12px; letter-spacing:.22em; text-transform:uppercase; font-weight:700; opacity:.78; margin:0 0 12px; }
+  header.hero h1 { font-family:"Noto Serif TC",serif; font-weight:800; font-size:clamp(26px,5vw,38px); margin:0 0 10px; }
+  header.hero p { margin:0 auto; max-width:34em; opacity:.92; font-size:15px; }
+  h2 { font-family:"Noto Serif TC",serif; font-weight:800; font-size:21px; margin:40px 0 6px; }
+  p { margin:9px 0; }
+  .fill { background:var(--warn-soft); border-bottom:2px solid var(--warn-line); padding:0 6px; font-weight:700; color:var(--warn); border-radius:3px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin:16px 0; }
+  .card.good { background:var(--good-soft); border-color:color-mix(in srgb,var(--good) 35%,transparent); }
+  .card.warn { background:var(--warn-soft); border-color:var(--warn-line); }
+  .card h3 { margin:0 0 8px; font-size:17px; font-family:"Noto Serif TC",serif; font-weight:700; }
+  ul { margin:8px 0; padding-left:20px; } li { margin:5px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; }
+  .tag.free { background:var(--good-soft); color:var(--good); border:1px solid color-mix(in srgb,var(--good) 40%,transparent); }
+  .tag.paid { background:var(--brand-soft); color:var(--brand-ink); border:1px solid color-mix(in srgb,var(--brand) 40%,transparent); }
+  .tag.no { background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn-line); }
+  table { border-collapse:collapse; width:100%; font-size:15px; margin:10px 0; }
+  th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:var(--surface-2); font-weight:700; }
+  .note { font-size:13px; color:var(--ink-soft); }
+  .sign { display:flex; gap:24px; flex-wrap:wrap; margin-top:20px; }
+  .sign div { flex:1; min-width:200px; border-top:1px solid var(--ink); padding-top:8px; font-size:14px; color:var(--ink-soft); }
+  hr { border:0; border-top:1px solid var(--line); margin:32px 0; }
+  .footer { text-align:center; color:var(--ink-soft); font-size:13px; margin-top:36px; }
+  @media print { header.hero{background:none!important;color:#000!important;border-bottom:2px solid #000;} .card{break-inside:avoid;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="kicker">BDS 網站系統</p>
+  <h1>售後服務範圍說明</h1>
+  <p>這份說明買方在購買本系統後，「哪些由賣方協助、哪些需另外付費」，讓雙方對售後有清楚共識。</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <p><strong>賣方：</strong><span class="fill">＿＿＿＿＿＿</span>　<strong>買方：</strong><span class="fill">＿＿＿＿＿＿</span>　<strong>交付日：</strong><span class="fill">＿＿年＿＿月＿＿日</span></p>
+    <p class="note">（黃底空格請雙方於成交時填寫；本文件一式兩份，雙方各執一份。）</p>
+  </div>
+
+  <h2>一、免費保固 <span class="tag free">免費</span></h2>
+  <div class="card good">
+    <p><strong>期間：交付日起 <span class="fill">＿＿</span> 個月內。</strong></p>
+    <p>此期間內，若是「<strong>賣方交付的程式本身有缺陷</strong>」（原本該正常運作卻出錯），賣方免費修正。例如：金流流程異常、後台功能報錯、頁面壞掉等屬程式面的問題。</p>
+  </div>
+
+  <h2>二、一次性設定協助 <span class="tag free">免費</span></h2>
+  <div class="card good">
+    <p><strong>期間：交付日起 <span class="fill">＿＿</span> 天內。</strong></p>
+    <p>協助買方完成初次上線設定的疑問（照《開站手冊》操作卡關時）。超過期間或重複詢問同一操作，屬下方「教學/操作支援」。</p>
+  </div>
+
+  <h2>三、不含 / 需另外收費 <span class="tag no">另計</span></h2>
+  <div class="card warn">
+    <ul>
+      <li><strong>第三方服務的問題與費用</strong>：Supabase、Netlify、Resend、Bunny、PayUni、網域等的帳號申請、審核、故障、以及它們的<strong>付費方案費用</strong>（例如 Bunny 影片費、網域續約、免費額度用完後的升級），皆由買方自行負責與支付。</li>
+      <li><strong>教學 / 操作支援</strong>（超出上述期間）：如「怎麼改公告」「怎麼上架課程」等後台操作教學。</li>
+      <li><strong>功能客製 / 新增功能</strong>：與原交付規格不同的修改或加購功能。</li>
+      <li><strong>買方自行變更造成的問題</strong>：如自行改動設定、金鑰、程式碼、或誤刪資料。</li>
+      <li><strong>資料救援</strong>：非因程式缺陷造成的資料遺失（備份與還原協助另計）。</li>
+    </ul>
+    <p class="note">上述項目可依需求<strong>按次計費</strong>或併入下方「長期維護方案」。</p>
+  </div>
+
+  <h2>四、長期維護方案（選配） <span class="tag paid">月費 / 年費</span></h2>
+  <div class="card">
+    <p>若買方希望有人長期把系統顧好，可加購維護方案，費用 <span class="fill">＿＿＿＿</span> /月（或 <span class="fill">＿＿＿＿</span> /年）。內容包含：</p>
+    <ul>
+      <li>監控網站與資料庫運作（含保活、備份、排程維持啟用）。</li>
+      <li>發生狀況時的處理與排除。</li>
+      <li>免費額度接近上限、需要升級付費時，主動提醒與協助。</li>
+      <li>系統小幅更新與安全維護。</li>
+    </ul>
+    <p class="note">不含第三方服務本身的付費方案費用（仍由買方支付）。</p>
+  </div>
+
+  <h2>五、買方自行負責事項</h2>
+  <div class="card">
+    <ul>
+      <li>妥善保管各服務的帳號、密碼與金鑰（外洩風險由買方承擔）。</li>
+      <li>網域每年續約、各第三方服務的付費升級與帳單。</li>
+      <li>定期維護動作（如每 1～2 個月確認 GitHub 排程未被停用），詳見《開站手冊》最後「長期維護」章節。</li>
+      <li>網站上架的內容與其合法性、以及對學員的客服。</li>
+    </ul>
+  </div>
+
+  <h2>六、回報方式與回應時間</h2>
+  <div class="card">
+    <table>
+      <tr><th>項目</th><th>內容</th></tr>
+      <tr><td>回報管道</td><td><span class="fill">＿＿＿＿＿＿</span>（Email／通訊軟體）</td></tr>
+      <tr><td>回應時間</td><td>一般狀況 <span class="fill">＿＿</span> 個工作天內回覆</td></tr>
+      <tr><td>服務時間</td><td><span class="fill">＿＿＿＿＿＿</span>（例：週一至週五 10:00–18:00）</td></tr>
+    </table>
+  </div>
+
+  <h2>七、名詞界定（避免爭議）</h2>
+  <div class="card">
+    <table>
+      <tr><th>算「程式缺陷」（保固內免費）</th><th>算「操作/第三方問題」（另計）</th></tr>
+      <tr><td>照手冊操作、程式卻回應錯誤或功能壞掉</td><td>不知道按鈕在哪、忘記帳密、想學怎麼用</td></tr>
+      <tr><td>金流驗證、開通權限等後端邏輯異常</td><td>第三方（Supabase/Bunny/PayUni…）自身故障或欠費</td></tr>
+      <tr><td>交付時就存在的錯誤</td><td>買方自行改動後才出現的問題</td></tr>
+    </table>
+  </div>
+
+  <div class="sign">
+    <div>賣方簽名 / 日期</div>
+    <div>買方簽名 / 日期</div>
+  </div>
+
+  <div class="footer">
+    <p>本說明為服務範圍共識文件，實際條款以雙方另行簽訂之合約為準。</p>
+  </div>
+
+</div>
+</body>
+</html>
