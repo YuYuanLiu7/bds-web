@@ -261,6 +261,12 @@
     </table>
   </div>
 
+  <div class="box warn">
+    <p class="box-title">🧭 開始前，先懂兩件事（會讓你少卡很多）</p>
+    <p><strong>① 網站的按鈕名稱可能跟這裡寫的不一樣。</strong>Supabase、Netlify、Resend 這些網站常常改版、換名字、甚至改成英文。<strong>請認「你要做的事」而不是死記按鈕名字</strong>——例如要找「API 金鑰」，畫面上可能叫 <em>API Keys</em>、<em>Project API</em>、<em>Publishable key</em>…只要是「一串拿來當通行證的字」就對了。找不到一模一樣的字不用慌，找意思最接近的。</p>
+    <p><strong>② 看到「複製／抄下某個值」，就貼到你的「鑰匙收集表」。</strong>不是複製了就好——要<strong>先貼到一個記事本存起來</strong>，最後步驟 6 會一次把它們全部貼進網站平台。下面步驟 0 有一張現成的表格，先複製到你的記事本。</p>
+  </div>
+
   <p class="eyebrow" id="s0">步驟 0</p>
   <div class="step">
     <div class="step-head">
@@ -281,6 +287,44 @@
     <div class="box tip">
       <p class="box-title">💡 提早準備、邊等邊做</p>
       <p>「買網域」和「送 PayUni 審核」都建議<strong>第一天就先弄</strong>——網域 DNS 生效、PayUni 審核都要等，早點開始才不會卡在最後。</p>
+    </div>
+
+    <div class="box good">
+      <p class="box-title">📋 先做這件事：把「鑰匙收集表」複製到你的記事本</p>
+      <p>打開電腦的<strong>記事本</strong>（Windows「記事本」／Mac「備忘錄」都行），把下面整段複製貼進去。之後每一步只要拿到一個值，就<strong>填到對應的空格</strong>；到步驟 6 就把整張表一次貼進網站平台。這樣就不會「複製了卻忘記貼到哪」。</p>
+<pre>========== 我的 BDS 鑰匙收集表 ==========
+（每拿到一個就填在 = 後面；沒拿到的先空著）
+
+我買的網域 = ____________   例：myschool.com
+
+── Supabase 資料庫（步驟 2）──
+NEXT_PUBLIC_SUPABASE_URL       = ____________
+NEXT_PUBLIC_SUPABASE_ANON_KEY  = ____________
+SUPABASE_SERVICE_ROLE_KEY      = ____________
+資料庫密碼（自己設的）          = ____________
+資料庫連線字串 SUPABASE_DB_URL  = ____________  （備份用，選填）
+
+── Bunny 影片（步驟 3）──
+BUNNY_STREAM_LIBRARY_ID = ____________
+BUNNY_TOKEN_AUTH_KEY    = ____________   （播放防盜用）
+BUNNY_STREAM_API_KEY    = ____________   （影片上傳用，另一把）
+
+── Resend 寄信（步驟 4）──
+RESEND_API_KEY        = ____________
+RESEND_FROM_EMAIL     = no-reply@我的網域
+RESEND_TEST_RECIPIENT = ____________   （你自己的信箱）
+CONTACT_TO_EMAIL      = ____________   （客服信箱）
+ADMIN_ALERT_EMAIL     = ____________   （收系統警示的信箱）
+
+── PayUni 金流（步驟 5，審核過才有）──
+PAYUNI_MERID    = ____________
+PAYUNI_HASH_KEY = ____________
+PAYUNI_HASH_IV  = ____________
+
+── 網站基本（步驟 6）──
+NEXTAUTH_SECRET = ____________   （步驟 6 產生的一串亂碼）
+NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
+=========================================</pre>
     </div>
   </div>
 
