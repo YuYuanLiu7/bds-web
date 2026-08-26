@@ -677,6 +677,37 @@ WHERE email = '你的信箱@example.com';</pre>
   </div>
 
   <p class="eyebrow" id="s9">步驟 9</p>
+
+  <div class="box warn">
+    <p class="box-title">📍 這一步是在「GitHub」做，不是 Netlify</p>
+    <p>下面的保活、備份、通知、自動續命，都是 <strong>GitHub</strong> 幫你在背景自動跑的工作，跟 Netlify（放網站的地方）是<strong>兩個不同網站</strong>。所以請打開你的 <strong>GitHub</strong>，不是 Netlify。</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">9-0</div>
+      <div>
+        <h2>先開啟並確認 GitHub Actions（做一次）</h2>
+        <p class="sub"><span class="time-tag">約 3 分鐘</span>　所有背景自動工作都靠它，先確認它是開的</p>
+      </div>
+    </div>
+    <ol class="dolist">
+      <li><strong>打開你的專案頁</strong>：瀏覽器登入 <a href="https://github.com">github.com</a> → 點進你的專案（例如 <code class="inline">你的帳號/bds-web</code>）。</li>
+      <li><strong>點最上方一排分頁裡的 <span style="border:1px solid var(--line);border-radius:6px;padding:1px 8px;">Actions</span></strong>（在 Code、Issues、Pull requests… 那一排）。</li>
+      <li><strong>看到什麼？兩種情況：</strong>
+        <ul class="plain">
+          <li><strong>A. 出現一個綠色按鈕寫「I understand my workflows, go ahead and enable them」</strong> → 按它一下。這代表 Actions 剛被啟用。（這就是「生效」的動作。）</li>
+          <li><strong>B. 直接看到左側一排工作名稱</strong>（Supabase 保活、每日資料庫備份、網站健康檢查、自動保持 repo 活躍…）→ 代表<strong>已經是開的</strong>，不用再按。</li>
+        </ul>
+      </li>
+      <li><strong>當場確認真的會動（強烈建議做一次）：</strong>左側點 <strong>「自動保持 repo 活躍（避免排程被 GitHub 停用）」</strong> → 右邊出現 <strong>Run workflow</strong> 下拉鈕 → 點它 → 再點綠色 <strong>Run workflow</strong>。等約 10～30 秒，列表會出現一筆紀錄，圖示從<strong>黃色轉圈</strong>變成<strong>綠色打勾 ✓</strong> 就代表成功、以後會自動跑。（紅色叉 ✗ 才是失敗。）</li>
+    </ol>
+    <div class="box good">
+      <p class="box-title">✅ 看到「綠色打勾」＝生效了</p>
+      <p>只要在 Actions 分頁能看到工作清單、且手動跑一次是綠勾，就代表 GitHub 會照排程自動幫你做。接著再做 9A～9C 把各自要的值填上。</p>
+    </div>
+  </div>
+
   <div class="step">
     <div class="step-head">
       <div class="step-num">9A</div>
