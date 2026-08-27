@@ -859,6 +859,12 @@ WHERE email = '你的信箱@example.com';</pre>
   </div>
 
   <div class="box tip">
+    <p class="box-title">🔁 改設定的重要小知識：程式會自動部署，改「環境變數」不會</p>
+    <p><strong>改程式碼</strong>（工程師 push 到 GitHub）→ Netlify 會<strong>自動重新編譯、自動上線</strong>，不用手動按。</p>
+    <p><strong>但只改「環境變數」</strong>（例如在 Netlify 改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效</strong>，要到 Netlify → <strong>Deploys → Trigger deploy</strong> 手動按一次（選 <em>Clear cache and deploy site</em>）新值才會套用。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
+  </div>
+
+  <div class="box tip">
     <p class="box-title">🔔 系統會主動通知你嗎？（誠實說）</p>
     <p><strong>部分會、部分要自己留意。</strong></p>
     <ul class="plain">
