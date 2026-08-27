@@ -18,6 +18,11 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    # 於 job 層把 secret 映射為 env，因為 GitHub Actions 的 step `if:` 不能直接使用 secrets，
+    # 必須改用 env（下方 rclone 步驟以 env.RCLONE_* 判斷是否設定）。
+    env:
+      RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
+      RCLONE_REMOTE: ${{ secrets.RCLONE_REMOTE }}
     steps:
       - name: 以 pg_dump 匯出資料庫（用 postgres:16 容器避免版本不符）
         env:
@@ -40,10 +45,7 @@ jobs:
           retention-days: 90
 
       - name: 上傳到 Google Drive（rclone）
-        if: ${{ secrets.RCLONE_CONFIG_BASE64 != '' && secrets.RCLONE_REMOTE != '' }}
-        env:
-          RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
-          RCLONE_REMOTE: ${{ secrets.RCLONE_REMOTE }}
+        if: ${{ env.RCLONE_CONFIG_BASE64 != '' && env.RCLONE_REMOTE != '' }}
         run: |
           set -euo pipefail
           curl -fsSL https://rclone.org/install.sh | sudo bash
