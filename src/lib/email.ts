@@ -1,9 +1,34 @@
 /**
  * BDS Email Notification Utility
- * 
+ *
  * Uses Resend REST API for completely free, zero-dependency transactional emails (3,000 free emails/month).
  * Falls back to console log with clear setup instructions if API keys are not configured.
  */
+
+import { headers } from 'next/headers';
+
+/**
+ * 決定信件連結要用的網站網址（base URL），依序：
+ *  1. NEXTAUTH_URL（若為合法網址）
+ *  2. 當次請求的實際主機（x-forwarded-host / host）——即使忘了設 NEXTAUTH_URL，
+ *     信裡連結也會用「使用者實際連進來的正式網址」，不會再寄出 localhost 連結
+ *  3. 最後才退回 http://localhost:3000（僅本機開發會走到）
+ */
+async function resolveBaseUrl(): Promise<string> {
+  const env = (process.env.NEXTAUTH_URL || '').trim();
+  try {
+    return new URL(env).toString().replace(/\/$/, '');
+  } catch { /* 未設定或非合法網址，往下用請求主機推斷 */ }
+  try {
+    const h = await headers();
+    const host = h.get('x-forwarded-host') || h.get('host');
+    if (host) {
+      const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
+      return `${proto}://${host}`;
+    }
+  } catch { /* 非請求情境（無法取得 headers），退回預設 */ }
+  return 'http://localhost:3000';
+}
 
 interface SendEmailParams {
   email: string;
@@ -120,6 +145,8 @@ export async function sendPurchaseSuccessEmail({
   }
 
   console.log(`[Email System] Preparing purchase success email for ${targetEmail} (${itemName})`);
+
+  const siteUrl = await resolveBaseUrl();
 
   // HTML elegant transactional email template matching BDS premium style
   const htmlContent = `
@@ -295,7 +322,7 @@ export async function sendPurchaseSuccessEmail({
               
               <!-- CTA Button -->
               <div class="btn-container">
-                <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/courses" class="btn">
+                <a href="${siteUrl}/courses" class="btn">
                   立刻進入教室，開始學習 🚀
                 </a>
               </div>
@@ -377,7 +404,7 @@ export async function sendVerificationEmail({
 }: AuthEmailParams): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  const siteUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const siteUrl = await resolveBaseUrl();
 
   let targetEmail = email;
   const testRecipient = process.env.RESEND_TEST_RECIPIENT;
@@ -464,7 +491,7 @@ export async function sendPasswordResetEmail({
 }: AuthEmailParams): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  const siteUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const siteUrl = await resolveBaseUrl();
 
   let targetEmail = email;
   const testRecipient = process.env.RESEND_TEST_RECIPIENT;
