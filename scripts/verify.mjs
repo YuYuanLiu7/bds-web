@@ -45,7 +45,9 @@ function checkEnv() {
   const core = ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'NEXTAUTH_URL', 'NEXTAUTH_SECRET'];
   const missingCore = core.filter((k) => !process.env[k]);
   if (missingCore.length === 0) ok('核心變數齊全（Supabase / NEXTAUTH）');
-  else { bad(`核心變數缺少：${missingCore.join(', ')}（網站無法正常運作）`); fail++; }
+  else { bad(`核心變數缺少：${missingCore.join(', ')}（網站無法正常運作）`);
+    console.log('     → 請到 Netlify → Site settings → Environment variables 補上；各值去哪拿見《開站手冊》步驟 2、6。');
+    fail++; }
 
   const groups = [
     ['金流 PayUni', ['PAYUNI_MERID', 'PAYUNI_HASH_KEY', 'PAYUNI_HASH_IV', 'NEXT_PUBLIC_PAYUNI_UPP_URL']],
@@ -237,6 +239,9 @@ async function checkExternalKeys() {
     console.log('  \x1b[32m全部必要項目通過！\x1b[0m 上面若有黃色 ⚠ 提醒，是「上線前建議補齊」的項目（例如金流換正式、寄信換自家網域）。');
     process.exit(0);
   }
-  console.log(`  \x1b[31m有 ${fail} 項「必須修正」未通過\x1b[0m，請依上面每項後面的指示處理，再重跑一次。`);
+  console.log(`  \x1b[31m有 ${fail} 項「必須修正」未通過。\x1b[0m`);
+  console.log('  怎麼辦：每一個紅色 ✗ 的「下一行」都寫了該怎麼修（去哪個網站、按什麼、補哪個值）。');
+  console.log('  照著修好後，再跑一次 npm run verify，直到全部變綠、沒有紅色 ✗ 為止。');
+  console.log('  若照提示仍卡住：把這整段畫面「截圖」給協助你的工程師看，訊息已足夠讓他判斷。');
   process.exit(1);
 })().catch((e) => { console.error('\n驗收腳本錯誤：', e); process.exit(1); });
