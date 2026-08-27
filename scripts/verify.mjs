@@ -152,6 +152,68 @@ async function checkSite() {
   await hit('公開設定 API', `${base}/api/settings?key=faqs`);
 }
 
+// 6. 真的去連第三方，驗證金鑰「不只有填、而且是對的」
+async function checkExternalKeys() {
+  head('6. 第三方金鑰實連驗證');
+
+  // ── Resend：驗證 API 金鑰是否有效，並檢查寄件網域是否已 verified ──
+  const resendKey = process.env.RESEND_API_KEY;
+  const fromEmail = (process.env.RESEND_FROM_EMAIL || '').trim();
+  if (!resendKey) {
+    warn('Resend：未設 RESEND_API_KEY，略過（寄信功能上線前需補）');
+  } else {
+    try {
+      const res = await fetch('https://api.resend.com/domains', {
+        headers: { Authorization: `Bearer ${resendKey}` },
+      });
+      if (res.status === 401 || res.status === 403) {
+        bad('Resend：API 金鑰無效（回應 ' + res.status + '）→ 請重新複製正確的 RESEND_API_KEY'); fail++;
+      } else if (!res.ok) {
+        warn(`Resend：金鑰檢查回應 ${res.status}（稍後再試）`);
+      } else {
+        ok('Resend：API 金鑰有效');
+        // 檢查寄件網域驗證狀態
+        if (fromEmail === 'onboarding@resend.dev' || !fromEmail) {
+          warn('Resend：寄件人仍是沙盒地址 → 正式對外收客前，必須驗證自家網域並改用 no-reply@你的網域（否則客戶收不到驗證信、無法登入）');
+        } else {
+          const domain = fromEmail.split('@')[1];
+          const data = await res.json().catch(() => ({}));
+          const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          const match = list.find((d) => (d?.name || '').toLowerCase() === (domain || '').toLowerCase());
+          if (match && /verified/i.test(match.status || '')) {
+            ok(`Resend：寄件網域 ${domain} 已驗證（verified）`);
+          } else if (match) {
+            bad(`Resend：寄件網域 ${domain} 尚未驗證（目前狀態：${match.status}）→ 到 Resend → Domains 完成驗證，否則客戶收不到信`); fail++;
+          } else {
+            bad(`Resend：找不到寄件網域 ${domain}（未在此帳號新增/驗證）→ 到 Resend → Domains 新增並驗證，否則客戶收不到信`); fail++;
+          }
+        }
+      }
+    } catch {
+      warn('Resend：連線失敗（可能無網路），略過');
+    }
+  }
+
+  // ── Bunny：用「上傳 API 金鑰 + 影片庫 ID」實連，驗證兩者是否正確 ──
+  const bunnyLib = process.env.BUNNY_STREAM_LIBRARY_ID;
+  const bunnyApiKey = process.env.BUNNY_STREAM_API_KEY;
+  if (!bunnyApiKey || !bunnyLib) {
+    warn('Bunny：未設 BUNNY_STREAM_LIBRARY_ID 或 BUNNY_STREAM_API_KEY，略過金鑰實連（僅影片批次上傳需要）');
+  } else {
+    try {
+      const res = await fetch(`https://video.bunnycdn.com/library/${bunnyLib}/videos?page=1&itemsPerPage=1`, {
+        headers: { AccessKey: bunnyApiKey, accept: 'application/json' },
+      });
+      if (res.status === 401) { bad('Bunny：上傳 API 金鑰無效 → 請重新複製 Bunny → Stream → 影片庫 → API 的 AccessKey'); fail++; }
+      else if (res.status === 404) { bad(`Bunny：找不到影片庫 ID ${bunnyLib} → 請確認 BUNNY_STREAM_LIBRARY_ID`); fail++; }
+      else if (res.ok) ok('Bunny：影片庫 ID 與上傳金鑰正確');
+      else warn(`Bunny：檢查回應 ${res.status}（稍後再試）`);
+    } catch {
+      warn('Bunny：連線失敗（可能無網路），略過');
+    }
+  }
+}
+
 (async () => {
   console.log('\x1b[1m\n=== BDS 架站後一鍵驗收 ===\x1b[0m');
   loadEnvLocal();
@@ -166,6 +228,9 @@ async function checkSite() {
   } else {
     warn('因無法連線，略過資料表／儲存空間／資料檢查。修正連線後請重跑。');
   }
+
+  // 第三方金鑰實連驗證（不需 Supabase 連線，獨立進行）
+  await checkExternalKeys();
 
   head('驗收結果');
   if (fail === 0) {
