@@ -71,7 +71,8 @@ export async function GET(req: Request) {
     );
     return NextResponse.json(visible.map(toClient));
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    console.error("API GET comments error:", error);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }
 
@@ -135,6 +136,7 @@ export async function POST(req: Request) {
     if (error) throw error;
     return NextResponse.json(toClient(data as CommentRow));
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    console.error("API POST comments error:", error);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }

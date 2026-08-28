@@ -140,6 +140,9 @@ async function getSupabase() {
   if (PREVIEW) {
     head('課程標題清單（請確認這些課稍後都要在系統中以「相同標題」建立）');
     [...courseTitleSet].sort().forEach((t, i) => console.log(`  ${String(i + 1).padStart(2)}. ${t}`));
+    warn('⚠️ 課程清單以半形逗號「,」分隔。若「原始課名本身含逗號」，會被切成好幾段半截標題。');
+    console.log('     → 請逐一檢查上面清單有沒有看起來被切斷、不完整的怪標題；若有，代表某課名含逗號，');
+    console.log('       請在後台建立該課時避免用逗號（或改用其他標點），否則該課權限會對不上、被漏開。');
     head('結果'); ok('預覽完成（未連資料庫、未寫入任何資料）。');
     return;
   }
@@ -192,7 +195,14 @@ async function getSupabase() {
     let userId;
     if (existing) {
       userId = existing.id;
-      await supabase.from('users').update({ name: s.name || undefined, phone: s.phone || undefined }).eq('id', userId);
+      // 只把「有值」的欄位放進 update，避免送出空物件（no-op 或報錯）；並檢查錯誤
+      const patch = {};
+      if (s.name) patch.name = s.name;
+      if (s.phone) patch.phone = s.phone;
+      if (Object.keys(patch).length > 0) {
+        const { error: upErr } = await supabase.from('users').update(patch).eq('id', userId);
+        if (upErr) warn(`更新學員資料失敗 ${s.email}：${upErr.message}`);
+      }
     } else {
       const { data: inserted, error: uErr } = await supabase.from('users')
         .insert({ email: s.email, name: s.name || s.email.split('@')[0], phone: s.phone || null,

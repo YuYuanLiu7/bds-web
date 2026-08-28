@@ -1,20 +1,23 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { isValidPassword, hashPassword, MIN_PASSWORD_LENGTH } from '@/lib/validate';
+import { isValidPassword, hashPassword, normalizeEmail, MIN_PASSWORD_LENGTH } from '@/lib/validate';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
   try {
     // 速率限制：同一 IP 每 10 分鐘最多 10 次，防止對重設 token 暴力嘗試
-    if (!(await rateLimit(`reset-pw:${clientIp(req)}`, 10, 600))) {
+    // 重設密碼屬安全關鍵端點，故 failClosed（機制失效時拒絕）
+    if (!(await rateLimit(`reset-pw:${clientIp(req)}`, 10, 600, { failClosed: true }))) {
       return NextResponse.json({ error: '操作過於頻繁，請稍後再試' }, { status: 429 });
     }
 
-    const { email, token, password } = await req.json();
+    const { email: rawEmail, token, password } = await req.json();
 
-    if (!email || !token || !password) {
+    if (!rawEmail || !token || !password) {
       return NextResponse.json({ error: '請提供電子郵件、驗證 Token 與新密碼。' }, { status: 400 });
     }
+
+    const email = normalizeEmail(rawEmail);
 
     if (!isValidPassword(password)) {
       return NextResponse.json({ error: `新密碼長度至少需要 ${MIN_PASSWORD_LENGTH} 位` }, { status: 400 });
@@ -41,10 +44,12 @@ export async function POST(req: Request) {
     // 3. 密碼加密
     const hashedPassword = await hashPassword(password);
 
-    // 4. 更新使用者密碼
+    // 4. 更新使用者密碼；一併標記 is_verified=true。
+    //    能收到並使用重設連結即證明信箱可用，等同完成信箱驗證；
+    //    否則未驗證的帳號設好新密碼仍會被登入流程（is_verified=false）擋下，形成「設好卻登不進去」。
     const { error: updateError } = await supabase
       .from('users')
-      .update({ password_hash: hashedPassword })
+      .update({ password_hash: hashedPassword, is_verified: true })
       .eq('email', email);
 
     if (updateError) {

@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { grantMembership, computeMembershipExpiry } from "@/lib/entitlements";
 import { sendPurchaseSuccessEmail } from "@/lib/email";
+import crypto from "crypto";
 
 // 模擬付款請求主體
 interface SimulateBody {
@@ -34,21 +35,24 @@ export async function POST(req: Request) {
     // 與原行為一致：將 price 以 10 進位解析為整數金額（無法解析則為 0）
     const amount = parseInt(String(price)) || 0;
 
-    const merTradeNo = `BDS_SIM_${Date.now()}`;
+    // 加隨機碼避免同毫秒並發造成主鍵（訂單編號）碰撞
+    const merTradeNo = `BDS_SIM_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
 
     // 2. 建立已付費訂單紀錄
-    try {
-      await supabase.from('orders').insert({
-        id: merTradeNo,
-        user_id: userId,
-        membership_plan_id: planId,
-        amount,
-        status: 'paid',
-        payment_type: 'SIMULATED_TEST',
-        updated_at: new Date().toISOString()
-      });
-    } catch (e) {
-      console.warn("DB insert simulated order skipped (table/columns might not be migrated yet):", e);
+    // 注意：supabase 的 .insert() 失敗是回傳 { error } 而非拋例外，try/catch 攔不到，
+    // 必須顯式檢查 error，否則寫入失敗仍會往下開通並寄信，造成對帳落差。
+    const { error: insertError } = await supabase.from('orders').insert({
+      id: merTradeNo,
+      user_id: userId,
+      membership_plan_id: planId,
+      amount,
+      status: 'paid',
+      payment_type: 'SIMULATED_TEST',
+      updated_at: new Date().toISOString()
+    });
+    if (insertError) {
+      console.error("模擬訂單寫入失敗：", insertError.message);
+      return NextResponse.json({ error: "模擬訂單寫入失敗：" + insertError.message }, { status: 500 });
     }
 
     // 3. 計算到期日並開通使用者會員方案權限（'一次性' 為永久會員，expiresAt 為 null）

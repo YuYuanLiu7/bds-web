@@ -23,7 +23,8 @@ export function isBunnyVideo(input: string): boolean {
 
 /**
  * 產生帶 Token 的 Bunny Stream 嵌入網址（防盜）。
- * 演算法：SHA256(TokenAuthKey + VideoID + Expiration)，效期預設 6 小時。
+ * 演算法：SHA256(TokenAuthKey + VideoID + Expiration)，效期預設 30 分鐘
+ * （效期越短，簽好的網址被複製轉發後可濫用的時間越短；播放頁每次載入都會重新簽發）。
  * 必須在「伺服器端」呼叫（API Route / server component），且需設定
  * BUNNY_STREAM_LIBRARY_ID 與 BUNNY_TOKEN_AUTH_KEY。
  *
@@ -32,7 +33,7 @@ export function isBunnyVideo(input: string): boolean {
  *       若 Bunny 端驗章失敗，請對照官方文件調整下方 update() 的串接順序。
  * 回傳 null 代表未設定 env 或非 Bunny 影片（呼叫端應退回原始網址處理）。
  */
-export function signBunnyEmbedUrl(videoUrlOrId: string, expiresInSeconds = 6 * 60 * 60): string | null {
+export function signBunnyEmbedUrl(videoUrlOrId: string, expiresInSeconds = 30 * 60): string | null {
   const videoId = extractBunnyVideoId(videoUrlOrId);
   if (!videoId || !LIBRARY_ID || !TOKEN_KEY) return null;
 

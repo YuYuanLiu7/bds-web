@@ -33,7 +33,13 @@ export function computeMembershipExpiry(
 ): string | null {
   const d = new Date(from.getTime());
   if (period === '月繳') {
+    // 安全加一個月：先記住原本日期，setMonth 後若「日」變小代表溢位到下下個月
+    // （例如 1/31 + 1 月 → 3/2），退回設為當月最後一天，避免到期日莫名提前跳月。
+    const day = d.getDate();
     d.setMonth(d.getMonth() + 1);
+    if (d.getDate() < day) {
+      d.setDate(0); // 退回上一個月的最後一天
+    }
     return d.toISOString();
   }
   if (period === '年繳') {

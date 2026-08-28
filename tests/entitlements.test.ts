@@ -24,6 +24,17 @@ describe('computeMembershipExpiry 會員到期日', () => {
     expect(computeMembershipExpiry(null, base)).toBeNull();
     expect(computeMembershipExpiry('亂填', base)).toBeNull();
   });
+
+  it('月繳月底防溢位：1/31 + 1 月 應為 2 月最後一天，而非跳到 3 月', () => {
+    const jan31 = new Date('2026-01-31T00:00:00.000Z');
+    // 2026 非閏年 → 2 月最後一天為 28 日；不可溢位成 3/2 或 3/3
+    expect(computeMembershipExpiry('月繳', jan31)).toBe('2026-02-28T00:00:00.000Z');
+  });
+
+  it('續訂累加：以「現有到期日」為基準加一個週期（模擬未到期續訂）', () => {
+    const existingExpiry = new Date('2026-06-10T00:00:00.000Z');
+    expect(computeMembershipExpiry('月繳', existingExpiry)).toBe('2026-07-10T00:00:00.000Z');
+  });
 });
 
 describe('canAccess 權限判斷（不需資料庫的分支）', () => {

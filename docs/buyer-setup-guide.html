@@ -221,7 +221,8 @@
   <div class="box tip">
     <p class="box-title">👋 先看這裡（30 秒）</p>
     <p>這個網站可以：<strong>賣線上課程、賣數位檔案、收月費會員、刷卡收錢、寄通知信、放防盜影片</strong>。你會有一個專屬的「後台」，之後上架課程、看訂單都在那裡點一點就好。</p>
-    <p>架設要用到 <strong>6 個免費服務</strong>（像積木一樣拼起來）。全部弄好大約要花 <strong>3～5 小時</strong>，但<strong>不是一次做完</strong>——中間有幾關要「等別人審核」，所以請分幾天做，不要趕。</p>
+    <p>架設要用到 <strong>6 個服務</strong>（像積木一樣拼起來，多數免費）。全部弄好大約要花 <strong>3～5 小時</strong>，但<strong>不是一次做完</strong>——中間有幾關要「等別人審核」，所以請分幾天做，不要趕。</p>
+    <p style="font-size:14px;color:#64748b;">※ 誠實說明：這 6 個大多有免費額度，但 <strong>Bunny（影片）依用量計費、需綁定付款方式</strong>（會依觀看/儲存量實際扣款），<strong>PayUni（金流）每筆交易收手續費</strong>。其餘（Supabase、Netlify、Resend、GitHub）在你的用量內通常免費。</p>
   </div>
 
   <div class="box warn">
@@ -337,7 +338,7 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
         <p class="sub"><span class="time-tag">約 30 分鐘</span>　每個都用同一個信箱註冊，比較好記</p>
       </div>
     </div>
-    <p>先把 6 個免費帳號都申請好。點下面連結 → 用信箱註冊 → 收信點驗證即可。</p>
+    <p>先把 6 個帳號都申請好（多數免費；Bunny 需綁付款方式、依用量計費）。點下面連結 → 用信箱註冊 → 收信點驗證即可。</p>
     <div class="tablewrap">
       <table>
         <tr><th>服務</th><th>它負責什麼（白話）</th></tr>
@@ -401,7 +402,7 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
     </div>
     <div class="box tip">
       <p class="box-title">💡 想更省事？（給願意開一次終端機的人）</p>
-      <p>賣方或工程師可以在電腦上跑一行指令 <code class="inline">npm run setup -- --migrate</code>，自動把上面 5 個檔一次跑完（此法需先在 <code class="inline">.env.local</code> 設定 <code class="inline">SUPABASE_DB_URL</code> 連線字串）。做不到就用上面的手動貼上法，一樣的結果。</p>
+      <p>賣方或工程師可以在電腦上跑一行指令 <code class="inline">npm run setup -- --migrate</code>，它會<strong>依相依順序自動跑完 <code class="inline">db/</code> 內所有必要的 SQL（最後一步才 enable_rls 對外上鎖）</strong>，結果與手動一張張貼上完全等價、且可安心重複跑（每個檔都是冪等的）。此法需先在 <code class="inline">.env.local</code> 設定 <code class="inline">SUPABASE_DB_URL</code>（選 Session pooler 那條）。做不到就用上面的手動貼上法，一樣的結果，但<strong>手動法務必最後補跑 <code class="inline">enable_rls.sql</code></strong>。</p>
     </div>
 
     <h3>2-3. 拿 3 把鑰匙（等一下要貼到上線平台）</h3>
@@ -658,6 +659,7 @@ WHERE email = '你的信箱@example.com';</pre>
       <p class="box-title">⚡ 先跑「一鍵驗收」，讓電腦幫你檢查一遍</p>
       <p>在專案 <code class="inline">bds-web</code> 資料夾（需先照《搬家手冊》附錄裝好 Node＋<code class="inline">npm install</code>）執行：</p>
 <pre>npm run verify</pre>
+      <p style="font-size:14px;color:#64748b;">※ 若你全程都在<strong>網頁上</strong>設定、電腦裡從沒建過 <code class="inline">.env.local</code>，這支會滿螢幕紅字（因為它讀本機的 <code class="inline">.env.local</code>）。請先照《搬家手冊》附錄②把 <code class="inline">.env.example</code> 複製成 <code class="inline">.env.local</code>，填好 Supabase 兩把金鑰、<code class="inline">NEXTAUTH_URL</code>、<code class="inline">NEXTAUTH_SECRET</code>，再跑本檢查。這支是「給會用電腦指令的人」的加分檢查；不跑也能上線，但強烈建議請工程師幫你跑一次。</p>
       <p>它會自動體檢：環境變數、資料庫 17 張表、限流函式、圖片空間、管理員帳號、線上網站是否活著——全程<strong>唯讀、不會改任何東西</strong>。看到「全部必要項目通過！」就代表地基沒問題；有紅色 ✗ 會直接告訴你缺什麼、怎麼補。下面的清單則是這支工具檢查不到、需要你「親手實測」的部分。</p>
     </div>
     <ul class="plain">
@@ -776,8 +778,9 @@ WHERE email = '你的信箱@example.com';</pre>
 <pre>SUPABASE_DB_URL</pre>
       </div>
       <div class="paste">
-        <div class="label"><span>Value 貼資料庫連線字串（把 [YOUR-PASSWORD] 換成步驟 2-1 的密碼）</span><span class="where">Supabase → Connect → Connection string (URI)</span></div>
-<pre>postgresql://postgres:你的密碼@db.xxxx.supabase.co:5432/postgres</pre>
+        <div class="label"><span>Value 貼資料庫連線字串（把 [YOUR-PASSWORD] 換成步驟 2-1 的密碼）</span><span class="where">Supabase → Connect → Connection string → 選「Session pooler」</span></div>
+<pre>postgresql://postgres.xxxx:你的密碼@aws-0-&lt;region&gt;.pooler.supabase.com:5432/postgres</pre>
+        <p style="font-size:14px;color:#b91c1c;">⚠️ 一定要選「<strong>Session pooler</strong>」那條（網址是 <code class="inline">...pooler.supabase.com</code>）。<strong>不要用「Direct connection」（<code class="inline">db.xxxx.supabase.co</code>）</strong>——它只支援 IPv6，GitHub 的備份機器連不到，備份會失敗。</p>
       </div>
       <p>設好後，到 <strong>Actions</strong> 分頁點 <strong>「每日資料庫備份」</strong> → <strong>Run workflow</strong> 跑一次，看到綠色打勾、且在該次紀錄下方 <strong>Artifacts</strong> 出現 <code class="inline">db-backup</code> 檔，才代表備份真的有生效。<strong>沒設這個值的話，備份會失敗、你其實一份都沒有。</strong></p>
     </div>

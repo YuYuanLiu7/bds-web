@@ -3,6 +3,11 @@ import { supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '@/lib/email';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
+import { normalizeEmail } from '@/lib/validate';
+
+// 防帳號枚舉：無論帳號是否存在／是否已驗證，一律回傳相同的中性成功訊息。
+// 僅在「帳號存在且尚未驗證」時才實際寄信，但回應不透露此差異。
+const NEUTRAL_MESSAGE = '若該信箱存在且尚未完成驗證，我們已重新寄出驗證信，請檢查信箱（含垃圾郵件匣）。';
 
 export async function POST(req: Request) {
   try {
@@ -11,15 +16,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '重寄信件過於頻繁，請稍後再試。' }, { status: 429 });
     }
 
-    const { email } = await req.json();
+    const { email: rawEmail } = await req.json();
 
-    if (!email) {
+    if (!rawEmail) {
       return NextResponse.json({ error: '請提供電子郵件信箱' }, { status: 400 });
     }
 
-    // 防帳號枚舉：無論帳號是否存在／是否已驗證，一律回傳相同的中性成功訊息。
-    // 僅在「帳號存在且尚未驗證」時才實際寄信，但回應不透露此差異。
-    const NEUTRAL_MESSAGE = '若該信箱存在且尚未完成驗證，我們已重新寄出驗證信，請檢查信箱（含垃圾郵件匣）。';
+    const email = normalizeEmail(rawEmail);
 
     // 1. 查詢使用者
     const { data: user, error: userError } = await supabase
@@ -50,11 +53,12 @@ export async function POST(req: Request) {
       ]);
 
     if (tokenError) {
+      // 不透露帳號狀態：記伺服器日誌，對外仍回中性 200
       console.error('Insert new verification token error:', tokenError);
-      return NextResponse.json({ error: '系統錯誤，無法產生驗證 Token。' }, { status: 500 });
+      return NextResponse.json({ message: NEUTRAL_MESSAGE });
     }
 
-    // 5. 寄送驗證信
+    // 5. 寄送驗證信（寄信成敗一律回中性訊息，避免以回應差異枚舉帳號）
     const sent = await sendVerificationEmail({
       email,
       name: user.name || '學員',
@@ -62,7 +66,7 @@ export async function POST(req: Request) {
     });
 
     if (!sent) {
-      return NextResponse.json({ error: '信件寄送失敗，請稍後再試。' }, { status: 500 });
+      console.error('[resend-verification] 驗證信寄送失敗：', email);
     }
 
     return NextResponse.json({ message: NEUTRAL_MESSAGE });

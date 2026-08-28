@@ -101,9 +101,16 @@ export async function DELETE(req: Request) {
     if (!auth.ok) return auth.res;
 
     const { searchParams } = new URL(req.url);
-    const fileName = searchParams.get('name');
-    if (!fileName) {
+    const rawName = searchParams.get('name');
+    if (!rawName) {
       return NextResponse.json({ error: "Missing file name" }, { status: 400 });
+    }
+
+    // 防路徑穿越：只取檔名本身，拒絕任何含路徑分隔符或 ".." 的輸入，
+    // 避免傳入 ../../ 之類越界刪除到 uploads 以外的檔案。
+    const fileName = path.basename(rawName);
+    if (fileName !== rawName || fileName.includes('..')) {
+      return NextResponse.json({ error: "Invalid file name" }, { status: 400 });
     }
 
     const bucketName = 'uploads';

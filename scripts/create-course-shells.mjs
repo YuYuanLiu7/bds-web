@@ -96,6 +96,8 @@ function distinctCourseTitles() {
   ok(`已存在（跳過）：${already.length} 門`);
   ok(`將建立空殼：${toCreate.length} 門`);
   toCreate.sort().forEach((t, i) => console.log(`  ${String(i + 1).padStart(2)}. ${t}`));
+  warn('⚠️ 課程清單以半形逗號「,」分隔。若原始課名本身含逗號，會被切成半截標題並各自建成一門空殼課。');
+  console.log('     → 請檢查上面清單有無看起來被切斷的怪標題；若有，別直接 --commit，先改掉含逗號的課名。');
 
   if (!COMMIT) {
     head('結果'); warn('這是「試跑」，未建立任何課程。確認上面清單後，加 --commit 正式建立。');

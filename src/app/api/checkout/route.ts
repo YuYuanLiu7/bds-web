@@ -49,8 +49,9 @@ export async function POST(req: Request) {
     }
     const { item } = resolved;
 
-    // 訂單編號加入隨機成分，避免同一毫秒的並發結帳產生相同編號而互相覆蓋
-    const merTradeNo = `BDS${Date.now()}${crypto.randomBytes(4).toString('hex')}`;
+    // 訂單編號：加入隨機成分避免同一毫秒的並發結帳產生相同編號而互相覆蓋。
+    // 以 base36 壓縮時間戳，控制長度在 ~17 字元（PayUni MerTradeNo 有長度上限，過長會被拒單）。
+    const merTradeNo = `BDS${Date.now().toString(36)}${crypto.randomBytes(3).toString('hex')}`;
 
     // 建立 pending 訂單（依 email 找使用者）。
     // 🔒 不變式：一定要先有 pending 訂單，才發出付款參數。

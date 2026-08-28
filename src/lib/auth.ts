@@ -52,10 +52,15 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        // 一律正規化（去空白、轉小寫）後才比對，與註冊寫入時一致，避免大小寫造成登不進去
+        const email = credentials.email.trim().toLowerCase();
+
         // 速率限制：同一帳號每 10 分鐘最多 8 次登入嘗試，防止密碼暴力破解
+        // 登入屬安全關鍵端點，故 failClosed：限流機制異常時「拒絕」而非放行，
+        // 避免限流失效時任人暴力破解（正常部署已建立 check_rate_limit RPC，不會誤擋）
         // 丟出特定錯誤碼讓登入頁能顯示友善的限流訊息（而非一般的帳密錯誤）
-        if (!(await rateLimit(`login:${credentials.email.toLowerCase()}`, 8, 600))) {
-          console.warn("Login rate limit exceeded for:", credentials.email);
+        if (!(await rateLimit(`login:${email}`, 8, 600, { failClosed: true }))) {
+          console.warn("Login rate limit exceeded (or rate-limit unavailable) for:", email);
           throw new Error("RATE_LIMIT_EXCEEDED");
         }
 
@@ -63,7 +68,7 @@ export const authOptions: NextAuthOptions = {
         const { data: user, error } = await supabase
           .from('users')
           .select('*')
-          .eq('email', credentials.email)
+          .eq('email', email)
           .single();
 
         if (error || !user) {

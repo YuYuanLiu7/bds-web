@@ -41,9 +41,11 @@ const csvPath = argv.find((a) => !a.startsWith('--') && a !== TEST_EMAIL && a !=
 
 const TOKEN_TTL_DAYS = 7;
 const SEND_GAP_MS = 400;
-// 已成功寄出的紀錄檔與結果檔（放專案根目錄）——用來「只補未寄成功者」、避免重複寄、且結果可稽核
-const SENT_LOG = path.join(process.cwd(), 'invites-sent.json');
-const RESULT_CSV = path.join(process.cwd(), 'send-invites-result.csv');
+// 已成功寄出的紀錄檔與結果檔——固定放「專案根目錄」(ROOT)，不用 process.cwd()。
+// ⚠️ 關鍵：若用 cwd，換一個資料夾執行（例如先 cd 進 scripts）就讀不到舊的 invites-sent.json，
+//    會把已寄過的全部人「重新再寄一次」（對 656 位客戶是災難）。固定 ROOT 可避免。
+const SENT_LOG = path.join(ROOT, 'invites-sent.json');
+const RESULT_CSV = path.join(ROOT, 'send-invites-result.csv');
 
 const ok = (m) => console.log('  \x1b[32m✓\x1b[0m ' + m);
 const bad = (m) => console.log('  \x1b[31m✗\x1b[0m ' + m);
@@ -87,6 +89,13 @@ function readRecipients() {
   const rows = parseCSV(fs.readFileSync(abs, 'utf8'));
   const header = rows.shift().map((h) => h.trim().toLowerCase());
   const iEmail = header.indexOf('email'), iName = header.indexOf('name');
+  // 防呆：找不到 Email 欄位就直接中止（否則 iEmail=-1 會讓每列 email 變空、被濾光，
+  // 造成「0 位收件、卻不報錯」的靜默失敗——常見於 Teachify 匯出成中文表頭）。
+  if (iEmail === -1) {
+    bad('CSV 找不到 Email 欄位。實際表頭：' + header.join(' | '));
+    console.log('     → 請把該欄的表頭改成英文 Email（大小寫皆可），再重跑。');
+    process.exit(1);
+  }
   const seen = new Set(); const out = [];
   for (const r of rows) {
     const email = (r[iEmail] || '').trim().toLowerCase();
@@ -128,7 +137,7 @@ async function sendEmail({ apiKey, fromEmail, to, name, url }) {
     }),
   });
   const data = await res.json().catch(() => ({}));
-  return { ok: res.ok, id: data.id, error: data.message || data.name };
+  return { ok: res.ok, status: res.status, id: data.id, error: data.message || data.name };
 }
 
 (async () => {
@@ -193,7 +202,7 @@ async function sendEmail({ apiKey, fromEmail, to, name, url }) {
   if (Number.isFinite(LIMIT)) ok(`本次上限 --limit ${LIMIT} 封（配合 Resend 每日額度分批；隔天再跑一次即續寄）`);
 
   const resultRows = [];
-  let sent = 0, failed = 0, quota = 0; const fails = [];
+  let sent = 0, failed = 0, quota = 0, hitRateLimit = false; const fails = [];
   for (const rcpt of pending) {
     if (sent >= LIMIT) { quota = pending.length - sent - failed; break; }
     const { data: user } = await supabase.from('users').select('id').eq('email', rcpt.email).maybeSingle();
@@ -214,6 +223,12 @@ async function sendEmail({ apiKey, fromEmail, to, name, url }) {
     } else {
       failed++; fails.push(rcpt.email); resultRows.push([rcpt.email, 'failed-send', r.error || '']);
       bad(`寄送失敗 ${rcpt.email}：${r.error}`);
+      // 達寄信商速率/每日額度上限（429 或訊息含 limit/quota/rate）：立即停止，避免無謂硬打。
+      // 已寄成功者都記在 SENT_LOG，明天用「同一指令」再跑即自動續寄。
+      if (r.status === 429 || /limit|quota|rate|too many/i.test(String(r.error))) {
+        hitRateLimit = true;
+        break;
+      }
     }
     await sleep(SEND_GAP_MS);
   }
@@ -225,6 +240,10 @@ async function sendEmail({ apiKey, fromEmail, to, name, url }) {
   head('結果');
   ok(`本次成功寄出：${sent} 封（累計已寄 ${sentSet.size} / ${recipients.length}）`);
   if (failed) { warn(`本次失敗：${failed} 封`); console.log('     失敗名單：' + fails.join(', ')); }
+  if (hitRateLimit) {
+    warn('偵測到寄信商速率/每日額度上限，已提前停止（避免無謂硬打）。');
+    console.log('     → 明天（或額度恢復後）用「同一指令」再跑一次即自動續寄，已寄成功者不會重複寄。');
+  }
   if (quota > 0) warn(`因達 --limit 上限，還有 ${quota} 位未寄 → 明天（或額度恢復後）用「同一指令」再跑一次即自動續寄。`);
   ok(`結果已存檔：${RESULT_CSV}（狀態 sent/failed 可核對）`);
   if (sentSet.size < recipients.length) console.log('     尚未全部寄完：重跑同一指令會自動跳過已成功者、只補剩下的，不會重複寄。');

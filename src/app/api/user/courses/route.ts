@@ -27,6 +27,7 @@ export async function GET() {
     const courseIds = ((data || []) as UserCourseRow[]).map((e) => e.course_id);
     return NextResponse.json(courseIds);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    console.error("API GET user/courses error:", error);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }

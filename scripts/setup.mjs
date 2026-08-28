@@ -113,6 +113,7 @@ async function runMigrations() {
     'add_performance_indexes.sql',
     'add_rate_limiting.sql',
     'add_auth_flows.sql',
+    'add_fulfilled_at.sql',
     'enable_rls.sql',
   ];
   const { default: pg } = await import('pg');

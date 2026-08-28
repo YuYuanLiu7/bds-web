@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next";
 import { authOptions, SessionUser } from "@/lib/auth";
 import { ownsDownload } from "@/lib/entitlements";
+import { signStorageUrl } from "@/lib/storage";
 import { NextResponse } from "next/server";
 
 // 安全下載端點：只有「管理員」「已購買者」或「免費商品」才會拿到 file_url。
@@ -46,8 +47,11 @@ export async function GET(
       return NextResponse.json({ error: "此資源尚未配置下載檔案連結" }, { status: 404 });
     }
 
-    return NextResponse.json({ file_url: download.file_url });
+    // 已驗證權限後才簽發短效網址（Supabase Storage 檔案）；非儲存空間網址則原樣返回。
+    const signedUrl = await signStorageUrl(download.file_url);
+    return NextResponse.json({ file_url: signedUrl });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "下載連結取得失敗" }, { status: 500 });
+    console.error("API GET download file error:", error);
+    return NextResponse.json({ error: "下載連結取得失敗" }, { status: 500 });
   }
 }

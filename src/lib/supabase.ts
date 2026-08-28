@@ -17,6 +17,21 @@ export function getSupabase(): SupabaseClient {
   if (!client) {
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
+
+    // 安全防呆：啟用 RLS 後，伺服器端必須使用 service_role 金鑰才能正常讀寫；
+    // 若正式環境只設了 anon 金鑰，所有查詢會讀到空資料（看似壞掉），
+    // 且代表整套安全模型的假設被破壞。這裡大聲告警協助及早發現設定漏填。
+    if (
+      process.env.NODE_ENV === 'production' &&
+      !process.env.SUPABASE_SERVICE_ROLE_KEY &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
+      console.error(
+        '[supabase] ⚠️ 正式環境未設定 SUPABASE_SERVICE_ROLE_KEY，退回使用公開 anon 金鑰。' +
+          '啟用 RLS 後伺服器端將讀到空資料，請至部署平台補上 SUPABASE_SERVICE_ROLE_KEY 後重新部署。'
+      );
+    }
+
     const supabaseKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||

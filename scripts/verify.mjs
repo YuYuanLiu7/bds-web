@@ -117,6 +117,42 @@ async function checkDatabase(supabase) {
   } else warn(`呼叫 check_rate_limit 有訊息：${rpcErr.message}`);
 }
 
+// 2b. RLS 上鎖實測：用「公開 anon 金鑰」嘗試讀取資料。
+//     若讀得到資料，代表 RLS 沒開，任何人都能用公開金鑰撈走 users（含 email/密碼雜湊）→ 最嚴重的資安漏洞。
+async function checkRlsLockdown() {
+  head('2b. 資料庫對外上鎖（RLS）');
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) {
+    warn('未設 NEXT_PUBLIC_SUPABASE_ANON_KEY，略過 RLS 上鎖檢查（建議補上以完成此項安全驗收）');
+    return;
+  }
+  let pub;
+  try {
+    pub = createClient(url, anon, { auth: { persistSession: false, autoRefreshToken: false } });
+  } catch {
+    warn('建立 anon 測試連線失敗，略過 RLS 檢查');
+    return;
+  }
+  // RLS 開啟且無 policy 時，anon 查詢不會報錯，而是回傳「0 筆」；
+  // 因此以「讀得到 >=1 筆」判定 RLS 未開。site_settings 於 init 後必有 homepage 一筆，最可靠。
+  let leaked = false;
+  for (const t of ['site_settings', 'users', 'orders']) {
+    const { data, error } = await pub.from(t).select('*').limit(1);
+    if (!error && Array.isArray(data) && data.length > 0) {
+      bad(`危險：用公開 anon 金鑰可讀到「${t}」的資料 → RLS 未啟用，任何人都能撈走你的資料`);
+      leaked = true;
+    }
+  }
+  if (leaked) {
+    console.log('     → 請到 Supabase SQL Editor 執行 db/enable_rls.sql（或跑 `node scripts/setup.mjs --migrate`），');
+    console.log('       執行後再跑一次本驗收，確認本項通過。');
+    fail++;
+  } else {
+    ok('公開金鑰讀不到 users/orders 等資料（RLS 已對外上鎖）');
+  }
+}
+
 async function checkStorage(supabase) {
   head('3. 圖片/檔案儲存空間');
   const { data, error } = await supabase.storage.getBucket('uploads');
@@ -224,6 +260,7 @@ async function checkExternalKeys() {
   if (!supabase) { bad('缺少 Supabase 連線資訊，後續檢查中止'); fail++; }
   else if (await probeConnection(supabase)) {
     await checkDatabase(supabase);
+    await checkRlsLockdown();
     await checkStorage(supabase);
     await checkData(supabase);
     await checkSite();

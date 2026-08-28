@@ -13,6 +13,16 @@ export function isValidEmail(email: unknown): boolean {
   return typeof email === 'string' && EMAIL_RE.test(email.trim());
 }
 
+/**
+ * Email 正規化：去除前後空白並轉小寫。
+ * 全站「寫入 users.email」與「以 email 查詢」都必須先經過這裡，
+ * 否則 John@Gmail.com 註冊、john@gmail.com 登入會查不到（登不進去），
+ * 且同一信箱不同大小寫可重複註冊。
+ */
+export function normalizeEmail(email: unknown): string {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
+}
+
 // 密碼規則：至少 6 位
 export const MIN_PASSWORD_LENGTH = 6;
 export function isValidPassword(password: unknown): boolean {
@@ -27,7 +37,7 @@ export function hashPassword(password: string): Promise<string> {
 
 /** 檢查信箱是否已被使用；excludeUserId 用於「更新成員」時排除自己 */
 export async function emailTaken(email: string, excludeUserId?: string): Promise<boolean> {
-  let query = supabase.from('users').select('id').eq('email', email);
+  let query = supabase.from('users').select('id').eq('email', normalizeEmail(email));
   if (excludeUserId) query = query.neq('id', excludeUserId);
   const { data } = await query.maybeSingle();
   return !!data;

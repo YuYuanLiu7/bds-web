@@ -1,5 +1,5 @@
 import { PayuniTool } from '@/lib/payuni';
-import { getOrder, markOrderPaid, markOrderFailed, fulfillOrder } from '@/lib/purchases';
+import { getOrder, markOrderPaid, markOrderFailed, markOrderFulfilled, releaseOrderFulfillment, fulfillOrder } from '@/lib/purchases';
 import { sendAdminAlert } from '@/lib/email';
 import crypto from 'crypto';
 
@@ -48,15 +48,9 @@ export async function POST(req: Request) {
       return new Response('ERROR');
     }
 
-    // 防重送攻擊 (Replay Attack)：已完成的訂單不再重複開通權限與重寄信，
-    // 但仍回傳 SUCCESS 讓 PayUni 不再重送通知。
-    if (order.status === 'paid') {
-      console.warn('Duplicate paid callback ignored for order:', merTradeNo);
-      return new Response('SUCCESS');
-    }
-
     // 金額一致性校驗：比對 PayUni 回傳的 TradeAmt 與資料庫預存金額，
     // 防止有心人士在金流端竄改交易金額（低買）。
+    // （已 paid 的重送也會走到這裡再校驗一次，金額本就一致，無副作用。）
     const callbackAmount = Number(decodedData.TradeAmt);
     if (!Number.isFinite(callbackAmount) || callbackAmount !== Number(order.amount)) {
       console.error(
@@ -67,27 +61,37 @@ export async function POST(req: Request) {
       return new Response('ERROR');
     }
 
-    // 5. 原子地將訂單標記為 paid
+    // 5. 原子地將訂單標記為 paid（首次通知會成功；重送/並發會得到 'duplicate'，皆繼續往下走履約認領）
     const result = await markOrderPaid(merTradeNo, decodedData.PaymentType);
-    if (result === 'duplicate') {
-      // 被並發回呼搶先，不重複履約
-      console.warn('Concurrent duplicate paid callback ignored for order:', merTradeNo);
-      return new Response('SUCCESS');
-    }
     if (result === 'error') {
       // DB 更新失敗：回 ERROR 讓 PayUni 重送通知以自我修復，避免訂單卡在 pending、權益不發放
       console.error('markOrderPaid 失敗，回 ERROR 以觸發 PayUni 重送：', merTradeNo);
       return new Response('ERROR');
     }
 
-    // result === 'updated'：履約（開通權益 + 寄送通知信）
-    // 訂單此時已標記 paid，若履約失敗回 ERROR 會使 PayUni 重送卻被 paid 短路而永不履約；
-    // 因此改為記錄明確的嚴重告警供人工補開通，仍回 SUCCESS。
+    // 6. 履約認領（冪等 + 當機補償）：
+    //    無論本次是首次通知或重送，都嘗試「認領履約」。只有 fulfilled_at 仍為 null 者會認領成功，
+    //    因此開通權益恰好發生一次；若上次在「已 paid」與「開通」之間當機，這次重送會補開通。
+    const claim = await markOrderFulfilled(merTradeNo);
+    if (claim === 'error') {
+      // 認領更新失敗：回 ERROR 讓 PayUni 重送，避免權益漏發
+      console.error('markOrderFulfilled 失敗，回 ERROR 以觸發 PayUni 重送：', merTradeNo);
+      return new Response('ERROR');
+    }
+    if (claim === 'duplicate') {
+      // 已履約過（或被並發搶先），不重複開通、不重寄信
+      console.warn('Duplicate/already-fulfilled callback ignored for order:', merTradeNo);
+      return new Response('SUCCESS');
+    }
+
+    // claim === 'updated'：由本次負責履約（開通權益 + 寄送通知信）
     try {
       await fulfillOrder(order);
       console.log('Payment success and access granted:', merTradeNo);
     } catch (fulfillErr) {
       const detail = fulfillErr instanceof Error ? fulfillErr.message : String(fulfillErr);
+      // 釋放履約認領，讓 PayUni 重送時可重新認領並補開通（避免卡在「已認領但未開通」）
+      await releaseOrderFulfillment(merTradeNo).catch(() => {});
       console.error(
         `[需人工處理] 訂單 ${merTradeNo} 已付款(paid)但權益開通失敗，請至後台手動補開通：`,
         fulfillErr

@@ -35,9 +35,11 @@ const LIMIT = limIdx !== -1 ? parseInt(argv[limIdx + 1], 10) : Infinity;
 const folder = argv.find((a) => !a.startsWith('--') && a !== String(LIMIT));
 
 const VIDEO_EXT = new Set(['.mp4', '.mov', '.m4v', '.webm', '.mkv', '.avi', '.wmv', '.flv']);
-const PROGRESS = path.join(process.cwd(), 'bunny-upload-progress.json');
-const PLAN_CSV = path.join(process.cwd(), 'bunny-upload-plan.csv');
-const RESULT_CSV = path.join(process.cwd(), 'bunny-upload-result.csv');
+// 進度／對照表固定放專案根目錄(ROOT)，不用 process.cwd()：
+// 否則換資料夾執行會讀不到舊進度，導致已傳過的影片被重新建立/上傳（產生重複與孤兒影片）。
+const PROGRESS = path.join(ROOT, 'bunny-upload-progress.json');
+const PLAN_CSV = path.join(ROOT, 'bunny-upload-plan.csv');
+const RESULT_CSV = path.join(ROOT, 'bunny-upload-result.csv');
 
 const ok = (m) => console.log('  \x1b[32m✓\x1b[0m ' + m);
 const bad = (m) => console.log('  \x1b[31m✗\x1b[0m ' + m);
@@ -139,39 +141,50 @@ async function bunnyUploadFile(libId, apiKey, guid, filePath) {
   }
 
   head('2. 上傳到 Bunny（可中斷續傳）');
-  const progress = readProgress(); // { 絕對路徑: { guid } }
-  const resultLines = ['course_guess,chapter_guess,relative_path,bunny_guid,embed_url'];
+  const progress = readProgress(); // { 絕對路徑: { guid, uploaded } }
   let done = 0, uploaded = 0, skipped = 0, failed = 0;
 
   for (const f of files) {
     if (done >= LIMIT) break;
     done++;
-    let guid = progress[f.full]?.guid;
-    if (guid) {
-      skipped++;
-    } else {
-      try {
+    const rec = progress[f.full];
+    if (rec?.guid && rec.uploaded) { skipped++; continue; } // 這支已完整上傳過
+    try {
+      // 若上次已建立影片物件但上傳中斷（有 guid、未 uploaded），重用同一個 guid 只重試上傳，
+      // 避免每次重跑又 createVideo 一次而在 Bunny 累積 0 秒的孤兒空白影片。
+      let guid = rec?.guid;
+      if (!guid) {
         guid = await bunnyCreateVideo(libId, apiKey, f.guessChapter);
-        await bunnyUploadFile(libId, apiKey, guid, f.full);
-        progress[f.full] = { guid };
-        writeProgress(progress); // 每支傳完就存，中斷可續
-        uploaded++;
-        console.log(`     ✓ (${uploaded}) ${f.rel}  ${mb(f.size)}`);
-      } catch (e) {
-        failed++;
-        bad(`${f.rel}：${e.message}`);
-        continue;
+        progress[f.full] = { guid, uploaded: false };
+        writeProgress(progress); // 先記下 guid，之後失敗也不遺失、可續傳同一個
       }
+      await bunnyUploadFile(libId, apiKey, guid, f.full);
+      progress[f.full] = { guid, uploaded: true };
+      writeProgress(progress);
+      uploaded++;
+      console.log(`     ✓ (${uploaded}) ${f.rel}  ${mb(f.size)}`);
+    } catch (e) {
+      failed++;
+      bad(`${f.rel}：${e.message}`);
+      continue;
     }
+  }
+
+  // 對照表：由「全部檔案 × 進度」重建，凡進度中已有 guid 者都輸出，
+  // 與本次是否 --limit 無關（避免 --limit 只跑幾支時把完整對照表覆寫成只剩幾列）。
+  const resultLines = ['course_guess,chapter_guess,relative_path,bunny_guid,embed_url'];
+  for (const f of files) {
+    const guid = progress[f.full]?.guid;
+    if (!guid) continue;
     const embed = `https://iframe.mediadelivery.net/embed/${libId}/${guid}`;
     resultLines.push([f.guessCourse, f.guessChapter, f.rel, guid, embed].map(csvCell).join(','));
   }
-
   fs.writeFileSync(RESULT_CSV, '\uFEFF' + resultLines.join('\n'), 'utf8');
+
   head('結果');
   ok(`本次新上傳：${uploaded} 支`);
   if (skipped) ok(`已上傳過而略過：${skipped} 支`);
-  if (failed) warn(`失敗：${failed} 支（可直接重跑，已成功的會自動略過）`);
+  if (failed) warn(`失敗：${failed} 支（可直接重跑，已成功的會自動略過、未完成的會沿用同一個影片物件續傳）`);
   ok(`對照表已輸出：${RESULT_CSV}`);
   console.log('\n  下一步：打開 bunny-upload-result.csv，依 embed_url 到後台把每支影片貼進對應課程的章節。');
 })().catch((e) => { console.error('\n工具執行錯誤：', e); process.exit(1); });

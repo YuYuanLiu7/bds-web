@@ -51,7 +51,8 @@ export async function GET(req: Request) {
     }));
     return NextResponse.json(reviews);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    console.error("API GET reviews error:", error);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }
 
@@ -111,6 +112,7 @@ export async function POST(req: Request) {
       date: fmt(review.created_at),
     });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    console.error("API POST reviews error:", error);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }

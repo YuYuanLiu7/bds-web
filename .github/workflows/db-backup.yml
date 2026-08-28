@@ -4,7 +4,10 @@ name: 每日資料庫備份（Google Drive）
 # 上傳到 Google Drive（rclone），並同時保留一份 GitHub Actions artifact 作雙保險。
 #
 # 需在 GitHub repo → Settings → Secrets and variables → Actions 設定：
-#   SUPABASE_DB_URL      Supabase 直連連線字串（Supabase → Settings → Database → Connection string → URI，port 5432）
+#   SUPABASE_DB_URL      Supabase 連線字串（Supabase → Settings → Database → Connection string）
+#                        ⚠️ 請選「Session pooler」那條（aws-0-<region>.pooler.supabase.com），
+#                        不要用「Direct connection」（db.<ref>.supabase.co）——後者只支援 IPv6，
+#                        GitHub Actions 是 IPv4、連不到，會導致備份失敗。
 #   RCLONE_CONFIG_BASE64 本機執行 `rclone config` 設好 Google Drive remote 後，
 #                        將 ~/.config/rclone/rclone.conf 以 base64 編碼後貼上（例：base64 -w0 rclone.conf）
 #   RCLONE_REMOTE        你的 rclone remote 名稱（例如 gdrive）

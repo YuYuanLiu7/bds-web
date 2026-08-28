@@ -174,6 +174,41 @@ export async function markOrderPaid(
 }
 
 /**
+ * 原子地「認領履約」：僅將 fulfilled_at 仍為 null 且已 paid 的訂單標記為現在時間。
+ * 回傳 'updated' 代表本次呼叫取得履約權（應接著執行 fulfillOrder）；
+ * 'duplicate' 代表已被履約（或已被並發呼叫搶先），不應重複開通；
+ * 'error' 代表更新失敗（呼叫端應回 ERROR 讓 PayUni 重送以自我修復）。
+ * 這讓「已付款但開通前當機」可在重送時自動補開通，且不會重複累加會員天數。
+ */
+export async function markOrderFulfilled(
+  orderId: string
+): Promise<'updated' | 'duplicate' | 'error'> {
+  const { data: updatedRows, error } = await supabase
+    .from('orders')
+    .update({ fulfilled_at: new Date().toISOString() })
+    .eq('id', orderId)
+    .eq('status', 'paid')
+    .is('fulfilled_at', null)
+    .select('id');
+
+  if (error) return 'error';
+  if (!updatedRows || updatedRows.length === 0) return 'duplicate';
+  return 'updated';
+}
+
+/**
+ * 釋放履約認領（把 fulfilled_at 清回 null）。
+ * 用於 fulfillOrder 拋錯時：讓 PayUni 重送通知時可重新認領並補開通，
+ * 避免「已認領但實際未開通」而卡死。
+ */
+export async function releaseOrderFulfillment(orderId: string): Promise<void> {
+  await supabase
+    .from('orders')
+    .update({ fulfilled_at: null })
+    .eq('id', orderId);
+}
+
+/**
  * 將訂單標記為失敗；以 .neq('status','paid') 守衛，避免晚到/重送的非成功通知
  * 把已付款（已開通權限）的訂單降級為 failed，造成金流狀態與授權/對帳不一致。
  */
@@ -223,25 +258,38 @@ export async function fulfillOrder(order: OrderRow): Promise<void> {
   } else if (order.download_id) {
     await grantDownload(order.user_id, order.download_id);
   } else if (order.membership_plan_id) {
-    try {
-      const { data: plan } = await supabase
-        .from('membership_plans')
-        .select('period')
-        .eq('id', order.membership_plan_id)
-        .single();
+    // ⚠️ 這裡「不」用 try/catch 吞掉錯誤：grantMembership 失敗時必須讓例外冒泡到 callback，
+    //    由 callback 記「[需人工處理]」並 sendAdminAlert。先前用 try/catch 只 console.error，
+    //    導致「付款成功卻沒開通會員」時站方毫無所覺（三品項唯獨最貴的會員靜默失敗）。
+    const { data: plan } = await supabase
+      .from('membership_plans')
+      .select('period')
+      .eq('id', order.membership_plan_id)
+      .single();
 
-      if (!plan) {
-        // 查不到方案時不臆測付款週期，computeMembershipExpiry 會回傳 null（永久），
-        // 避免把「一次性永久會員」誤設成 30 天到期。記錄警告供後台稽核補正。
-        console.warn(
-          `Membership plan ${order.membership_plan_id} not found in fulfillment; leaving membership_expires_at as null.`
-        );
-      }
-      const expiresAt = computeMembershipExpiry(plan?.period);
-      await grantMembership(order.user_id, order.membership_plan_id, expiresAt);
-    } catch (mErr) {
-      console.error('Failed to process membership fulfillment (table might not exist yet):', mErr);
+    if (!plan) {
+      // 查不到方案時不臆測付款週期，computeMembershipExpiry 會回傳 null（永久），
+      // 避免把「一次性永久會員」誤設成 30 天到期。記錄警告供後台稽核補正。
+      console.warn(
+        `Membership plan ${order.membership_plan_id} not found in fulfillment; leaving membership_expires_at as null.`
+      );
     }
+
+    // 續訂累加：若現有會員尚未到期，以「現有到期日」為基準往後加一個週期，
+    // 而非用「現在」覆寫，避免提前續訂者未用完的天數蒸發。
+    const { data: current } = await supabase
+      .from('users')
+      .select('membership_expires_at')
+      .eq('id', order.user_id)
+      .single();
+    const now = new Date();
+    const existing = current?.membership_expires_at
+      ? new Date(current.membership_expires_at)
+      : null;
+    const base = existing && existing.getTime() > now.getTime() ? existing : now;
+
+    const expiresAt = computeMembershipExpiry(plan?.period, base);
+    await grantMembership(order.user_id, order.membership_plan_id, expiresAt);
   }
 
   // 2. 寄送購買成功通知信（寄信失敗不影響履約結果）

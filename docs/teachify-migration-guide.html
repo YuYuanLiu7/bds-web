@@ -219,7 +219,7 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
     </div>
     <div class="box warn">
       <p class="box-title">⚠️ 656 封不能「一次寄完」——會爆 Resend 每日上限</p>
-      <p>Resend 免費方案通常有<strong>每日約 100 封、每月約 3,000 封</strong>的上限（實際數字以你的 Resend 後台方案為準）。656 封一次送，超過當日上限後會<strong>大量失敗、約 550 位客戶收不到信卻沒人發現</strong>。三選一：</p>
+      <p>Resend 免費方案通常有<strong>每日約 100 封、每月約 3,000 封</strong>的上限（實際數字以你的 Resend 後台方案為準）。656 封一次送，超過當日上限後會<strong>大量失敗、約 550 位客戶收不到信卻沒人發現</strong>。工具已內建保護：偵測到寄信商上限會自動停、已寄成功者會記錄，隔天用同一指令即自動續寄。二選一：</p>
       <ul class="plain">
         <li><strong>（推薦）分批寄</strong>：用 <code class="inline">--limit</code> 每天寄一批，例如每天 <code class="inline">--limit 100</code>，連續幾天寄完。工具會自動記錄「已寄成功的人」，<strong>隔天用同一指令再跑就只補剩下的、不會重複寄</strong>。</li>
         <li><strong>升級 Resend 付費方案</strong>後一次寄完（額度拉高）。</li>
@@ -278,7 +278,8 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
     </div>
     <div class="box good">
       <p class="box-title">✅ 切換成功後，才做最後一步：寄設定密碼信</p>
-      <p>現在正式網址穩了，<strong>回到步驟 4 執行 <code class="inline">--send</code></strong>（先 <code class="inline">--test</code> 在正式網址點開連結能設密碼，再群發）。這樣 656 封信裡的連結都會指向已生效的正式網址。</p>
+      <p>現在正式網址穩了，<strong>回到步驟 4 執行 <code class="inline">--send</code></strong>。這樣 656 封信裡的連結都會指向已生效的正式網址。</p>
+      <p style="font-size:14px;color:#64748b;">※ 關於 <code class="inline">--test</code>：它只驗證「信寄得出去、版型正常」；<strong>測試信裡的連結點了不會真的能設密碼（那是預覽，未寫入 token），這是正常的</strong>。要確認「真的能重設密碼」，請在正式群發後，用一個真實學員帳號收到的正式信去點連結測試。</p>
     </div>
   </div>
 
@@ -360,8 +361,8 @@ node scripts/import-students.mjs "你的CSV路徑" --commit        # 正式匯�
     <p style="font-size:15px;color:var(--ink-soft);">先降 TTL → Netlify 加網域 → 抄舊 DNS（回滾用）→ 設 NEXTAUTH_URL＋Trigger deploy → 改 DNS → 等憑證 → 正式網址煙霧測試。確認穩定前 Teachify 別停。</p>
 
     <h3>⑤ 最後才寄「設定新密碼」信（分批）</h3>
-<pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱          # 先在正式網址點開測試
-node scripts/send-invites.mjs "你的CSV路徑" --send --limit 100     # 每天一批，隔天再跑即續寄</pre>
+<pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱          # 只驗證信寄得出、版型正常（連結是預覽、不會真的能設密碼）
+node scripts/send-invites.mjs "你的CSV路徑" --send --limit 100     # 每天一批，隔天再跑即續傳（達上限會自動停）</pre>
     <p style="font-size:15px;color:var(--ink-soft);">→ 前提：網域已切好、<code class="inline">NEXTAUTH_URL</code> 已是正式網址、<code class="inline">RESEND_FROM_EMAIL</code> 是已驗證網域。寄完看 <code class="inline">send-invites-result.csv</code> 補失敗者。</p>
 
     <div class="box good">

@@ -34,6 +34,8 @@ export async function GET() {
     });
     return NextResponse.json(sanitized);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    // 對外只回制式訊息，詳細錯誤（可能含資料表/欄位名）只記伺服器日誌
+    console.error("API GET downloads error:", error);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }
