@@ -99,6 +99,30 @@
     <p>密碼<strong>沒有任何平台能匯出</strong>（Teachify 也不行），所以搬不過來。做法是：我們幫每位學員自動寄一封「設定新密碼」信，他點一下設定好，就能用<strong>原本的 Email</strong> 繼續登入看課。這是唯一要客戶動手的一次，其他都無感。</p>
   </div>
 
+  <div class="box warn" style="border-width:2px;">
+    <p class="box-title">⛔ 動工前必過關卡①：你能改 <code class="inline">fu-notes.com</code> 的 DNS 嗎？</p>
+    <p>「同一個網址 <code class="inline">bds.fu-notes.com</code> 無縫接軌」這件事，<strong>完全取決於你能不能自行把它的 DNS 從 Teachify 改指到 Netlify</strong>。開工前先確認：</p>
+    <ul class="plain">
+      <li><strong>(a) <code class="inline">fu-notes.com</code> 登記在你名下、你能登入網域註冊商後台自行改 DNS</strong> → 可照本手冊做。</li>
+      <li><strong>(b) 網域是 Teachify 提供/代管、你只能在 Teachify 後台設定</strong> → <strong>你改不了 DNS，第 5 步做不到</strong>。要嘛先向 Teachify 取得網域移轉／DNS 委派，要嘛<strong>改用一個你自己的新網域</strong>並公告客戶新網址。</li>
+      <li><strong>(c) 網域在別人（前員工/代理商）手上</strong> → 先取回控制權。</li>
+    </ul>
+    <p>沒通過這關（不是 a），先別進到步驟 5——否則搬到一半才發現網址切不過去。<br>
+    <span style="font-size:14px;color:var(--ink-soft);">註：寄信（Resend）驗證網域也需要同樣的 DNS 控制權（要加驗證用的 DNS 記錄），所以這關也決定信寄不寄得出去。</span></p>
+  </div>
+
+  <div class="box warn" style="border-width:2px;">
+    <p class="box-title">⛔ 動工前必過關卡②：先把 Teachify 上的東西「拿齊」再說</p>
+    <p>Teachify 一旦停用/欠費，上面的東西可能被關、<strong>永久拿不回</strong>。所以搬家前先逐項確認都拿到手（放自己電腦）：</p>
+    <ul class="plain">
+      <li>學員名單 CSV（含 <code class="inline">Email</code>、<code class="inline">Attended courses</code>）</li>
+      <li><strong>每一門課、每一支影片的原始檔</strong>——逐一對照課程數與章節數點名，別漏</li>
+      <li>每門課的<strong>說明、章節文字、文章內容</strong>另存備份（這些要手動重建，沒存底就要重打）</li>
+      <li>歷史<strong>訂單／交易／營收紀錄</strong>（對帳、退款、報稅用；Teachify 一關就查不到）</li>
+    </ul>
+    <p><strong>這些沒拿齊之前，絕對不要停用或讓 Teachify 欠費。</strong></p>
+  </div>
+
   <p class="eyebrow">搬家順序</p>
   <h2>照這 5 步做</h2>
 
@@ -193,27 +217,68 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
       <p>① <strong>寄件人網域</strong>：<code class="inline">RESEND_FROM_EMAIL</code> 必須是<strong>已驗證的自家網域</strong>（用你買的域名，例如網域是 myschool.com 就填 <code class="inline">no-reply@myschool.com</code>；作法見《開站手冊》步驟 4）。還在用沙盒地址的話工具會擋下。<span class="gate">要先驗證網域</span><br>
       ② <strong>網址要先定案</strong>：信裡的「設定密碼」連結是用 <code class="inline">.env.local</code> 的 <code class="inline">NEXTAUTH_URL</code> 組出來的、效期 7 天。所以請<strong>先把 <code class="inline">NEXTAUTH_URL</code> 設成客戶最終會用的正式網址</strong>（<code class="inline">https://bds.fu-notes.com</code>）再 <code class="inline">--send</code>；否則連結會指到臨時網址，切換網域後可能失效。最穩的做法：<strong>把這步（--send）放到步驟 5 換好網域、確認新站能登入之後再做</strong>。</p>
     </div>
-    <p><strong>先寄一封測試信給自己</strong>看版面（測試信只是預覽版型，<strong>裡面的連結點了不會真的能設密碼</strong>，正式 <code class="inline">--send</code> 才會產生有效連結）：</p>
+    <div class="box warn">
+      <p class="box-title">⚠️ 656 封不能「一次寄完」——會爆 Resend 每日上限</p>
+      <p>Resend 免費方案通常有<strong>每日約 100 封、每月約 3,000 封</strong>的上限（實際數字以你的 Resend 後台方案為準）。656 封一次送，超過當日上限後會<strong>大量失敗、約 550 位客戶收不到信卻沒人發現</strong>。三選一：</p>
+      <ul class="plain">
+        <li><strong>（推薦）分批寄</strong>：用 <code class="inline">--limit</code> 每天寄一批，例如每天 <code class="inline">--limit 100</code>，連續幾天寄完。工具會自動記錄「已寄成功的人」，<strong>隔天用同一指令再跑就只補剩下的、不會重複寄</strong>。</li>
+        <li><strong>升級 Resend 付費方案</strong>後一次寄完（額度拉高）。</li>
+      </ul>
+      <p>（更正舊說法：每封間隔 0.4 秒只避開「每秒速率」，<strong>不會</strong>避開「每日總量」上限。）</p>
+    </div>
+    <p><strong>先寄一封測試信給自己</strong>看版面（測試信只是預覽版型，連結點了不會真的能設密碼）：</p>
     <pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱@example.com</pre>
-    <p>兩個前提都滿足後，<strong>正式寄給全部人</strong>（每封間隔 0.4 秒，自動避開寄信限制）：</p>
-    <pre>node scripts/send-invites.mjs "你的CSV路徑" --send</pre>
-    <p>學員收到信 → 點按鈕 → 設定新密碼 → 用原本 Email 登入，課程權限都在。</p>
+    <p>確認前提都滿足後，<strong>分批寄出</strong>（每天一批；沒加 --limit 就是一次全寄）：</p>
+    <pre>node scripts/send-invites.mjs "你的CSV路徑" --send --limit 100</pre>
+    <p>寄完會產生 <code class="inline">send-invites-result.csv</code>（每位 sent/failed），<strong>打開核對有沒有失敗的</strong>；有失敗就再跑同一指令會自動只補未成功者。學員收到信 → 點按鈕 → 設定新密碼 → 用原本 Email 登入，課程權限都在。</p>
+    <div class="box tip">
+      <p class="box-title">⏰ 什麼時候寄？請放到最後</p>
+      <p>兩個前提：① <code class="inline">RESEND_FROM_EMAIL</code> 是已驗證的自家網域；② <strong>已完成步驟 5 換網域、<code class="inline">NEXTAUTH_URL</code> 已是正式網址且穩定</strong>。信裡連結用 <code class="inline">NEXTAUTH_URL</code> 組成、效期 7 天，所以務必等正式網址穩了才群發，否則連結會落在網域還沒生效的空窗期。</p>
+    </div>
   </div>
 
   <div class="step">
     <div class="step-head"><div class="step-num">5</div><div>
-      <h2>把網址切到新網站</h2>
-      <p class="sub">客戶用同一個網址無縫接軌</p>
+      <h2>把網址切到新網站（安全換網域）</h2>
+      <p class="sub">幾百位既有客戶要「幾乎無感」——照這個順序做，並先備好回滾</p>
     </div></div>
-    <ol class="dolist">
-      <li><strong>先在新網站的臨時網址上把 1～4 步全部測好</strong>（登入、看課、金流都正常）。</li>
-      <li>確認無誤後，到你的<strong>網域管理處</strong>（買 <code class="inline">fu-notes.com</code> 的地方），把 <code class="inline">bds.fu-notes.com</code> 的指向從 Teachify 改到 Netlify（Netlify 的 Domain 設定會給你要填的值）。</li>
-      <li>同時把新網站的 <code class="inline">NEXTAUTH_URL</code> 改成 <code class="inline">https://bds.fu-notes.com</code>，重新部署。</li>
-      <li>切換後有幾分鐘～幾小時的生效時間，建議選離峰時段做。</li>
-    </ol>
+    <div class="box warn">
+      <p class="box-title">⚠️ 這步最怕客戶斷線，務必照順序、別跳</p>
+      <p>換網域＝把 <code class="inline">bds.fu-notes.com</code> 從指向 Teachify 改成指向 Netlify。做不好，切換當下客戶可能連不上或看到「不安全」。下面每一小步都是為了把斷線壓到最短、且萬一有問題能秒切回。</p>
+    </div>
+    <h3>5-1. 切換前 1～2 天：把 TTL 調低</h3>
+    <p>到網域管理處，把 <code class="inline">bds.fu-notes.com</code> 那筆記錄的 <strong>TTL 調到最低（例如 300 秒）</strong>。TTL 決定「全世界的快取多久更新一次」；先調低，正式切換才會在<strong>幾分鐘內</strong>生效（而不是等數小時～一天），回滾也才能快。</p>
+
+    <h3>5-2. 先在 Netlify 加自訂網域（這時還不要改 DNS）</h3>
+    <p>Netlify → Domain management → 把 <code class="inline">bds.fu-notes.com</code> 加為自訂網域。先加好，Netlify 才會開始準備 HTTPS 憑證，縮短之後「不安全」的空窗。它會給你待會要在 DNS 填的值。</p>
+
+    <h3>5-3. 抄下目前的 DNS 設定（回滾用）</h3>
+    <p><strong>切換前，先把 <code class="inline">bds.fu-notes.com</code> 現在指向 Teachify 的那筆記錄（類型與值）截圖或抄下來。</strong>萬一切換後有問題，把它改回這個值就能秒切回 Teachify 止血。</p>
+
+    <h3>5-4. 設好新站網址並重新部署</h3>
+    <p>到 Netlify 環境變數把 <code class="inline">NEXTAUTH_URL</code> 改成 <code class="inline">https://bds.fu-notes.com</code>，然後<strong>務必到 Deploys → Trigger deploy → 選「Clear cache and deploy site」手動觸發一次</strong>（只改環境變數不會自動生效）。</p>
+
+    <h3>5-5. 正式改 DNS 指向 Netlify</h3>
+    <p>選<strong>離峰時段</strong>，把 <code class="inline">bds.fu-notes.com</code> 依 Netlify 給的值改指過去。因為 5-1 已降 TTL，通常幾分鐘生效。</p>
+
+    <h3>5-6. 等 HTTPS 憑證就緒</h3>
+    <p>回 Netlify Domain management，等狀態顯示憑證已簽發（出現 <em>Netlify certificate / SSL</em> 或綠色鎖頭）。然後<strong>用無痕視窗開 <code class="inline">https://bds.fu-notes.com</code></strong>，確認網址列是鎖頭、不是「不安全」。</p>
+
+    <h3>5-7. 在「正式網址」上煙霧測試</h3>
+    <p>就在 <code class="inline">https://bds.fu-notes.com</code>（不是臨時網址）跑一遍關鍵路徑：登入、看課、下單走完金流看是否正確導回、觸發一次密碼重設信看連結網域對不對、點得開。<strong>全部過，才算切換成功。</strong></p>
+
+    <div class="box warn">
+      <p class="box-title">🔙 回滾（萬一新站出問題）</p>
+      <p>把 <code class="inline">bds.fu-notes.com</code> 的 DNS 改回 5-3 抄下的 Teachify 值即可切回（因已降 TTL，幾分鐘生效）。所以——<strong>Teachify 在這段觀察期一定要保持付費、不要退租</strong>。</p>
+    </div>
+    <div class="box warn">
+      <p class="box-title">⛔ Teachify 什麼時候才能停？</p>
+      <p>務必等以下<strong>三件事全部達成</strong>才可退租/停付 Teachify（太早停，Teachify 上的影片與內容會被關、永久拿不回）：<br>
+      ① 該從 Teachify 拿的都拿齊了（見步驟 2 上方「必拿清單」）；② 新站在正式網址上完整驗收（登入/看課/金流）；③ 換網域後<strong>穩定運作數天、含尖峰、零客訴</strong>。</p>
+    </div>
     <div class="box good">
-      <p class="box-title">✅ 完成！</p>
-      <p>客戶打開 <code class="inline">bds.fu-notes.com</code>（同一個網址），就進到你的新系統了。之後不用再付 Teachify 年費。</p>
+      <p class="box-title">✅ 切換成功後，才做最後一步：寄設定密碼信</p>
+      <p>現在正式網址穩了，<strong>回到步驟 4 執行 <code class="inline">--send</code></strong>（先 <code class="inline">--test</code> 在正式網址點開連結能設密碼，再群發）。這樣 656 封信裡的連結都會指向已生效的正式網址。</p>
     </div>
   </div>
 
@@ -252,8 +317,16 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
       <p class="box-title">⚠️ 千萬別直接沿用賣方交給你的舊 <code class="inline">.env.local</code></p>
       <p>裡面是賣方的舊鑰匙，會連到<strong>賣方的舊資料庫</strong>，把課程和 656 位學員灌錯地方。一定要換成你自己新專案的鑰匙。</p>
     </div>
-    <p style="margin-top:12px;"><strong>③ 影片上傳要多一把鑰匙。</strong>步驟 2 的 <code class="inline">bunny-upload.mjs</code> 需要 <code class="inline">BUNNY_STREAM_API_KEY</code>（Bunny → Stream → 影片庫 → <strong>API</strong> 分頁，和播放防盜金鑰不同），記得也填進 <code class="inline">.env.local</code>。</p>
+    <p style="margin-top:12px;"><strong>③ 影片上傳要 Bunny 兩個值。</strong>步驟 2 的 <code class="inline">bunny-upload.mjs</code> 需要 <code class="inline">BUNNY_STREAM_LIBRARY_ID</code> 與 <code class="inline">BUNNY_STREAM_API_KEY</code>（後者在 Bunny → Stream → 影片庫 → <strong>API</strong> 分頁，和播放防盜金鑰不同），兩個都要填進 <code class="inline">.env.local</code>。</p>
     <p><strong>④ 路徑替換：</strong>把指令裡的 <code class="inline">你的CSV路徑</code> 換成實際位置，例如 <code class="inline">"../BDS-students-2026-08-24.csv"</code>。</p>
+    <div class="box warn" style="margin:10px 0 0;">
+      <p class="box-title">⚠️ 幾個容易踩的小地雷</p>
+      <ul class="plain">
+        <li><strong>CSV 表頭要用英文</strong>：必須含 <code class="inline">Email</code> 與 <code class="inline">Attended courses</code>（大小寫沒關係、其餘欄選用）。Teachify 若匯出成中文表頭，先把這兩欄名改成英文再跑。</li>
+        <li><strong>課程標題不要含半形逗號 <code class="inline">,</code></strong>：工具用逗號分隔課程清單，標題含逗號會被切碎成怪標題。試跑時看印出的課程清單有沒有怪怪的半截標題。</li>
+        <li><strong>教材單檔上限 50MB</strong>：超過的簡報/檔案會被 <code class="inline">upload-materials</code> 略過（結果會標「略過」）。太大的先壓縮、拆檔，或放雲端後在後台貼連結。</li>
+      </ul>
+    </div>
   </div>
 
   <div class="step">
@@ -278,20 +351,22 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 全部上
     <p style="font-size:15px;color:var(--ink-soft);">→ 依 <code class="inline">materials-upload-result.csv</code> 把教材網址貼進章節「教材／附件」欄位；補完內容後<strong>發佈課程</strong>。</p>
 
     <h3>③ 匯入 656 位學員 + 課程權限</h3>
-<pre>node scripts/import-students.mjs "你的CSV路徑"                 # 試跑：看課程標題對不對得上
-node scripts/import-students.mjs "你的CSV路徑" --commit        # 正式匯入</pre>
+<pre>node scripts/import-students.mjs "你的CSV路徑" --preview        # 只看 CSV（不連 DB）
+node scripts/import-students.mjs "你的CSV路徑"                 # 試跑：確認「對不上 0 種」
+node scripts/import-students.mjs "你的CSV路徑" --commit        # 正式匯入（對不上>0 會被擋下）</pre>
+    <p style="font-size:15px;color:var(--ink-soft);">→ 試跑要顯示「對不上 0 種」才 --commit；匯入後照結果的驗收指引對帳。</p>
 
-    <h3>④ 寄「設定新密碼」信給全體學員</h3>
-<pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱     # 先寄一封測試給自己
-node scripts/send-invites.mjs "你的CSV路徑" --send             # 正式寄給全部人</pre>
-    <p style="font-size:15px;color:var(--ink-soft);">→ 寄全體前，<code class="inline">RESEND_FROM_EMAIL</code> 必須是已驗證的自家網域，否則工具會擋下。</p>
+    <h3>④ 換網域（見上方步驟 5 的安全 SOP）</h3>
+    <p style="font-size:15px;color:var(--ink-soft);">先降 TTL → Netlify 加網域 → 抄舊 DNS（回滾用）→ 設 NEXTAUTH_URL＋Trigger deploy → 改 DNS → 等憑證 → 正式網址煙霧測試。確認穩定前 Teachify 別停。</p>
 
-    <h3>⑤ 最後：把網址切到新站（見上方步驟 5）</h3>
-    <p style="font-size:15px;color:var(--ink-soft);">全部測好後，才把 <code class="inline">bds.fu-notes.com</code> 從 Teachify 改指到 Netlify。</p>
+    <h3>⑤ 最後才寄「設定新密碼」信（分批）</h3>
+<pre>node scripts/send-invites.mjs "你的CSV路徑" --test 你的信箱          # 先在正式網址點開測試
+node scripts/send-invites.mjs "你的CSV路徑" --send --limit 100     # 每天一批，隔天再跑即續寄</pre>
+    <p style="font-size:15px;color:var(--ink-soft);">→ 前提：網域已切好、<code class="inline">NEXTAUTH_URL</code> 已是正式網址、<code class="inline">RESEND_FROM_EMAIL</code> 是已驗證網域。寄完看 <code class="inline">send-invites-result.csv</code> 補失敗者。</p>
 
     <div class="box good">
-      <p class="box-title">✅ 順序邏輯</p>
-      <p>先有課（①）→ 影片就位（②）→ 灌人和權限（③）→ 通知客戶（④）→ 換網址（⑤）。順序別跳，權限才對得上。</p>
+      <p class="box-title">✅ 順序邏輯（別跳）</p>
+      <p>先有課（①）→ 影片/教材就位（②）→ 灌人和權限（③）→ <strong>換網域並驗收穩定（④）</strong>→ <strong>最後才通知客戶（⑤）</strong>。寄信放最後，是因為信裡連結要用「已生效的正式網址」，否則客戶點開是壞的。</p>
     </div>
   </div>
 
