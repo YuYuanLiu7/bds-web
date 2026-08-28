@@ -394,7 +394,8 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
 2.  db/add_auth_flows.sql        ← 信箱驗證、忘記密碼
 3.  db/add_rate_limiting.sql     ← 防止被灌爆的保護
 4.  db/add_performance_indexes.sql ← 讓網站更快（可選但建議）
-5.  db/enable_rls.sql            ← 最後跑！打開資料保護鎖</pre>
+5.  db/add_fulfilled_at.sql      ← 付款開通用（確保付了錢一定開通、不重複）
+6.  db/enable_rls.sql            ← 最後跑！打開資料保護鎖</pre>
     </div>
     <div class="box warn">
       <p class="box-title">⚠️ 第 5 個一定要放最後</p>
