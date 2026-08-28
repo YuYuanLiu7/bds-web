@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BDS 平台功能與安全說明</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  :root {
+    --ground: #f5f7fb;
+    --surface: #ffffff;
+    --surface-2: #eef2f9;
+    --ink: #1a2130;
+    --ink-soft: #55607a;
+    --line: #dde3ee;
+    --brand: #21448e;
+    --brand-soft: #e7edf8;
+    --brand-ink: #21448e;
+    --warn: #a8560a;
+    --warn-soft: #fbf0e0;
+    --warn-line: #f0d3a8;
+    --good: #1c7a45;
+    --good-soft: #e5f3ea;
+    --radius: 14px;
+    --maxw: 760px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0e131d; --surface: #161d2b; --surface-2: #1e2637;
+      --ink: #e7ecf6; --ink-soft: #9aa7c0; --line: #2b3446;
+      --brand: #8fb0e6; --brand-soft: #1c2a44; --brand-ink: #bcd0f2;
+      --warn: #e6a95a; --warn-soft: #2e2416; --warn-line: #4a3a20;
+      --good: #6cc78d; --good-soft: #16281d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0e131d; --surface: #161d2b; --surface-2: #1e2637;
+    --ink: #e7ecf6; --ink-soft: #9aa7c0; --line: #2b3446;
+    --brand: #8fb0e6; --brand-soft: #1c2a44; --brand-ink: #bcd0f2;
+    --warn: #e6a95a; --warn-soft: #2e2416; --warn-line: #4a3a20;
+    --good: #6cc78d; --good-soft: #16281d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+    font-size: 17px; line-height: 1.85; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px 100px; }
+  header.hero {
+    background: linear-gradient(160deg, #21448e 0%, #16305f 100%);
+    color: #fff; padding: 56px 20px 48px; text-align: center;
+  }
+  header.hero .inner { max-width: var(--maxw); margin: 0 auto; }
+  .kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700; opacity: .78; margin: 0 0 14px; }
+  header.hero h1 { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: clamp(30px, 6vw, 46px); line-height: 1.25; margin: 0 0 16px; text-wrap: balance; }
+  header.hero p { margin: 0 auto; max-width: 32em; font-size: 17px; opacity: .92; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
+  .hero-meta span { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: 6px 15px; font-size: 14px; font-weight: 500; }
+  h2 { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 25px; line-height: 1.35; margin: 56px 0 8px; text-wrap: balance; }
+  h3 { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 19px; margin: 30px 0 8px; }
+  p { margin: 10px 0; }
+  a { color: var(--brand-ink); }
+  strong { font-weight: 700; }
+  .lead { font-size: 18px; color: var(--ink-soft); }
+  .box { border-radius: var(--radius); padding: 18px 20px; margin: 20px 0; border: 1px solid var(--line); background: var(--surface); }
+  .box p:first-child { margin-top: 0; }
+  .box p:last-child { margin-bottom: 0; }
+  .box .box-title { font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .box.tip { background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent); }
+  .box.tip .box-title { color: var(--brand-ink); }
+  .box.warn { background: var(--warn-soft); border-color: var(--warn-line); }
+  .box.warn .box-title { color: var(--warn); }
+  .box.good { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 35%, transparent); }
+  .box.good .box-title { color: var(--good); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin: 16px 0; }
+  .card h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
+  .card .ic { font-size: 22px; }
+  .grid { display: grid; gap: 14px; }
+  @media (min-width: 620px) { .grid.two { grid-template-columns: 1fr 1fr; } }
+  ul.plain { list-style: none; padding: 0; margin: 12px 0; }
+  ul.plain > li { padding: 7px 0 7px 30px; position: relative; border-bottom: 1px dashed var(--line); }
+  ul.plain > li:last-child { border-bottom: 0; }
+  ul.plain > li::before { content: "✓"; position: absolute; left: 4px; color: var(--good); font-weight: 700; }
+  ul.feat { list-style: none; padding: 0; margin: 10px 0; }
+  ul.feat > li { padding: 6px 0 6px 28px; position: relative; }
+  ul.feat > li::before { content: "▸"; position: absolute; left: 4px; color: var(--brand-ink); font-weight: 700; }
+  code.inline { font-family: "JetBrains Mono", monospace; font-size: .9em; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 46px 0; }
+  .footer { text-align: center; color: var(--ink-soft); font-size: 14px; margin-top: 50px; }
+  .eyebrow { display: inline-block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; color: var(--brand-ink); margin: 54px 0 0; }
+  @media print { header.hero { background: none !important; color: #000 !important; border-bottom: 2px solid #000; } .card, .box { break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <p class="kicker">給您的線上課程平台說明</p>
+    <h1>您的平台能做什麼、有多安全</h1>
+    <p>這一頁用白話說明：這個線上課程網站提供哪些功能、您辛苦累積的學員為什麼不會流失、以及我們在資料與金流上做了哪些保護。</p>
+    <div class="hero-meta">
+      <span>🎓 完整賣課功能</span>
+      <span>🔒 標準安全防護</span>
+      <span>👥 學員零流失搬遷</span>
+      <span>🖨️ 可列印</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <p class="lead">簡單一句話：這是一套<strong>屬於您自己</strong>的線上課程網站。學員照常註冊、登入、購買、看課；您在自己的後台管理課程、學員與收款——不再需要每年付租金給別人的平台。</p>
+
+  <!-- 1. 功能 -->
+  <span class="eyebrow">Part 1</span>
+  <h2>這個平台能做什麼</h2>
+  <p>學員看到的、以及您在後台能管理的功能：</p>
+
+  <div class="grid two">
+    <div class="card">
+      <h3><span class="ic">🎬</span>賣課程與看課</h3>
+      <ul class="feat">
+        <li>課程分章節，線上刷卡購買後即可觀看</li>
+        <li>影片放在專業影片空間，播放順暢、支援手機</li>
+        <li>只有買過的人看得到；沒買的被擋在外面</li>
+        <li>學員可留言、給評價（留言需您審核才公開）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">💳</span>收款與方案</h3>
+      <ul class="feat">
+        <li>單堂課購買、數位檔案下載販售</li>
+        <li>會員訂閱方案（月繳／年繳／一次性）</li>
+        <li>串接台灣金流 <strong>PayUni</strong>，付款成功自動開通</li>
+        <li>每筆訂單都有紀錄可對帳</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">🛠️</span>您的管理後台</h3>
+      <ul class="feat">
+        <li>自己新增/編輯課程、章節、上傳影片與教材</li>
+        <li>管理學員、手動開通或調整權限</li>
+        <li>改站名、Logo、主色、首頁、公告、FAQ</li>
+        <li>發佈文章、活動資訊</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">✉️</span>自動信件</h3>
+      <ul class="feat">
+        <li>註冊驗證信、忘記密碼重設信</li>
+        <li>購買成功通知信</li>
+        <li>聯絡表單直接寄到您信箱</li>
+        <li>系統出狀況時自動寄警示信提醒您</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. 客戶不流失 -->
+  <span class="eyebrow">Part 2</span>
+  <h2>您辛苦累積的學員，不會流失</h2>
+  <p class="lead">這是換平台最讓人擔心的一點，所以我們特別把它設計得很穩：</p>
+
+  <div class="box good">
+    <p class="box-title">✅ 舊學員與已購課程，全部保留</p>
+    <p>搬家時，我們會把每一位學員的帳號、以及他<strong>買過的每一門課的觀看權限</strong>都完整帶過來。學員<strong>不需要重新付費</strong>，登入後買過的課照樣看得到。</p>
+  </div>
+
+  <ul class="plain">
+    <li><strong>用原本的 Email 就能繼續用。</strong>任何平台都無法匯出舊密碼（這是安全規定），所以我們幫每位學員寄一封「設定新密碼」信，他點一下設定一次，就能用<strong>原本的 Email</strong> 登入。</li>
+    <li><strong>學員只要動手一次。</strong>就是設定新密碼那一下，其餘都無感。</li>
+    <li><strong>換網址不斷線。</strong>我們有一套安全的網域切換流程（先暖機、可隨時切回舊的），把切換造成的中斷降到最低，避免幾百位學員同時連不上。</li>
+    <li><strong>舊平台先別急著停。</strong>要等新網站確認一切正常、資料都到齊了，才停用舊平台，確保萬無一失。</li>
+  </ul>
+
+  <!-- 3. 安全 -->
+  <span class="eyebrow">Part 3</span>
+  <h2>資料與金流，有多安全</h2>
+  <p>我們採用<strong>業界常見的標準安全做法</strong>來保護您和學員的資料。以下用白話說明：</p>
+
+  <div class="grid two">
+    <div class="card">
+      <h3><span class="ic">🔑</span>密碼與帳號</h3>
+      <ul class="feat">
+        <li>密碼一律<strong>加密保存</strong>（bcrypt），連我們也看不到原始密碼</li>
+        <li>Email 需驗證才能啟用，防假帳號</li>
+        <li>登入、重設密碼有<strong>次數限制</strong>，擋密碼暴力嘗試</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">💳</span>金流安全</h3>
+      <ul class="feat">
+        <li>刷卡在 <strong>PayUni</strong> 完成，<strong>卡號不經過、也不存在我們網站</strong></li>
+        <li>付款回報會<strong>驗證簽章、核對金額</strong>，防偽造與竄改低買</li>
+        <li>防重複開通；付款成功卻沒開通會<strong>自動補開通並通知站長</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">🗄️</span>資料庫上鎖</h3>
+      <ul class="feat">
+        <li>資料庫對外<strong>上鎖</strong>（RLS），外部無法用公開金鑰直接撈資料</li>
+        <li>所有存取都經過網站伺服器驗證身分</li>
+        <li>上線前有<strong>自動檢查</strong>會確認這道鎖確實有開</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">🎞️</span>影片防外流</h3>
+      <ul class="feat">
+        <li>影片用<strong>限時簽章網址</strong>播放，連結過一陣子就失效</li>
+        <li>降低有人複製網址轉發給沒付費的人</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">💾</span>每日自動備份</h3>
+      <ul class="feat">
+        <li>資料庫<strong>每天自動備份</strong>（雲端＋另一份保險）</li>
+        <li>萬一出事，資料救得回來</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="ic">🔐</span>連線與監控</h3>
+      <ul class="feat">
+        <li>全站 <strong>HTTPS 加密連線</strong>（網址鎖頭）</li>
+        <li>系統出錯會<strong>自動寄信通知站長</strong>，不必等客訴</li>
+        <li>附一支<strong>一鍵驗收工具</strong>，上線前把上述保護逐項檢查一遍</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4. 誠實說明 -->
+  <span class="eyebrow">Part 4</span>
+  <h2>誠實說明（我們不誇大）</h2>
+  <p>為了讓您做決定時心裡有底，這些也一併講清楚：</p>
+  <div class="box warn">
+    <p class="box-title">⚠️ 幾點務實提醒</p>
+    <ul class="plain" style="margin:6px 0 0;">
+      <li>這是<strong>紮實、可實際營運</strong>的商業網站，採用標準的安全與備份做法；但我們不會用「軍規級／絕對零風險」這種話術——世上沒有系統能保證零風險。</li>
+      <li>部分服務有<strong>免費額度</strong>（如寄信量、資料庫用量），生意成長到一定規模時，可能需要升級付費方案；<strong>影片空間依用量計費</strong>、金流每筆收手續費。</li>
+      <li>網站需要<strong>基本的長期維護</strong>（例如定期確認備份正常）；「搬家」這種一次性的大工程，建議由賣方或工程師協助執行，最穩。</li>
+    </ul>
+  </div>
+  <div class="box good">
+    <p class="box-title">✅ 一句話總結</p>
+    <p>學員與已購課程<strong>完整保留、不需重買</strong>；密碼加密、金流不碰卡號、資料庫上鎖、每日備份、出錯自動通知。這是一套<strong>能安心接手、繼續營運</strong>的自有平台。</p>
+  </div>
+
+  <div class="footer">
+    <p>本說明由賣方提供，供了解平台功能與安全設計之用。技術細節可另請工程師說明。</p>
+  </div>
+
+</div>
+</body>
+</html>
