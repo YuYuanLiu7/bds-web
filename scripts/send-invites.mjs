@@ -35,10 +35,15 @@ const argv = process.argv.slice(2);
 const SEND = argv.includes('--send');
 const testIdx = argv.indexOf('--test');
 const TEST_EMAIL = testIdx !== -1 ? argv[testIdx + 1] : null;
-const csvPath = argv.find((a) => !a.startsWith('--') && a !== TEST_EMAIL);
+const limIdx = argv.indexOf('--limit');
+const LIMIT = limIdx !== -1 ? parseInt(argv[limIdx + 1], 10) : Infinity; // 每次最多寄幾封（配合 Resend 每日上限分批）
+const csvPath = argv.find((a) => !a.startsWith('--') && a !== TEST_EMAIL && a !== String(LIMIT));
 
 const TOKEN_TTL_DAYS = 7;
 const SEND_GAP_MS = 400;
+// 已成功寄出的紀錄檔與結果檔（放專案根目錄）——用來「只補未寄成功者」、避免重複寄、且結果可稽核
+const SENT_LOG = path.join(process.cwd(), 'invites-sent.json');
+const RESULT_CSV = path.join(process.cwd(), 'send-invites-result.csv');
 
 const ok = (m) => console.log('  \x1b[32m✓\x1b[0m ' + m);
 const bad = (m) => console.log('  \x1b[31m✗\x1b[0m ' + m);
@@ -179,26 +184,48 @@ async function sendEmail({ apiKey, fromEmail, to, name, url }) {
   }
 
   // 正式寄送
-  head('2. 正式寄送（每封間隔 0.4 秒）');
-  let sent = 0, failed = 0; const fails = [];
-  for (const rcpt of recipients) {
-    // 確認該學員存在（未匯入的略過）
+  head('2. 正式寄送');
+  // 讀取「已成功寄出」記錄：重跑時自動跳過，避免重複寄、也不會作廢別人手上還沒點的連結
+  let sentSet = new Set();
+  try { sentSet = new Set(JSON.parse(fs.readFileSync(SENT_LOG, 'utf8'))); } catch { /* 首次執行沒有記錄檔 */ }
+  const pending = recipients.filter((r) => !sentSet.has(r.email));
+  ok(`名單共 ${recipients.length} 位；已成功寄過 ${sentSet.size} 位；這次待寄 ${pending.length} 位`);
+  if (Number.isFinite(LIMIT)) ok(`本次上限 --limit ${LIMIT} 封（配合 Resend 每日額度分批；隔天再跑一次即續寄）`);
+
+  const resultRows = [];
+  let sent = 0, failed = 0, quota = 0; const fails = [];
+  for (const rcpt of pending) {
+    if (sent >= LIMIT) { quota = pending.length - sent - failed; break; }
     const { data: user } = await supabase.from('users').select('id').eq('email', rcpt.email).maybeSingle();
-    if (!user) { warn(`略過（系統中查無此帳號，請先跑 import-students）：${rcpt.email}`); continue; }
+    if (!user) { warn(`略過（系統查無此帳號，請先跑 import-students）：${rcpt.email}`); resultRows.push([rcpt.email, 'skipped-no-user', '']); continue; }
 
     const token = crypto.randomBytes(32).toString('hex');
     await supabase.from('password_reset_tokens').delete().eq('email', rcpt.email);
     const { error: tErr } = await supabase.from('password_reset_tokens').insert([{ email: rcpt.email, token, expires_at: expiresAt }]);
-    if (tErr) { failed++; fails.push(rcpt.email); bad(`產生連結失敗 ${rcpt.email}：${tErr.message}`); continue; }
+    if (tErr) { failed++; fails.push(rcpt.email); resultRows.push([rcpt.email, 'failed-token', tErr.message]); bad(`產生連結失敗 ${rcpt.email}：${tErr.message}`); continue; }
 
     const url = `${siteUrl}/reset-password?token=${token}&email=${encodeURIComponent(rcpt.email)}`;
     const r = await sendEmail({ apiKey, fromEmail, to: rcpt.email, name: rcpt.name, url });
-    if (r.ok) { sent++; if (sent % 25 === 0) console.log(`     ...已寄 ${sent} 封`); }
-    else { failed++; fails.push(rcpt.email); bad(`寄送失敗 ${rcpt.email}：${r.error}`); }
+    if (r.ok) {
+      sent++; sentSet.add(rcpt.email);
+      fs.writeFileSync(SENT_LOG, JSON.stringify([...sentSet], null, 0)); // 每封成功即存檔，中斷也不會忘記寄過誰
+      resultRows.push([rcpt.email, 'sent', r.id || '']);
+      if (sent % 25 === 0) console.log(`     ...本次已寄 ${sent} 封`);
+    } else {
+      failed++; fails.push(rcpt.email); resultRows.push([rcpt.email, 'failed-send', r.error || '']);
+      bad(`寄送失敗 ${rcpt.email}：${r.error}`);
+    }
     await sleep(SEND_GAP_MS);
   }
 
+  // 輸出結果檔（可稽核）
+  const csv = ['email,status,detail', ...resultRows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))];
+  fs.writeFileSync(RESULT_CSV, '﻿' + csv.join('\n'), 'utf8');
+
   head('結果');
-  ok(`成功寄出：${sent} 封`);
-  if (failed) { warn(`失敗：${failed} 封`); console.log('     失敗名單：' + fails.join(', ')); console.log('     可直接重跑 --send，只會重寄（已成功者會拿到新連結，舊連結失效）。'); }
+  ok(`本次成功寄出：${sent} 封（累計已寄 ${sentSet.size} / ${recipients.length}）`);
+  if (failed) { warn(`本次失敗：${failed} 封`); console.log('     失敗名單：' + fails.join(', ')); }
+  if (quota > 0) warn(`因達 --limit 上限，還有 ${quota} 位未寄 → 明天（或額度恢復後）用「同一指令」再跑一次即自動續寄。`);
+  ok(`結果已存檔：${RESULT_CSV}（狀態 sent/failed 可核對）`);
+  if (sentSet.size < recipients.length) console.log('     尚未全部寄完：重跑同一指令會自動跳過已成功者、只補剩下的，不會重複寄。');
 })().catch((e) => { console.error('\n工具執行錯誤：', e); process.exit(1); });

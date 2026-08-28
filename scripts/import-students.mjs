@@ -34,6 +34,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
 const PREVIEW = argv.includes('--preview');
 const COMMIT = argv.includes('--commit');
+const FORCE = argv.includes('--force'); // 在「有課程標題對不上」時仍強制寫入（不建議）
 const csvPath = argv.find((a) => !a.startsWith('--'));
 
 const ok = (m) => console.log('  \x1b[32m✓\x1b[0m ' + m);
@@ -165,14 +166,25 @@ async function getSupabase() {
 
   if (!COMMIT) {
     head('結果');
-    warn('這是「試跑」，未寫入任何資料。確認上面數字無誤後，加 --commit 正式匯入。');
+    if (unmatched.length === 0) ok('課程標題全部對得上（對不上 0 種）→ 可以加 --commit 正式匯入。');
+    else warn(`還有 ${unmatched.length} 種課程標題對不上 → 請先在後台把這些課建好（標題完全一致）再重跑，直到「對不上 0 種」才 --commit。`);
+    warn('這是「試跑」，未寫入任何資料。');
     return;
+  }
+
+  // 🔒 硬性關卡：有課程標題對不上就「拒絕」正式寫入，避免那些學員的該門權限被靜默漏開
+  if (unmatched.length > 0 && !FORCE) {
+    head('已中止（未寫入任何資料）');
+    bad(`有 ${unmatched.length} 種課程標題對不上，若現在匯入，這些課的學員權限會被「靜默略過」（漏開通、事後很難察覺）。`);
+    console.log('     → 正確做法：先到後台把上面列出的課程以「完全相同標題」建好，再重跑試跑，確認「對不上 0 種」後才 --commit。');
+    console.log('     → 若你確定這些課本來就不搬、要略過它們，才加 --force 強制匯入。');
+    process.exit(1);
   }
 
   // 正式寫入
   head('3. 寫入學員與課程權限（--commit）');
   const sharedHash = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), 12); // 佔位密碼，學員需自行重設
-  let createdOrUpdated = 0, granted = 0, failed = 0;
+  let createdOrUpdated = 0, granted = 0, failed = 0, skippedUnmatched = 0;
 
   for (const s of withEmail) {
     // 3a. upsert 使用者（以 email 為唯一鍵；已存在則更新姓名/電話，不覆寫既有密碼）
@@ -192,6 +204,7 @@ async function getSupabase() {
     createdOrUpdated++;
 
     // 3b. 依對得上的課程標題開通權限（重複執行安全）
+    skippedUnmatched += s.courses.filter((t) => !titleToId.has(t)).length; // 記錄因對不上而未開通的筆數（--force 時才可能 >0）
     const rows = s.courses
       .filter((t) => titleToId.has(t))
       .map((t) => ({ user_id: userId, course_id: titleToId.get(t), purchased_at: new Date().toISOString() }));
@@ -205,7 +218,10 @@ async function getSupabase() {
 
   head('結果');
   ok(`已建立/更新學員：${createdOrUpdated} 位`);
-  ok(`已開通課程權限：${granted} 筆`);
-  if (failed) warn(`失敗：${failed} 位（見上方訊息）`);
-  console.log('\n  下一步：請通知所有學員到「網站/forgot-password」用同一個 Email 設定新密碼即可登入。');
+  ok(`已嘗試開通課程權限：${granted} 筆（含既有；下方驗收法可核對實際）`);
+  if (skippedUnmatched > 0) warn(`因課程標題對不上而「未開通」：${skippedUnmatched} 筆（你用了 --force）`);
+  if (failed) warn(`建立失敗：${failed} 位（見上方訊息）`);
+  console.log('\n  驗收：到 Supabase SQL Editor 執行 `select count(*) from user_courses;` 與試跑印的「學員×課程」筆數比對；');
+  console.log('  並抽查 3~5 位不同課的學員（用其帳號登入或查 user_courses）確認看得到買過的課。');
+  console.log('  下一步：確認驗收無誤後，再進行寄「設定新密碼」信（見手冊步驟 4，且建議在換好網域後才寄）。');
 })().catch((e) => { console.error('\n工具執行錯誤：', e); process.exit(1); });
