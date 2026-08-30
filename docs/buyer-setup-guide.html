@@ -237,17 +237,17 @@
 
   <nav class="toc" aria-label="目錄">
     <strong>這份手冊的順序</strong>
-    <ol>
-      <li><a href="#s0">開始前：準備什麼</a></li>
-      <li><a href="#s1">申請 6 個帳號（含馬上送 PayUni 審核）</a></li>
-      <li><a href="#s2">建立資料庫（Supabase）</a></li>
-      <li><a href="#s3">設定影片（Bunny）</a></li>
-      <li><a href="#s4">設定寄信（Resend）</a></li>
-      <li><a href="#s5">設定刷卡（PayUni）</a></li>
-      <li><a href="#s6">把網站放上線（Netlify）</a></li>
-      <li><a href="#s7">建立你的管理員帳號</a></li>
-      <li><a href="#s8">開門收客前的安全檢查（很重要）</a></li>
-      <li><a href="#s9">開啟保活（必做）＋自動備份（選配）</a></li>
+    <ol style="list-style:none;padding-left:0;">
+      <li><a href="#s0">步驟 0 · 開始前：準備什麼</a></li>
+      <li><a href="#s1">步驟 1 · 申請 6 個帳號（含馬上送 PayUni 審核）</a></li>
+      <li><a href="#s2">步驟 2 · 建立資料庫（Supabase）</a></li>
+      <li><a href="#s3">步驟 3 · 設定影片（Bunny）</a></li>
+      <li><a href="#s4">步驟 4 · 設定寄信（Resend）</a></li>
+      <li><a href="#s5">步驟 5 · 設定刷卡（PayUni）</a></li>
+      <li><a href="#s6">步驟 6 · 把網站放上線（Netlify）</a></li>
+      <li><a href="#s7">步驟 7 · 建立你的管理員帳號</a></li>
+      <li><a href="#s8">步驟 8 · 開門收客前的安全檢查（很重要）</a></li>
+      <li><a href="#s9">步驟 9 · 開啟 Actions＋保活（必做）＋備份、通知（選配）</a></li>
       <li><a href="#daily">上線後的日常操作</a></li>
     </ol>
   </nav>
@@ -392,9 +392,9 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
 
     <div class="box tip">
       <p class="box-title">✅ 最省事：一行指令全自動（建議給工程師）</p>
-      <p>在 <code class="inline">bds-web</code> 資料夾設好 <code class="inline">SUPABASE_DB_URL</code>（Session pooler 那條）後執行：</p>
+      <p>在 <code class="inline">bds-web</code> 資料夾設好 <code class="inline">SUPABASE_DB_URL</code>（<strong>這條連線字串怎麼拿：見下方 2-3，選「Session pooler」那條；備份章節 9B 也會用到</strong>）後執行：</p>
 <pre>npm run setup -- --migrate</pre>
-      <p>它會<strong>自動把 <code class="inline">db/</code> 內所有必要的 SQL 依正確順序跑完</strong>（含日後新增的），你不必自己記有哪些檔。跑完就跳到 2-3。</p>
+      <p>它會<strong>自動把 <code class="inline">db/</code> 內所有必要的 SQL 依正確順序跑完</strong>（含日後新增的），你不必自己記有哪些檔。跑完就跳到 2-3。<br><span style="color:var(--ink-soft);font-size:14px;">不會用終端機？跳過這框、直接看下面的「手動做」三步驟即可。</span></p>
     </div>
 
     <p><strong>手動做（不用指令）也可以</strong>——不必背檔名，只要記住這 3 條規則。左側點 <strong>SQL Editor</strong> → <strong>New query</strong>，把檔案整份貼進去、按 <strong>Run</strong>：</p>
@@ -679,7 +679,7 @@ WHERE email = '你的信箱@example.com';</pre>
     </ul>
     <div class="box tip">
       <p class="box-title">✅ 這一頁就是你的完整清單</p>
-      <p>上面這幾項 + 先跑過的 <code class="inline">npm run verify</code>，就是上線前要確認的全部，<strong>不用再去翻別的檔案</strong>。逐項打勾都通過，就可以安心開門收客了。</p>
+      <p>上面這幾項就是上線前要確認的全部。<span style="color:var(--ink-soft);font-size:14px;">（<code class="inline">npm run verify</code> 是「進階選配」，需先照《搬家手冊》附錄裝好環境；不會用也沒關係、不跑也能上線。）</span>逐項打勾都通過，就可以安心開門收客了。</p>
     </div>
   </div>
 
@@ -729,7 +729,7 @@ WHERE email = '你的信箱@example.com';</pre>
     </div>
     <div class="box tip">
       <p class="box-title">💡 這 2 個值就是步驟 2 抄過的那組</p>
-      <p>就是步驟 2 的 <code class="inline">NEXT_PUBLIC_SUPABASE_URL</code>（專案網址）和公開金鑰，值<strong>一模一樣</strong>；只是 GitHub 這裡的欄位名不帶 <code class="inline">NEXT_PUBLIC_</code> 前綴（叫 <code class="inline">SUPABASE_URL</code>／<code class="inline">SUPABASE_ANON_KEY</code>），不是別把新鑰匙，別緊張。</p>
+      <p>就是步驟 2 的 <code class="inline">NEXT_PUBLIC_SUPABASE_URL</code>（專案網址）和公開金鑰，值<strong>一模一樣</strong>；只是 GitHub 這裡的欄位名不帶 <code class="inline">NEXT_PUBLIC_</code> 前綴（叫 <code class="inline">SUPABASE_URL</code>／<code class="inline">SUPABASE_ANON_KEY</code>），不是另一把新鑰匙，別緊張。</p>
     </div>
     <ol class="dolist">
       <li>到你的 GitHub 專案頁 → 上方 <strong>Settings</strong>（齒輪）→ 左側 <strong>Secrets and variables → Actions</strong>。</li>
@@ -819,7 +819,7 @@ WHERE email = '你的信箱@example.com';</pre>
     <div class="box warn">
       <p class="box-title">⚠️ 還沒換網域前，填 Netlify 臨時網址（搬家的人尤其注意）</p>
       <p><strong>填「新網站現在真的打得開」的網址</strong>：還沒換網域前，就是 Netlify 給的臨時網址（像 <code class="inline">xxxx.netlify.app</code>）。等正式換好網域後，再回來把它改成你的網域（例 <code class="inline">https://myschool.com</code>）。</p>
-      <p style="margin-top:8px;"><strong>搬家情境特別注意：</strong>換網域完成前，<strong>千萬別填 <code class="inline">bds.fu-notes.com</code></strong>——它現在還指向舊的 Teachify 站（還在營運），填了等於在監控舊站、而不是你的新站。這個網址要等《搬家手冊》步驟 5 真正換網域、新站穩定後才改。</p>
+      <p style="margin-top:8px;"><strong>搬家情境特別注意：</strong>換網域完成前，<strong>千萬別填你舊站現在的網域</strong>（那個還指向舊 Teachify、還在營運的網址）——填了等於在監控舊站、而不是你的新站。要等《搬家手冊》換網域、新站穩定後才改成正式網域。</p>
     </div>
     <p style="font-size:15px;color:var(--ink-soft);">（確認 GitHub 帳號的 Email 通知有開：GitHub 預設會在排程工作「失敗」時寄信給你，等於網站掛掉就收到通知。）</p>
 
