@@ -14,8 +14,9 @@ import {
   Megaphone, 
   Users, 
   MessageSquare, 
-  Receipt, 
-  FileCode, 
+  Receipt,
+  Ticket,
+  FileCode,
   Settings, 
   FolderOpen,
   Sliders,
@@ -61,6 +62,7 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
         { name: '行銷', href: '/admin/marketing', icon: Megaphone },
         { name: '成員', href: '/admin/students', icon: Users },
         { name: '留言', href: '/admin/comments', icon: MessageSquare },
+        { name: '優惠券', href: '/admin/coupons', icon: Ticket },
         { name: '財務 & 訂單', href: '/admin/finance', icon: Receipt }
       ]
     },

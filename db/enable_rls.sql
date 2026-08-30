@@ -33,4 +33,10 @@ BEGIN
   IF to_regclass('public.promotions') IS NOT NULL THEN
     EXECUTE 'ALTER TABLE promotions ENABLE ROW LEVEL SECURITY';
   END IF;
+  IF to_regclass('public.course_progress') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE course_progress ENABLE ROW LEVEL SECURITY';
+  END IF;
+  IF to_regclass('public.coupons') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE coupons ENABLE ROW LEVEL SECURITY';
+  END IF;
 END $$;

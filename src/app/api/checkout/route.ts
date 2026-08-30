@@ -3,8 +3,9 @@ import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { resolvePurchasable, createOrder, buildPayuniCheckout, PurchaseType } from '@/lib/purchases';
+import { resolvePurchasable, createOrder, buildPayuniCheckout, PurchaseType, OrderCouponFields } from '@/lib/purchases';
 import { rateLimit } from '@/lib/rate-limit';
+import { validateCoupon, normalizeCouponCode } from '@/lib/coupons';
 
 // 結帳請求主體（金額一律以資料庫為準，此處僅用於指定品項與類型）
 interface CheckoutBody {
@@ -12,6 +13,8 @@ interface CheckoutBody {
   planId?: string;
   downloadId?: string;
   type?: PurchaseType;
+  // 選填折扣碼：有值才啟用折抵；折後金額一律於伺服器端重新計算
+  couponCode?: string;
 }
 
 export async function POST(req: Request) {
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
     }
 
     const body: CheckoutBody = await req.json();
-    const { courseId, planId, downloadId, type = 'course' } = body;
+    const { courseId, planId, downloadId, type = 'course', couponCode } = body;
     const itemId = type === 'membership' ? planId : type === 'download' ? downloadId : courseId;
 
     // 依購買類型解析品項（金額以資料庫為準，防止竄改價格低買）
@@ -48,6 +51,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: resolved.error }, { status: 400 });
     }
     const { item } = resolved;
+
+    // 🔒 折扣碼處理（非破壞式）：沒有 couponCode 時 finalAmount 完全等於原價，行為與原本一致。
+    //    有 couponCode 時，於伺服器端以同一套規則（validateCoupon）重新驗證並計算折後金額，
+    //    絕不信任前端傳入的任何金額；折後金額已在 computeFinalAmount 夾到最低 1 元，不會送 0 元給 PayUni。
+    let finalAmount = item.amount;
+    let couponFields: OrderCouponFields | undefined;
+    if (couponCode && couponCode.trim()) {
+      const couponResult = await validateCoupon(couponCode, item.amount);
+      if (!couponResult.valid) {
+        return NextResponse.json({ error: couponResult.message }, { status: 400 });
+      }
+      finalAmount = couponResult.finalAmount;
+      // 保險：即使計算結果異常，也不允許 <=0 的金額送出金流
+      if (!Number.isFinite(finalAmount) || finalAmount <= 0) {
+        return NextResponse.json({ error: '折扣後金額為 0，請洽客服' }, { status: 400 });
+      }
+      couponFields = {
+        coupon_code: normalizeCouponCode(couponCode),
+        discount_amount: couponResult.discountAmount,
+      };
+    }
 
     // 訂單編號：加入隨機成分避免同一毫秒的並發結帳產生相同編號而互相覆蓋。
     // 以 base36 壓縮時間戳，控制長度在 ~17 字元（PayUni MerTradeNo 有長度上限，過長會被拒單）。
@@ -65,7 +89,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '找不到您的帳號資料，請重新登入後再試' }, { status: 400 });
     }
     try {
-      await createOrder(merTradeNo, userData.id, item.amount, item.orderFields);
+      // 以「折後金額」建立訂單：與稍後送 PayUni 的金額一致，
+      // callback 端的金額一致性校驗（TradeAmt === order.amount）因此仍然成立，無需改動。
+      await createOrder(merTradeNo, userData.id, finalAmount, item.orderFields, couponFields);
     } catch (orderErr) {
       console.error('建立訂單失敗，中止結帳：', orderErr);
       return NextResponse.json({ error: '建立訂單失敗，請稍後再試或聯絡客服' }, { status: 500 });
@@ -80,7 +106,7 @@ export async function POST(req: Request) {
         hashKey: HashKey,
         hashIV: HashIV,
         merTradeNo,
-        amount: item.amount,
+        amount: finalAmount,
         prodDesc: item.prodDesc,
         returnUrl: `${cleanBaseUrl}/api/checkout/return`,
         notifyUrl: `${cleanBaseUrl}/api/webhook/payuni`,

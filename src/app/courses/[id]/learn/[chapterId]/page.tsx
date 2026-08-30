@@ -6,8 +6,9 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";
-import { ChevronLeft, Play } from "lucide-react";
+import { ChevronLeft, Play, Check } from "lucide-react";
 import LearnExtraDetails from "@/components/LearnExtraDetails";
+import ChapterCompleteButton from "@/components/ChapterCompleteButton";
 import { isBunnyVideo, signBunnyEmbedUrl } from "@/lib/bunny";
 import { signStorageUrl } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
@@ -69,6 +70,22 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
   const announcements = (announcementsData || []) as { title: string; content: string; created_at: string }[];
   const chapterContentHtml = (currentChapter as { content_html?: string | null }).content_html || '';
 
+  // 學習進度：查此 (user, course) 已完成章節集合。以「章節完成」為單位（不做秒數回報）。
+  // 側邊清單據此顯示 ✓、主內容區帶入本章完成狀態，並計算整體進度百分比。
+  const { data: progressData } = await supabase
+    .from('course_progress')
+    .select('chapter_id')
+    .eq('user_id', user.id)
+    .eq('course_id', id)
+    .eq('completed', true);
+  const completedSet = new Set(
+    (progressData || []).map((r: { chapter_id: string }) => r.chapter_id)
+  );
+  const totalChapters = course.chapters.length;
+  const completedCount = course.chapters.filter((c) => completedSet.has(c.id)).length;
+  const progressPercent =
+    totalChapters > 0 ? Math.round((completedCount / totalChapters) * 100) : 0;
+
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-950 via-[#0B0F19] to-indigo-950/40 text-white overflow-hidden relative font-sans">
       
@@ -82,22 +99,40 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             <ChevronLeft className="w-4 h-4 mr-1" /> 返回課程介紹
           </Link>
           <h2 className="font-bold text-lg line-clamp-2">{course.title}</h2>
+          {/* 本課程整體進度（已完成章節數 / 總章節數） */}
+          {totalChapters > 0 && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                <span>本課程進度</span>
+                <span>{completedCount}/{totalChapters}（{progressPercent}%）</span>
+              </div>
+              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex-1 overflow-y-auto">
-          {course.chapters.map((chapter, index) => (
-            <Link 
+          {course.chapters.map((chapter, index) => {
+            const isDone = completedSet.has(chapter.id);
+            return (
+            <Link
               key={chapter.id}
               href={`/courses/${id}/learn/${chapter.id}`}
               className={`flex items-center p-4 hover:bg-gray-800 transition border-b border-gray-800/50 ${chapter.id === chapterId ? 'bg-blue-900/30 border-l-4 border-l-blue-500' : ''}`}
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${chapter.id === chapterId ? 'bg-blue-500' : 'bg-gray-700'}`}>
-                <Play className="w-3 h-3 fill-white" />
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${isDone ? 'bg-emerald-500' : chapter.id === chapterId ? 'bg-blue-500' : 'bg-gray-700'}`}>
+                {isDone ? <Check className="w-3.5 h-3.5" strokeWidth={3} /> : <Play className="w-3 h-3 fill-white" />}
               </div>
               <span className={`text-sm ${chapter.id === chapterId ? 'text-white font-medium' : 'text-gray-400'}`}>
                 {index + 1}. {chapter.title}
               </span>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -115,7 +150,15 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
           </div>
           
           <div className="p-6 lg:px-0">
-            <h1 className="text-2xl font-bold mb-4">{currentChapter.title}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+              <h1 className="text-2xl font-bold">{currentChapter.title}</h1>
+              {/* 章節「標示完成 / 已完成」切換（樂觀更新） */}
+              <ChapterCompleteButton
+                courseId={course.id}
+                chapterId={currentChapter.id}
+                initialCompleted={completedSet.has(currentChapter.id)}
+              />
+            </div>
             <div className="h-px bg-gray-800 w-full mb-6"></div>
             {(currentChapter as { description?: string | null }).description ? (
               <div className="prose prose-invert max-w-none">

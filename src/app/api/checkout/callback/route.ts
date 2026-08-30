@@ -1,5 +1,6 @@
 import { PayuniTool } from '@/lib/payuni';
 import { getOrder, markOrderPaid, markOrderFailed, markOrderFulfilled, releaseOrderFulfillment, fulfillOrder } from '@/lib/purchases';
+import { incrementCouponUsage } from '@/lib/coupons';
 import { sendAdminAlert } from '@/lib/email';
 import crypto from 'crypto';
 
@@ -88,6 +89,16 @@ export async function POST(req: Request) {
     try {
       await fulfillOrder(order);
       console.log('Payment success and access granted:', merTradeNo);
+
+      // 折扣碼使用次數 +1（盡力而為）：僅在履約成功後累加，且以獨立 try/catch 包住，
+      // 失敗只記 log，不得觸發下方的釋放認領/警示（更不可影響開通與回應）。
+      if (order.coupon_code) {
+        try {
+          await incrementCouponUsage(order.coupon_code);
+        } catch (couponErr) {
+          console.error(`折扣碼使用次數累加失敗（不影響開通）：${merTradeNo}`, couponErr);
+        }
+      }
     } catch (fulfillErr) {
       const detail = fulfillErr instanceof Error ? fulfillErr.message : String(fulfillErr);
       // 釋放履約認領，讓 PayUni 重送時可重新認領並補開通（避免卡在「已認領但未開通」）

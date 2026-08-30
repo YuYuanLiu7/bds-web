@@ -31,6 +31,13 @@ export interface OrderRow {
   course_id?: string | null;
   download_id?: string | null;
   membership_plan_id?: string | null;
+  coupon_code?: string | null;
+}
+
+/** 訂單折扣欄位（選填，欄位可能尚未遷移 → 建立訂單時會降級為不寫入） */
+export interface OrderCouponFields {
+  coupon_code?: string;
+  discount_amount?: number;
 }
 
 // 可購買品項：查價結果與建立訂單所需的欄位
@@ -102,40 +109,52 @@ export async function resolvePurchasable(
   };
 }
 
-/** 建立 pending 訂單；會員方案欄位若尚未遷移則降級為不含該欄位的保底寫入 */
+/**
+ * 建立 pending 訂單，採「逐層降級」寫入以相容尚未遷移的資料庫：
+ *  1. 完整寫入（品項欄位 + 折扣欄位）
+ *  2. 折扣欄位（coupon_code / discount_amount）可能尚未遷移 → 移除折扣欄位重試（保留品項欄位）
+ *  3. 會員方案欄位可能尚未遷移 → 僅保底欄位寫入
+ * 未帶折扣欄位時行為與原本完全一致（不影響既有結帳路徑）。
+ */
 export async function createOrder(
   orderId: string,
   userId: string,
   amount: number,
-  orderFields: Purchasable['orderFields']
+  orderFields: Purchasable['orderFields'],
+  couponFields?: OrderCouponFields
 ): Promise<void> {
+  const base = { id: orderId, user_id: userId, amount, status: 'pending' };
+  const coupon = couponFields ?? {};
+  const hasCoupon = Object.keys(coupon).length > 0;
+
   // 注意：supabase 的 .insert() 失敗時是回傳 { error } 而非拋出例外，
   // 因此必須明確檢查 error（先前用 try/catch 攔截，實際上永遠攔不到）。
-  const { error } = await supabase.from('orders').insert({
-    id: orderId,
-    user_id: userId,
-    amount,
-    status: 'pending',
+  let { error } = await supabase.from('orders').insert({
+    ...base,
     ...orderFields,
+    ...coupon,
   });
+  if (!error) return;
 
-  if (error) {
-    // 會員方案欄位可能尚未遷移：降級為不含該欄位的保底寫入並重試一次
-    if (orderFields.membership_plan_id) {
-      console.warn('建立會員訂單失敗（membership 欄位可能尚未遷移），改以保底欄位重試：', error.message);
-      const retry = await supabase.from('orders').insert({
-        id: orderId,
-        user_id: userId,
-        amount,
-        status: 'pending',
-      });
-      if (retry.error) {
-        throw new Error(`建立訂單失敗：${retry.error.message}`);
-      }
-      return;
-    }
-    throw new Error(`建立訂單失敗：${error.message}`);
+  // 第一層降級：折扣欄位可能尚未遷移 → 移除折扣欄位重試（品項欄位保留）
+  if (hasCoupon) {
+    console.warn('建立訂單含折扣欄位失敗（coupon 欄位可能尚未遷移），移除折扣欄位重試：', error.message);
+    const retry = await supabase.from('orders').insert({ ...base, ...orderFields });
+    if (!retry.error) return;
+    error = retry.error;
   }
+
+  // 第二層降級：會員方案欄位可能尚未遷移 → 降級為不含該欄位的保底寫入
+  if (orderFields.membership_plan_id) {
+    console.warn('建立會員訂單失敗（membership 欄位可能尚未遷移），改以保底欄位重試：', error.message);
+    const retry = await supabase.from('orders').insert(base);
+    if (retry.error) {
+      throw new Error(`建立訂單失敗：${retry.error.message}`);
+    }
+    return;
+  }
+
+  throw new Error(`建立訂單失敗：${error.message}`);
 }
 
 /** 取得訂單（供回呼校驗金額與履約） */

@@ -61,6 +61,31 @@ export default async function MyCoursesPage() {
     }
   }
 
+  // 2.5 各課程學習進度（以「章節完成」為單位）：
+  //     為每一堂可觀看的課程各查一次總章節數與已完成數，於卡片顯示「已完成 X/Y 章」。
+  //     課程數量少，逐課查詢可接受。
+  const displayedIds = courses.map((c) => c.id);
+  const chapterTotals: Record<string, number> = {};
+  const completedTotals: Record<string, number> = {};
+  if (displayedIds.length > 0) {
+    const { data: chapterRows } = await supabase
+      .from('chapters')
+      .select('course_id')
+      .in('course_id', displayedIds);
+    for (const r of (chapterRows || []) as { course_id: string }[]) {
+      chapterTotals[r.course_id] = (chapterTotals[r.course_id] || 0) + 1;
+    }
+    const { data: progressRows } = await supabase
+      .from('course_progress')
+      .select('course_id')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .in('course_id', displayedIds);
+    for (const r of (progressRows || []) as { course_id: string }[]) {
+      completedTotals[r.course_id] = (completedTotals[r.course_id] || 0) + 1;
+    }
+  }
+
   // 3. 訂單紀錄（供退費對照）
   const { data: orderRows } = await supabase
     .from('orders')
@@ -112,6 +137,11 @@ export default async function MyCoursesPage() {
                 </div>
                 <div className="p-4">
                   <div className="font-bold text-gray-900 line-clamp-2 mb-2">{c.title}</div>
+                  {(chapterTotals[c.id] || 0) > 0 && (
+                    <div className="text-xs text-gray-500 mb-2">
+                      已完成 {completedTotals[c.id] || 0}/{chapterTotals[c.id]} 章
+                    </div>
+                  )}
                   <span className="text-sm text-blue-600 font-bold">前往上課 →</span>
                 </div>
               </Link>
