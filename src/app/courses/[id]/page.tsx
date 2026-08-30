@@ -69,8 +69,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 py-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold mb-4">
-              {course.category || "未分類"}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
+                {course.category || "未分類"}
+              </span>
+              {course.is_featured && (
+                <span className="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-bold">🔥 暢銷課程</span>
+              )}
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
               {course.title}

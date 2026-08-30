@@ -150,7 +150,7 @@ export default function Navbar() {
                 Hi, {userName}
               </span>
               <Link 
-                href={isAdmin ? "/admin" : "/courses"} 
+                href={isAdmin ? "/admin" : "/my-courses"}
                 style={{ background: primaryColor }}
                 className="text-white px-5 py-2.5 rounded-xl font-bold transition shadow-xs hover:opacity-90 active:scale-95 flex items-center"
               >

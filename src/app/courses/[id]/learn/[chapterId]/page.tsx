@@ -10,6 +10,8 @@ import { ChevronLeft, Play } from "lucide-react";
 import LearnExtraDetails from "@/components/LearnExtraDetails";
 import { isBunnyVideo, signBunnyEmbedUrl } from "@/lib/bunny";
 import { signStorageUrl } from "@/lib/storage";
+import { supabase } from "@/lib/supabase";
+import DOMPurify from "isomorphic-dompurify";
 
 export default async function ChapterPage({ params }: { params: Promise<{ id: string, chapterId: string }> }) {
   const { id, chapterId } = await params;
@@ -57,6 +59,15 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
   // 教材附件（付費內容）：同樣簽短效網址後才交給前端顯示，不外流永久連結
   const chapterFileUrl = await signStorageUrl((currentChapter as { file_url?: string }).file_url || '');
   const courseFileUrl = await signStorageUrl((course as { file_url?: string }).file_url || '');
+
+  // 課程公告：此頁已通過 canAccess，於伺服器端取該課程公告顯示給學員（後台發佈的公告）。
+  const { data: announcementsData } = await supabase
+    .from('course_announcements')
+    .select('title, content, created_at')
+    .eq('course_id', id)
+    .order('created_at', { ascending: false });
+  const announcements = (announcementsData || []) as { title: string; content: string; created_at: string }[];
+  const chapterContentHtml = (currentChapter as { content_html?: string | null }).content_html || '';
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-950 via-[#0B0F19] to-indigo-950/40 text-white overflow-hidden relative font-sans">
@@ -113,6 +124,35 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
                 </p>
               </div>
             ) : null}
+
+            {/* 章節圖文 / 簡報連結（後台 content_html，淨化後顯示） */}
+            {chapterContentHtml && (
+              <div
+                className="prose prose-invert max-w-none mt-4 text-sm text-gray-300 leading-relaxed prose-a:text-blue-400"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chapterContentHtml) }}
+              />
+            )}
+
+            {/* 課程公告（後台發佈，學員可見） */}
+            {announcements.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">📢 課程公告</h2>
+                <div className="space-y-3">
+                  {announcements.map((a, i) => (
+                    <div key={i} className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+                      <div className="flex items-baseline justify-between gap-3 mb-1">
+                        <div className="font-bold text-white text-sm">{a.title}</div>
+                        <div className="text-[11px] text-slate-500 flex-shrink-0">{(a.created_at || '').slice(0, 10)}</div>
+                      </div>
+                      <div
+                        className="text-sm text-gray-400 leading-relaxed prose prose-invert max-w-none prose-a:text-blue-400"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(a.content || '') }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Extra details (Attachments & Comment section) */}
             <LearnExtraDetails 

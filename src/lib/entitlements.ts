@@ -138,8 +138,14 @@ export async function canAccess(
   if (user?.role === 'admin') return true;
 
   switch (resource.kind) {
-    case 'course':
-      return !!user?.id && (await ownsCourse(user.id, resource.id));
+    case 'course': {
+      if (!user?.id) return false;
+      // 單堂已購 → 放行
+      if (await ownsCourse(user.id, resource.id)) return true;
+      // 有效付費會員 → 解鎖全站課程（與 membership 行銷頁「解鎖全站課程」承諾一致；
+      // 也與 reviews/comments 既有的 hasActiveMembership 判斷統一）
+      return await hasActiveMembership(user.id);
+    }
 
     case 'download': {
       // fail-closed：只有「明確標為免費（price 為數字且 <= 0）」才放行；
