@@ -20,7 +20,7 @@ import {
   Search,
   Presentation
 } from 'lucide-react';
-import { uploadFile, uploadLargeFile } from '@/lib/admin-upload';
+import { uploadFile, uploadLargeFile, uploadVideoToBunny } from '@/lib/admin-upload';
 import { useToast } from '@/components/Toast';
 
 interface Chapter {
@@ -207,11 +207,18 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
     setUploadingField(fieldKey);
     try {
-      // 封面/縮圖：小圖片走一般上傳（public、4.5MB 上限、含 HEIC 轉換）。
-      // 課程檔、章節影片、章節教材：屬付費大檔內容 → 走大檔直傳（protected、5GB 上限，直接 PUT 到 Supabase，不經 Netlify）。
-      const url = fieldKey === 'cover'
-        ? await uploadFile(file, 'public')
-        : await uploadLargeFile(file, 'protected');
+      // 三種上傳路徑：
+      //  - 封面/縮圖（cover）：小圖片走一般上傳（public、4.5MB、含 HEIC 轉換）。
+      //  - 章節影片（chapter-video-*）：直傳 Bunny Stream（串流大檔的正確去處，可傳長片、金鑰不外洩）。
+      //  - 課程檔/章節教材（文件）：走 Supabase 大檔直傳（protected 私有桶）。
+      let url: string;
+      if (fieldKey === 'cover') {
+        url = await uploadFile(file, 'public');
+      } else if (fieldKey.startsWith('chapter-video')) {
+        url = await uploadVideoToBunny(file);
+      } else {
+        url = await uploadLargeFile(file, 'protected');
+      }
       callback(url);
     } catch (err) {
       console.error(err);

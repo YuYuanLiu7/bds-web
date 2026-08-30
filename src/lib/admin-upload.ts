@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import * as tus from 'tus-js-client';
 import { ensureClientImageCompatible } from './image';
 
 /** 上傳大小上限：4.5MB，避免 Netlify gateway 6MB 限制與提升載入效能 */
@@ -91,6 +92,54 @@ export async function uploadLargeFile(
     throw new Error('上傳成功但未取得檔案參照，請重試');
   }
   return data.ref;
+}
+
+/**
+ * 章節影片「直傳 Bunny Stream」（僅供 client component 使用）。
+ * 影片屬大檔＋串流內容，應放 Bunny（非 Supabase）：先向 /api/admin/bunny-upload 取得
+ * 伺服器建立好的影片物件與 TUS 上傳授權，再用 tus-js-client 直接把檔案傳到 Bunny
+ * （金鑰不外洩、可傳大型長片、支援斷點續傳）。成功回傳可存進 video_url 的 Bunny 嵌入網址。
+ */
+export async function uploadVideoToBunny(
+  file: File,
+  onProgress?: (pct: number) => void
+): Promise<string> {
+  const res = await fetch('/api/admin/bunny-upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: file.name }),
+  });
+
+  let data: {
+    libraryId?: string; videoId?: string; signature?: string; expire?: number; embedUrl?: string; error?: string;
+  } = {};
+  const ct = res.headers.get('content-type');
+  if (ct && ct.includes('application/json')) data = await res.json();
+  else throw new Error((await res.text()).slice(0, 150) || `伺服器回應錯誤碼: ${res.status}`);
+
+  if (!res.ok || !data.videoId || !data.signature || !data.libraryId || !data.expire || !data.embedUrl) {
+    throw new Error(data.error || '無法建立 Bunny 上傳授權');
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint: 'https://video.bunnycdn.com/tusupload',
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      headers: {
+        AuthorizationSignature: data.signature as string,
+        AuthorizationExpire: String(data.expire),
+        VideoId: data.videoId as string,
+        LibraryId: data.libraryId as string,
+      },
+      metadata: { filetype: file.type || 'video/mp4', title: file.name },
+      onError: (err) => reject(err),
+      onProgress: (sent, total) => { if (onProgress && total) onProgress(Math.round((sent / total) * 100)); },
+      onSuccess: () => resolve(),
+    });
+    upload.start();
+  });
+
+  return data.embedUrl as string;
 }
 
 /**
