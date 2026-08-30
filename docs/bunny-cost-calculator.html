@@ -148,6 +148,35 @@
     <p>先儲上面算出的「建議儲值」金額，用完再加值。這樣<strong>就算金鑰外洩，最多也只損失餘額</strong>，不會被灌爆成天價帳單。</p>
   </div>
 
+  <h2>怎麼在 Bunny 實際設定</h2>
+  <p style="font-size:15px;color:var(--ink-soft);">介面名稱 Bunny 偶爾會微調；大方向是找「帳務／Billing」那一區。找不到就在頁面搜尋 <code class="inline">Billing</code> 或 <code class="inline">Payment</code>。</p>
+
+  <div class="box tip">
+    <p class="box-title">做法一（推薦）：儲值制，把損失鎖在餘額</p>
+    <ul class="plain">
+      <li><strong>1.</strong> 登入 Bunny → 右上角<strong>帳號選單 → Billing（帳務）</strong>。</li>
+      <li><strong>2.</strong> 用 <strong>Add funds（加值/儲值）</strong> 加一筆上面算出的「建議儲值」金額（例：US$200）。用量會從這筆餘額扣。</li>
+      <li><strong>3.</strong> 找 <strong>Auto Recharge（自動加值）</strong> → <strong>先關閉</strong>（或設很低）。這樣被盜刷時不會自動一直補錢；餘額用完服務會暫停＝等於硬上限。</li>
+      <li><strong>4.</strong> 開啟 <strong>低餘額 Email 通知</strong>（Billing / Notifications 區）：餘額快用完時會寄信提醒你去加值，影片才不會突然停播。</li>
+    </ul>
+    <p style="font-size:14px;color:var(--ink-soft);">※ 代價：關掉自動加值＝餘額歸零時影片會暫時停播。所以要留意低餘額通知、及時手動加值。要「絕不斷播」就用做法二。</p>
+  </div>
+
+  <div class="box tip">
+    <p class="box-title">做法二：綁卡自動扣 + 用量警示</p>
+    <ul class="plain">
+      <li><strong>1.</strong> Billing → 綁定信用卡、開 <strong>Auto Recharge</strong>（餘額低會自動補、不斷播）。</li>
+      <li><strong>2.</strong> 設 <strong>用量／花費 Email 警示</strong>，門檻填上面算出的「警示線」（例：US$190/月）。正常月份不會碰到，被盜用衝高就馬上收到信。</li>
+      <li><strong>3.</strong> 每月到 <strong>Statistics / Billing</strong> 看一次本月用量與花費，確認在預期內。</li>
+    </ul>
+    <p style="font-size:14px;color:var(--ink-soft);">※ 優點：不會斷播；風險：外洩被灌爆時，警示只是「通知」不是「自動停」，要收到信後儘快去把金鑰重設（rotate）止血。</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">🔑 萬一金鑰外洩了</p>
+    <p>到 Bunny → Stream → 你的影片庫 → <strong>API</strong> 分頁，把金鑰 <strong>重新產生（Regenerate / Reset）</strong>，舊金鑰立刻失效；再到 Netlify 更新 <code class="inline">BUNNY_STREAM_API_KEY</code>、重新部署即可。</p>
+  </div>
+
   <div class="box warn">
     <p class="box-title">⚠️ 這是估算，不是保證</p>
     <ul class="plain" style="margin:6px 0 0;">
