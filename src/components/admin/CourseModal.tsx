@@ -18,7 +18,8 @@ import {
   Loader2,
   Users,
   Search,
-  Presentation
+  Presentation,
+  Crown
 } from 'lucide-react';
 import { uploadFile, uploadLargeFile, uploadVideoToBunny } from '@/lib/admin-upload';
 import { useToast } from '@/components/Toast';
@@ -54,6 +55,7 @@ export interface Course {
   is_hidden?: boolean;
   is_featured?: boolean;        // 設為精選（暢銷課程標籤）
   show_student_count?: boolean; // 是否顯示學員數
+  membership_included?: boolean; // 是否開放給「訂閱會員」觀看
   allow_comments?: boolean;
   allow_ratings?: boolean;
   seo_title?: string;           // 自訂 SEO 標題
@@ -97,6 +99,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
     is_hidden: false,
     is_featured: false,
     show_student_count: false,
+    membership_included: false,
     allow_comments: true,
     allow_ratings: true,
     seo_title: '',
@@ -125,6 +128,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
           is_hidden: !!course.is_hidden,
           is_featured: !!course.is_featured,
           show_student_count: !!course.show_student_count,
+          membership_included: !!course.membership_included,
           allow_comments: course.allow_comments !== false,
           allow_ratings: course.allow_ratings !== false,
           seo_title: course.seo_title || '',
@@ -156,6 +160,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
           is_hidden: false,
           is_featured: false,
           show_student_count: false,
+    membership_included: false,
           allow_comments: true,
           allow_ratings: true,
           seo_title: '',
@@ -666,6 +671,22 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                         <Users className="w-3.5 h-3.5 mr-1 text-emerald-500" /> 顯示學員數
                       </span>
                       <p className="text-[10px] text-slate-400 mt-0.5 font-medium">開啟後銷售頁會顯示已報名學員人數（預設不顯示）。</p>
+                    </div>
+                  </label>
+
+                  {/* membership_included：開放給訂閱會員觀看 */}
+                  <label className="flex items-start space-x-3 cursor-pointer select-none group">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.membership_included}
+                      onChange={e => setFormData({...formData, membership_included: e.target.checked})}
+                      className="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition flex items-center">
+                        <Crown className="w-3.5 h-3.5 mr-1 text-amber-500" /> 開放給訂閱會員觀看
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-0.5 font-medium">開啟後，有效的「訂閱會員」不需個別購買即可觀看本課程；關閉則仍需個別購買。</p>
                     </div>
                   </label>
                 </div>

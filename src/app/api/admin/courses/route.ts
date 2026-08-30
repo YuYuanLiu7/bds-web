@@ -30,6 +30,7 @@ interface CourseWriteData {
   seo_description?: string | null;
   seo_no_index?: boolean;
   sort_order?: number;
+  membership_included?: boolean;
 }
 
 // 依請求內容組出完整寫入 payload（含新欄位）
@@ -55,6 +56,7 @@ function buildFullData(body: Record<string, unknown>): CourseWriteData {
     course_type: body.course_type === 'free' ? 'free' : 'paid',
     is_featured: !!body.is_featured,
     show_student_count: !!body.show_student_count,
+    membership_included: !!body.membership_included,
     seo_title: (body.seo_title as string) || null,
     seo_description: (body.seo_description as string) || null,
     seo_no_index: !!body.seo_no_index,

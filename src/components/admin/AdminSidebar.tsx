@@ -19,8 +19,6 @@ import {
   Settings, 
   FolderOpen,
   Sliders,
-  Grid,
-  Code,
   ChevronDown,
   LogOut,
   Menu,
@@ -82,9 +80,8 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
   ];
 
   const bottomItems = [
-    { name: '全站設定', href: '/admin/global-settings', icon: Sliders },
-    { name: '第三方整合', href: '/admin/integrations', icon: Grid },
-    { name: '開發者', href: '/admin/developer', icon: Code }
+    { name: '全站設定', href: '/admin/global-settings', icon: Sliders }
+    // 「第三方整合」「開發者」「推薦分潤」尚未實作，暫不列入側欄以免誤導（功能完成後再加回）
   ];
 
   const isActive = (href: string) => {

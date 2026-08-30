@@ -21,6 +21,7 @@ export interface Course {
   course_type?: string | null;         // paid / free
   is_featured?: boolean;               // 設為精選（暢銷標籤）
   show_student_count?: boolean;        // 銷售頁是否顯示學員數
+  membership_included?: boolean;       // 是否開放給訂閱會員觀看
   seo_title?: string | null;           // 自訂 SEO 標題
   seo_description?: string | null;     // 自訂 SEO 描述
   seo_no_index?: boolean;              // 是否禁止搜尋引擎索引

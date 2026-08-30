@@ -48,6 +48,19 @@ export default async function MyCoursesPage() {
     planTitle = plan?.title || '會員方案';
   }
 
+  // 訂閱會員可觀看「開放給會員」的課程 → 併入可看清單（去重）
+  if (membership.active) {
+    const { data: memData } = await supabase
+      .from('courses')
+      .select('id, title, thumbnail_url')
+      .eq('membership_included', true)
+      .eq('is_published', true);
+    const owned = new Set(courses.map((c) => c.id));
+    for (const m of (memData || []) as CourseRow[]) {
+      if (!owned.has(m.id)) courses.push(m);
+    }
+  }
+
   // 3. 訂單紀錄（供退費對照）
   const { data: orderRows } = await supabase
     .from('orders')
@@ -69,10 +82,10 @@ export default async function MyCoursesPage() {
             <div className="flex-1">
               <div className="font-bold text-gray-900">會員生效中：{planTitle}</div>
               <div className="text-sm text-gray-600">
-                {membership.expiresAt ? `到期日：${membership.expiresAt.slice(0, 10)}` : '永久有效'}　·　會員可觀看全站課程
+                {membership.expiresAt ? `到期日：${membership.expiresAt.slice(0, 10)}` : '永久有效'}　·　可觀看文章與「開放給會員」的課程
               </div>
             </div>
-            <Link href="/courses" className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-bold">瀏覽全站課程</Link>
+            <Link href="/courses" className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-bold">瀏覽課程</Link>
           </div>
         )}
 
@@ -104,7 +117,7 @@ export default async function MyCoursesPage() {
               </Link>
             ))}
             {courses.length === 0 && membership.active && (
-              <div className="col-span-full text-gray-500 text-sm">您以會員身分可觀看全站課程，<Link href="/courses" className="text-blue-600 font-bold hover:underline">前往課程目錄</Link>。</div>
+              <div className="col-span-full text-gray-500 text-sm">目前尚無「開放給會員」的課程；您仍可觀看文章。<Link href="/courses" className="text-blue-600 font-bold hover:underline">前往課程目錄</Link>。</div>
             )}
           </div>
         )}

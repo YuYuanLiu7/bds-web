@@ -142,9 +142,17 @@ export async function canAccess(
       if (!user?.id) return false;
       // 單堂已購 → 放行
       if (await ownsCourse(user.id, resource.id)) return true;
-      // 有效付費會員 → 解鎖全站課程（與 membership 行銷頁「解鎖全站課程」承諾一致；
-      // 也與 reviews/comments 既有的 hasActiveMembership 判斷統一）
-      return await hasActiveMembership(user.id);
+      // 訂閱會員：只解鎖「管理員開放給會員」的課程（membership_included=true）；
+      // 未開放的課仍需個別購買。一般免費帳號不因此解鎖任何課程。
+      if (await hasActiveMembership(user.id)) {
+        const { data } = await supabase
+          .from('courses')
+          .select('membership_included')
+          .eq('id', resource.id)
+          .maybeSingle();
+        if (data?.membership_included) return true;
+      }
+      return false;
     }
 
     case 'download': {
