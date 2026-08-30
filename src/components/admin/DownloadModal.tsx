@@ -77,7 +77,8 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
     // 大小限制與 HEIC 轉換皆由共用上傳模組處理
     setUploading(true);
     try {
-      const url = await uploadFile(file);
+      // 數位下載商品為付費內容 → 存 private bucket（protected），交付時才簽短效網址
+      const url = await uploadFile(file, 'protected');
       setFormData(prev => ({ ...prev, file_url: url }));
     } catch (err) {
       console.error(err);

@@ -48,3 +48,6 @@ next-env.d.ts
 
 # uploads
 /public/uploads/
+
+# 安全稽核報告（內部用，等同攻擊地圖，勿進版控）
+SECURITY_AUDIT.md

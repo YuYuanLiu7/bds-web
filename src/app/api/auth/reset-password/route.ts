@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     //    否則未驗證的帳號設好新密碼仍會被登入流程（is_verified=false）擋下，形成「設好卻登不進去」。
     const { error: updateError } = await supabase
       .from('users')
-      .update({ password_hash: hashedPassword, is_verified: true })
+      .update({ password_hash: hashedPassword, is_verified: true, password_changed_at: new Date().toISOString() })
       .eq('email', email);
 
     if (updateError) {

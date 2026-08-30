@@ -54,7 +54,12 @@ export async function POST(req: Request) {
 
     // 檔名改用隨機值，避免用戶端操控檔名或同毫秒併發覆蓋
     const fileName = `bds-${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${rawExt}`;
-    const bucketName = 'uploads';
+
+    // 依 visibility 決定存放位置：
+    //  - protected（付費影片/下載檔/教材）→ private bucket，回傳 protected:// 參照，交付時才簽短效網址（可撤銷、防外流）
+    //  - public（圖片：logo/封面/文章圖…）→ public bucket，回傳永久公開網址（本就要公開顯示）
+    const isProtected = formData.get('visibility') === 'protected';
+    const bucketName = isProtected ? 'protected' : 'uploads';
 
     // 4. 主要策略：上傳到 Supabase Storage（無狀態平台 Netlify/Vercel 唯一可行的持久化方式）
     const doUpload = () =>
@@ -65,21 +70,25 @@ export async function POST(req: Request) {
 
     let { data, error } = await doUpload();
 
-    // 若 bucket 尚未建立，自動建立公開 bucket 後重試一次（讓部署者免手動設定）
+    // 若 bucket 尚未建立，自動建立後重試一次（protected 桶為 private、uploads 桶為 public）
     if (error && /bucket|not found|exist/i.test(error.message || '')) {
-      await supabase.storage.createBucket(bucketName, { public: true }).catch(() => {});
+      await supabase.storage.createBucket(bucketName, { public: !isProtected }).catch(() => {});
       ({ data, error } = await doUpload());
     }
 
     if (!error && data) {
+      if (isProtected) {
+        // 不回永久公開網址；回傳 protected:// 參照，實際交付時經 signStorageUrl 簽短效網址
+        return NextResponse.json({ url: `protected://${fileName}` });
+      }
       const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(fileName);
       if (urlData?.publicUrl) {
         return NextResponse.json({ url: urlData.publicUrl });
       }
     }
 
-    // 5. 僅「開發環境」可退回寫入本機 public/uploads（正式/無狀態平台不可行，避免回傳會 404 的假連結）
-    if (process.env.NODE_ENV !== 'production') {
+    // 5. 僅「公開圖片」且「開發環境」可退回寫入本機 public/uploads（受保護內容不走此路，避免落到公開目錄）
+    if (!isProtected && process.env.NODE_ENV !== 'production') {
       const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });

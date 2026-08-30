@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ChevronLeft, Play } from "lucide-react";
 import LearnExtraDetails from "@/components/LearnExtraDetails";
 import { isBunnyVideo, signBunnyEmbedUrl } from "@/lib/bunny";
+import { signStorageUrl } from "@/lib/storage";
 
 export default async function ChapterPage({ params }: { params: Promise<{ id: string, chapterId: string }> }) {
   const { id, chapterId } = await params;
@@ -38,14 +39,24 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
     redirect(`/courses/${id}/learn`);
   }
 
-  // 🔒 影片防盜：此頁已通過登入＋課程存取權驗證，於伺服器端為 Bunny 影片簽發
-  //    短效（6 小時）Token 嵌入網址，不把可永久存取的原始網址暴露給前端。
-  //    未設定 Bunny env 時維持原值（degrade，仍可播放未啟用 token 的影片）。
+  // 🔒 影片防盜：此頁已通過登入＋課程存取權驗證，於伺服器端簽發「短效」網址，
+  //    不把可永久存取的原始網址暴露給前端。
+  //    - Bunny 影片：簽發短效（30 分鐘）Embed Token 網址；未設 Bunny env 時維持原值（degrade）。
+  //    - Supabase 自架上傳（protected:// 或舊的公開網址）：以 signStorageUrl 簽短效網址。
+  //    - 其他外部網址（YouTube/Vimeo）：signStorageUrl 原樣返回，交由播放器處理。
   let videoUrl = currentChapter.video_url || '';
-  if (videoUrl && isBunnyVideo(videoUrl)) {
-    const signed = signBunnyEmbedUrl(videoUrl);
-    if (signed) videoUrl = signed;
+  if (videoUrl) {
+    if (isBunnyVideo(videoUrl)) {
+      const signed = signBunnyEmbedUrl(videoUrl);
+      if (signed) videoUrl = signed;
+    } else {
+      videoUrl = await signStorageUrl(videoUrl);
+    }
   }
+
+  // 教材附件（付費內容）：同樣簽短效網址後才交給前端顯示，不外流永久連結
+  const chapterFileUrl = await signStorageUrl((currentChapter as { file_url?: string }).file_url || '');
+  const courseFileUrl = await signStorageUrl((course as { file_url?: string }).file_url || '');
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-950 via-[#0B0F19] to-indigo-950/40 text-white overflow-hidden relative font-sans">
@@ -111,8 +122,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
               chapterTitle={currentChapter.title}
               studentName={user.name || user.email}
               allowComments={course.allow_comments !== false}
-              chapterFileUrl={(currentChapter as { file_url?: string }).file_url || ''}
-              courseFileUrl={(course as { file_url?: string }).file_url || ''}
+              chapterFileUrl={chapterFileUrl}
+              courseFileUrl={courseFileUrl}
             />
           </div>
         </div>

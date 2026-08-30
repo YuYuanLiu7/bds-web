@@ -31,8 +31,16 @@ export async function POST(req: Request) {
     }
 
     // 1. 檢查使用者是否已存在
+    // 防帳號枚舉：信箱已註冊時，不透露此事實，回與新註冊「完全相同」的中性成功訊息
+    //（不建立帳號、不寄信）。並執行一次等成本的雜湊拉平時間差，避免以回應時間推斷帳號是否存在。
+    // 既有使用者本就能用「登入」或「忘記密碼」，不受影響。
     if (await emailTaken(email)) {
-      return NextResponse.json({ error: '此 Email 已被註冊' }, { status: 400 });
+      await hashPassword(password).catch(() => {});
+      return NextResponse.json({
+        message: '註冊成功，請檢查您的電子郵件（含垃圾郵件匣）以驗證並啟用您的帳戶。',
+        requiresVerification: true,
+        emailSent: true,
+      });
     }
 
     // 2. 密碼加密
@@ -86,13 +94,14 @@ export async function POST(req: Request) {
       }
     }
 
+    // 不回傳 user 物件（前端未使用），使此回應與「信箱已存在」的中性回應形狀一致，避免帳號枚舉
+    void newUser;
     return NextResponse.json({
       message: emailSent
         ? '註冊成功，請檢查您的電子郵件（含垃圾郵件匣）以驗證並啟用您的帳戶。'
         : '註冊成功，但驗證信暫時寄送失敗。請稍後至登入頁點「重寄驗證信」，或聯絡客服。',
       requiresVerification: true,
       emailSent,
-      user: { id: newUser.id, email: newUser.email, name: newUser.name }
     });
   } catch (error) {
     console.error('Signup API error:', error);

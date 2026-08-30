@@ -40,8 +40,18 @@ export async function rateLimit(
   }
 }
 
-/** 從請求標頭取得用戶端 IP（Vercel/反向代理會帶 x-forwarded-for） */
+/**
+ * 從請求標頭取得用戶端 IP。
+ * 優先採用「平台注入、用戶端無法偽造」的來源 IP header（Netlify: x-nf-client-connection-ip、
+ * 部分平台: true-client-ip），這些由邊緣層設定、不受請求方控制；
+ * 找不到時才退回 x-forwarded-for 最左值（可被偽造，僅作為最後手段）。
+ * 這可避免攻擊者每次帶不同的 X-Forwarded-For 就重置以 IP 為 key 的限流計數。
+ */
 export function clientIp(req: Request): string {
+  const trusted =
+    req.headers.get("x-nf-client-connection-ip") || // Netlify
+    req.headers.get("true-client-ip");              // Cloudflare / 部分 CDN
+  if (trusted) return trusted.trim();
   const xff = req.headers.get("x-forwarded-for");
   if (xff) return xff.split(",")[0].trim();
   return req.headers.get("x-real-ip") || "unknown";

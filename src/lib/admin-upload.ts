@@ -12,7 +12,10 @@ export const MAX_UPLOAD_SIZE = 4.5 * 1024 * 1024;
  * 先前這段程式碼在 8 個元件/頁面各自複製一份；現在所有上傳一律經過此函式，
  * 修一次等於全部修好。
  */
-export async function uploadFile(file: File): Promise<string> {
+export async function uploadFile(
+  file: File,
+  visibility: 'public' | 'protected' = 'public'
+): Promise<string> {
   // HEIC/HEIF 先轉為 JPEG 再驗證大小（轉檔後通常更小，非 HEIC 檔案會原樣返回）
   const compatible = await ensureClientImageCompatible(file);
 
@@ -26,6 +29,9 @@ export async function uploadFile(file: File): Promise<string> {
   const formData = new FormData();
   const fileExt = compatible.name.split('.').pop() || 'png';
   formData.append('file', compatible, `upload-${Date.now()}.${fileExt}`);
+  // visibility='protected' 代表付費/受保護內容（影片、下載檔、教材），
+  // 伺服器會存入 private bucket 並回傳 protected:// 參照，交付時才簽短效網址。
+  formData.append('visibility', visibility);
 
   const res = await fetch('/api/admin/upload', {
     method: 'POST',

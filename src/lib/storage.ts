@@ -22,21 +22,34 @@ export async function signStorageUrl(
 ): Promise<string> {
   try {
     if (!fileUrl) return fileUrl;
-    const m = fileUrl.match(PUBLIC_RE);
-    if (!m) return fileUrl; // 非 Supabase Storage 公開網址（例如外部連結），原樣返回
 
-    const bucket = m[1];
-    // 去掉可能的 query string，再還原路徑中的百分比編碼
-    const rawPath = m[2].split('?')[0];
-    const objectPath = decodeURIComponent(rawPath);
+    let bucket: string;
+    let objectPath: string;
+
+    if (fileUrl.startsWith('protected://')) {
+      // 受保護內容參照（存於 private bucket 'protected'）——正常情況
+      bucket = 'protected';
+      objectPath = decodeURIComponent(fileUrl.slice('protected://'.length).split('?')[0]);
+    } else {
+      // 向後相容：舊資料以 Supabase 公開網址儲存
+      const m = fileUrl.match(PUBLIC_RE);
+      if (!m) return fileUrl; // 非 Supabase Storage（例如 YouTube/Bunny/外部連結），原樣返回
+      bucket = m[1];
+      objectPath = decodeURIComponent(m[2].split('?')[0]);
+    }
 
     const { data, error } = await supabase.storage
       .from(bucket)
       .createSignedUrl(objectPath, expiresInSeconds);
 
-    if (error || !data?.signedUrl) return fileUrl; // 簽章失敗：退回原網址，不讓下載壞掉
+    if (error || !data?.signedUrl) return fileUrl; // 簽章失敗：退回原值，不讓交付整個壞掉
     return data.signedUrl;
   } catch {
-    return fileUrl; // 任何例外：退回原網址
+    return fileUrl; // 任何例外：退回原值
   }
+}
+
+/** 判斷是否為受保護內容參照（存於 private bucket，須簽章才能存取） */
+export function isProtectedRef(value: string | null | undefined): boolean {
+  return typeof value === 'string' && value.startsWith('protected://');
 }

@@ -82,10 +82,8 @@ export async function GET(req: Request) {
     }
   } catch (error) {
     const err = error as SupabaseLikeError;
-    console.error("Public API GET articles error:", err?.message);
-    return NextResponse.json(
-      { error: err?.message || "Failed to fetch articles", code: err?.code },
-      { status: 500 }
-    );
+    // 對外只回制式訊息，不洩漏資料庫錯誤/欄位名；詳細只寫伺服器日誌
+    console.error("Public API GET articles error:", err?.message, err?.code);
+    return NextResponse.json({ error: "伺服器忙碌，請稍後再試" }, { status: 500 });
   }
 }

@@ -155,7 +155,9 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
     setUploadingField(fieldKey);
     try {
-      const url = await uploadFile(file);
+      // 封面/縮圖需公開顯示；課程檔、章節影片、章節教材屬付費內容 → 存 private bucket（protected）
+      const visibility = fieldKey === 'cover' ? 'public' : 'protected';
+      const url = await uploadFile(file, visibility);
       callback(url);
     } catch (err) {
       console.error(err);
