@@ -9,6 +9,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 import CourseReviews from '@/components/CourseReviews';
+import DOMPurify from 'isomorphic-dompurify';
+
+// 課程簡介現在是富文本（HTML）；顯示前一律淨化，metadata 用純文字。
+function stripHtml(html: string | null | undefined): string {
+  return (html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!course) return { title: "課程" };
   return {
     title: course.title,
-    description: course.description || `${course.title} — BDS By Doing So 線上實戰課程。`,
+    description: stripHtml(course.description) || `${course.title} — BDS By Doing So 線上實戰課程。`,
   };
 }
 
@@ -69,9 +75,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
               {course.title}
             </h1>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              {course.description}
-            </p>
+            <div
+              className="text-lg text-gray-600 mb-8 leading-relaxed prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.description || '') }}
+            />
             <div className="flex items-center space-x-6 text-gray-500 text-sm">
               <div className="flex items-center"><Clock className="w-4 h-4 mr-2" /> 課程大綱共 {course.chapters.length} 章節</div>
               <div className="flex items-center"><Users className="w-4 h-4 mr-2" /> 專業講師授課</div>

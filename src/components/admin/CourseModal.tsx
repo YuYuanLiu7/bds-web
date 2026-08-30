@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { uploadFile, uploadLargeFile, uploadVideoToBunny } from '@/lib/admin-upload';
 import { useToast } from '@/components/Toast';
+import RichTextEditor from './RichTextEditor';
 
 interface Chapter {
   id?: string;
@@ -76,6 +77,9 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
   const [uploadingField, setUploadingField] = useState<string | null>(null); // tracks which field is uploading (e.g. 'cover', 'course_file', 'chapter-video-idx', 'chapter-file-idx')
   const [deletedChapters, setDeletedChapters] = useState<string[]>([]);
   const [localCoverPreview, setLocalCoverPreview] = useState<string | null>(null);
+  // 課程類別下拉：優先讀「課程類別管理」的資料，讀不到才用預設四項（向後相容）
+  const DEFAULT_CATEGORIES = ['業務新手村', '產業大講堂', '圍爐夜話', '讀書會'];
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(DEFAULT_CATEGORIES);
   const [formData, setFormData] = useState<Course>({
     title: '',
     subtitle: '',
@@ -166,6 +170,23 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
       setUploadingField(null);
     }
   }, [isOpen, course]);
+
+  // 開啟時載入「課程類別管理」的分類，供下拉選單使用（讀不到就維持預設四項）
+  useEffect(() => {
+    if (!isOpen) return;
+    let alive = true;
+    fetch('/api/admin/course-categories')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => {
+        if (!alive) return;
+        const names = Array.isArray(rows)
+          ? rows.map((c: { name?: string }) => c?.name).filter((n): n is string => !!n)
+          : [];
+        if (names.length > 0) setCategoryOptions(names);
+      })
+      .catch(() => { /* 讀不到就用預設 */ });
+    return () => { alive = false; };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -350,12 +371,11 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程描述</label>
-                <textarea 
+                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程簡介</label>
+                <RichTextEditor
                   value={formData.description}
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition min-h-[100px]"
-                  placeholder="請輸入課程詳細介紹..."
+                  onChange={(html) => setFormData(prev => ({ ...prev, description: html }))}
+                  placeholder="請輸入課程詳細介紹（可用標題、清單、粗體、顏色、連結、圖片、表格…）"
                 />
               </div>
 
@@ -378,11 +398,15 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                     onChange={e => setFormData({...formData, category: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-bold transition bg-white cursor-pointer"
                   >
-                    <option>業務新手村</option>
-                    <option>產業大講堂</option>
-                    <option>圍爐夜話</option>
-                    <option>讀書會</option>
+                    {/* 若目前課程的分類不在清單中（例如舊資料），仍保留為可選項，避免被清掉 */}
+                    {formData.category && !categoryOptions.includes(formData.category) && (
+                      <option value={formData.category}>{formData.category}</option>
+                    )}
+                    {categoryOptions.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                   </select>
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">分類清單來自「課程 → 課程類別」管理；在那裡新增/調整。</p>
                 </div>
 
                 <div>
