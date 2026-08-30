@@ -405,10 +405,6 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
       <p class="box-title">⚠️ 只要記住：init.sql 先、enable_rls.sql 最後</p>
       <p>中間其他檔全部都要跑、順序不拘。這樣<strong>日後新增任何資料表/欄位（多一個 .sql 檔），你照這規則做就不會漏</strong>，不必更新這份手冊。</p>
     </div>
-    <div class="box tip">
-      <p class="box-title">💡 想更省事？（給願意開一次終端機的人）</p>
-      <p>賣方或工程師可以在電腦上跑一行指令 <code class="inline">npm run setup -- --migrate</code>，它會<strong>依相依順序自動跑完 <code class="inline">db/</code> 內所有必要的 SQL（最後一步才 enable_rls 對外上鎖）</strong>，結果與手動一張張貼上完全等價、且可安心重複跑（每個檔都是冪等的）。此法需先在 <code class="inline">.env.local</code> 設定 <code class="inline">SUPABASE_DB_URL</code>（選 Session pooler 那條）。做不到就用上面的手動貼上法，一樣的結果，但<strong>手動法務必最後補跑 <code class="inline">enable_rls.sql</code></strong>。</p>
-    </div>
 
     <h3>2-3. 拿 3 把鑰匙（等一下要貼到上線平台）</h3>
     <p>點 Supabase 畫面<strong>最上方的 <em>Connect</em> 按鈕</strong>（把所有金鑰放在同一個視窗，最好找）。抄下這 3 個：</p>
