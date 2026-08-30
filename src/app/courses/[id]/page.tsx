@@ -79,6 +79,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               className="text-lg text-gray-600 mb-8 leading-relaxed prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.description || '') }}
             />
+            {course.points && stripHtml(course.points) && (
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">課程重點</h2>
+                <div
+                  className="text-base text-gray-600 leading-relaxed prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-li:my-1"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.points) }}
+                />
+              </div>
+            )}
             <div className="flex items-center space-x-6 text-gray-500 text-sm">
               <div className="flex items-center"><Clock className="w-4 h-4 mr-2" /> 課程大綱共 {course.chapters.length} 章節</div>
               <div className="flex items-center"><Users className="w-4 h-4 mr-2" /> 專業講師授課</div>
