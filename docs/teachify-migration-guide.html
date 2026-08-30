@@ -257,6 +257,7 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
 
     <h3>5-4. 設好新站網址並重新部署</h3>
     <p>到 Netlify 環境變數把 <code class="inline">NEXTAUTH_URL</code> 改成 <code class="inline">https://bds.fu-notes.com</code>，然後<strong>務必到 Deploys → Trigger deploy → 選「Clear cache and deploy site」手動觸發一次</strong>（只改環境變數不會自動生效）。</p>
+    <p style="font-size:15px;color:var(--ink-soft);">※ 同時把 GitHub 的 <code class="inline">SITE_URL</code>（網站當機通知用）也從先前的 Netlify 臨時網址改成 <code class="inline">https://bds.fu-notes.com</code>——換網域前它應該填臨時網址，切換後才改成正式網域，否則會一直監控錯對象。</p>
 
     <h3>5-5. 正式改 DNS 指向 Netlify</h3>
     <p>選<strong>離峰時段</strong>，把 <code class="inline">bds.fu-notes.com</code> 依 Netlify 給的值改指過去。因為 5-1 已降 TTL，通常幾分鐘生效。</p>
