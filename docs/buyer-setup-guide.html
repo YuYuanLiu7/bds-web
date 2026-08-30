@@ -318,9 +318,12 @@ CONTACT_TO_EMAIL      = ____________   （客服信箱）
 ADMIN_ALERT_EMAIL     = ____________   （收系統警示的信箱）
 
 ── PayUni 金流（步驟 5，審核過才有）──
-PAYUNI_MERID    = ____________
-PAYUNI_HASH_KEY = ____________
-PAYUNI_HASH_IV  = ____________
+PAYUNI_MERID                 = ____________
+PAYUNI_HASH_KEY              = ____________
+PAYUNI_HASH_IV               = ____________
+NEXT_PUBLIC_PAYUNI_MERID     = ____________   （同商店代號，前端顯示用）
+NEXT_PUBLIC_PAYUNI_UPP_URL   = ____________   （測試/正式端點網址）
+ENABLE_PAYMENT_SIMULATION    = false          （正式站務必 false）
 
 ── 網站基本（步驟 6）──
 NEXTAUTH_SECRET = ____________   （步驟 6 產生的一串亂碼）
@@ -370,7 +373,7 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
     <p>後面很多步驟（貼 SQL、之後搬家跑指令）都需要「打得開專案裡的檔案」。所以先把賣方給你的程式碼放到電腦上：</p>
     <ul class="plain">
       <li>拿到的是<strong>壓縮檔（zip）</strong>：解壓縮到一個好找的位置（例如桌面），得到一個 <code class="inline">bds-web</code> 資料夾。</li>
-      <li>拿到的是 <strong>GitHub 連結</strong>：最簡單是先做步驟 6-1（賣方把 repo 轉到你的 GitHub），再在你的 GitHub 頁面按 <strong>Code → Download ZIP</strong> 下載解壓；或若你會用終端機，<code class="inline">git clone</code> 下來。</li>
+      <li>拿到的是 <strong>GitHub 連結</strong>：直接在該頁面按 <strong>Code → Download ZIP</strong> 下載、解壓縮即可（最簡單）。<span style="color:var(--ink-soft);">（之後步驟 6 才需要把 repo 轉到你自己的 GitHub 帳號，現在不用管。）</span></li>
     </ul>
     <div class="box tip">
       <p class="box-title">💡 記住這個資料夾位置</p>
@@ -656,32 +659,23 @@ WHERE email = '你的信箱@example.com';</pre>
         <p class="sub"><span class="time-tag">約 20 分鐘</span>　開始收真錢之前，這幾項一定要確認</p>
       </div>
     </div>
-    <div class="box warn">
-      <p class="box-title">① 先補跑兩行資料庫指令（必做）</p>
-      <p>系統有兩個必要的資料庫欄位；沒有的話「付款開通」會卡住、「重設密碼」會失敗。到 Supabase → <strong>SQL Editor</strong> → 貼上 → <strong>Run</strong>（看到 Success 就好，可重複跑）：</p>
-<pre>ALTER TABLE orders ADD COLUMN IF NOT EXISTS fulfilled_at timestamptz;
-ALTER TABLE users  ADD COLUMN IF NOT EXISTS password_changed_at timestamptz;</pre>
-      <p style="font-size:14px;color:#64748b;">※ 若你是照本手冊步驟 2 全新建立資料庫（清單已含這兩個檔），這步已自動完成，可略過；不確定就再跑一次也不會壞。</p>
-    </div>
     <div class="box tip">
-      <p class="box-title">⚡ 再跑「一鍵驗收」，讓電腦幫你檢查一遍</p>
+      <p class="box-title">⚡ 先跑「一鍵驗收」，讓電腦幫你檢查一遍</p>
       <p>在專案 <code class="inline">bds-web</code> 資料夾（需先照《搬家手冊》附錄裝好 Node＋<code class="inline">npm install</code>）執行：</p>
 <pre>npm run verify</pre>
       <p style="font-size:14px;color:#64748b;">※ 若你全程都在<strong>網頁上</strong>設定、電腦裡從沒建過 <code class="inline">.env.local</code>，這支會滿螢幕紅字（因為它讀本機的 <code class="inline">.env.local</code>）。請先照《搬家手冊》附錄②把 <code class="inline">.env.example</code> 複製成 <code class="inline">.env.local</code>，填好 Supabase 兩把金鑰、<code class="inline">NEXTAUTH_URL</code>、<code class="inline">NEXTAUTH_SECRET</code>，再跑本檢查。這支是「給會用電腦指令的人」的加分檢查；不跑也能上線，但強烈建議請工程師幫你跑一次。</p>
       <p>它會自動體檢：環境變數、資料庫 17 張表、限流函式、圖片空間、管理員帳號、線上網站是否活著——全程<strong>唯讀、不會改任何東西</strong>。看到「全部必要項目通過！」就代表地基沒問題；有紅色 ✗ 會直接告訴你缺什麼、怎麼補。下面的清單則是這支工具檢查不到、需要你「親手實測」的部分。</p>
     </div>
     <ul class="plain">
-      <li><strong>資料保護鎖有打開（資安最重要）：</strong>到 SQL Editor 貼上下面，按 Run，看每列 <code class="inline">relrowsecurity</code> 是否都 <strong>true</strong>；有任何 false，就把 <code class="inline">db/enable_rls.sql</code> 整份貼上跑一次。<br>
-        <code class="inline">select relname, relrowsecurity from pg_class where relname in ('users','orders','user_courses','user_downloads','site_settings','course_comments','rate_limits');</code></li>
+      <li><strong>資料保護鎖有打開（資安最重要）：</strong>上面的 <code class="inline">npm run verify</code> 會自動檢查這項（「資料庫對外上鎖」）。若顯示未上鎖，代表步驟 2 最後的 <code class="inline">db/enable_rls.sql</code> 沒跑到——回步驟 2 把它整份再貼一次即可。</li>
       <li>安全開關關好：Netlify 設定裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
       <li>金流換正式：確認商家審核通過後，把 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 換成正式端點、金鑰換成正式那組，重新部署。</li>
       <li>網址填對：<code class="inline">NEXTAUTH_URL</code> 已改成你真正的網址（不是預設的假網址）。</li>
       <li>寄信正常（很重要）：<code class="inline">RESEND_FROM_EMAIL</code> 已改成自家已驗證網域（不是 <code class="inline">onboarding@resend.dev</code>）。實測：用<strong>另一個</strong>信箱到 <code class="inline">/signup</code> 註冊 → 該信箱能收到「驗證信」→ 點了能成功登入。收不到＝客戶也會收不到、無法登入。</li>
       <li>真卡實測：用一張真卡買一筆最便宜的商品，確認「付款成功 → 自動開通 → 收到通知信」整條走得通，再退刷。（系統設計上同一筆只會開通一次，不會重複扣款。）</li>
       <li><strong>付費內容保護：</strong>之後上傳的付費影片/下載檔/教材會自動放進「私有空間」、只發會過期的短連結。<strong>若先前上傳過測試的付費檔，請重新上傳一次</strong>，舊的才會受保護。</li>
-      <li>備份實測：GitHub → Actions →「每日資料庫備份」→ Run workflow 跑一次，看到綠色打勾且下方 Artifacts 出現備份檔才算生效（見步驟 9B）。</li>
       <li>換成你的品牌：後台「設定」把站名、Logo、主色、聯絡信箱、FAQ、公告改成你自己的；刪掉範例課程與範例訂單。</li>
-      <li>保活已開：確認步驟 9A 的保活已設定並測試成功（否則網站閒置一週資料庫會睡著）。</li>
+      <li><strong>備份與保活已生效（在步驟 9 設定）：</strong>先做完下面的步驟 9（保活、每日備份），再回來確認它們都測試成功、打勾。（沒設好的話：網站閒置會睡著、資料也沒有備份。）</li>
     </ul>
     <div class="box tip">
       <p class="box-title">✅ 這一頁就是你的完整清單</p>
@@ -767,7 +761,8 @@ ALTER TABLE users  ADD COLUMN IF NOT EXISTS password_changed_at timestamptz;</pr
     </div>
     <div class="box warn">
       <p class="box-title">🗓️ 這個系統已幫你自動處理（了解即可）</p>
-      <p>GitHub 有個規則：專案<strong>連續約 60 天沒有任何變更</strong>，會自動把排程（保活/備份/健康檢查）停用。<strong>本系統已內建一個「自動保活」排程，每 10 天自動更動一次讓專案保持活躍</strong>，所以正常情況你<strong>不用手動處理</strong>。<br>
+      <p style="font-size:14px;color:var(--ink-soft);">※ 注意：這是<strong>「排程保活（每 10 天）」</strong>，和步驟 9A 的<strong>「資料庫保活（每 3 天）」是兩件不同的事</strong>——前者防 GitHub 停用排程、後者防 Supabase 資料庫睡著。兩個都已自動，你不用記。</p>
+      <p>GitHub 有個規則：專案<strong>連續約 60 天沒有任何變更</strong>，會自動把排程（保活/備份/健康檢查）停用。<strong>本系統已內建「排程保活」，每 10 天自動更動一次讓專案保持活躍</strong>，所以正常情況你<strong>不用手動處理</strong>。<br>
       備援起見，若哪天想確認，可到 GitHub → <strong>Actions</strong> 看一眼；萬一看到 workflow 被停用（有 <em>Enable workflow</em> 按鈕），按一下重新啟用即可。</p>
     </div>
   </div>
@@ -818,8 +813,8 @@ ALTER TABLE users  ADD COLUMN IF NOT EXISTS password_changed_at timestamptz;</pr
 <pre>SITE_URL</pre>
     </div>
     <div class="paste">
-      <div class="label"><span>Value 貼你的正式網址</span></div>
-<pre>https://bds.fu-notes.com</pre>
+      <div class="label"><span>Value 貼你自己的正式網址（不是別人的！）</span></div>
+<pre>https://你的正式網址（例：https://myschool.com）</pre>
     </div>
     <p style="font-size:15px;color:var(--ink-soft);">（確認 GitHub 帳號的 Email 通知有開：GitHub 預設會在排程工作「失敗」時寄信給你，等於網站掛掉就收到通知。）</p>
 
