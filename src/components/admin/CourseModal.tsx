@@ -381,13 +381,11 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程要點</label>
-                <textarea
+                <RichTextEditor
                   value={formData.points || ''}
-                  onChange={e => setFormData({...formData, points: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition min-h-[100px]"
-                  placeholder="每行一個要點，例如：&#10;學會客戶痛點分析&#10;掌握報價與談判技巧&#10;建立長期客戶關係"
+                  onChange={(html) => setFormData(prev => ({ ...prev, points: html }))}
+                  placeholder="條列課程重點，例如：學會客戶痛點分析、掌握報價與談判技巧、建立長期客戶關係（可用清單、粗體、顏色…）"
                 />
-                <p className="text-[10px] text-gray-400 mt-1.5 font-medium">每行輸入一個課程要點，將於銷售頁條列呈現。</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
