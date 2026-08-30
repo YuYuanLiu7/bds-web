@@ -85,7 +85,7 @@
   <div class="box warn" style="border-width:2px;">
     <p class="box-title">🛠️ 先看這裡：這份是給「執行搬家的人」看的技術指引</p>
     <p>搬家步驟 2、3、5 需要<strong>開電腦終端機打指令、安裝 Node、設定金鑰檔</strong>，步驟 4 換網域則要在網域商/Netlify 設定 DNS——都屬於工程師等級的操作，<strong>不建議完全沒有技術背景的人自行執行</strong>。而且搬家是一次性、會寄信給全部真實客戶的操作，做錯代價高。</p>
-    <p>👉 <strong>正確做法：由賣方或一位懂電腦的人幫你跑一次</strong>（在他的電腦上、填入你的新金鑰，依序跑幾支腳本，約 30 分鐘＋影片上傳時間）。把這份說明整份交給他即可。你只要負責提供資料（Teachify 匯出的 CSV、影片原始檔）與最後驗收。</p>
+    <p>👉 <strong>正確做法：由賣方或一位懂電腦的人幫你跑一次</strong>（在他的電腦上、填入你的新金鑰，依序跑幾支腳本，約 30 分鐘～1 小時，另加影片上傳時間）。把這份說明整份交給他即可。你只要負責提供資料（Teachify 匯出的 CSV、影片原始檔）與最後驗收。</p>
   </div>
 
   <div class="box tip">
@@ -104,7 +104,7 @@
     <p>「同一個網址 <code class="inline">bds.fu-notes.com</code> 無縫接軌」這件事，<strong>完全取決於你能不能自行把它的 DNS 從 Teachify 改指到 Netlify</strong>。開工前先確認：</p>
     <ul class="plain">
       <li><strong>(a) <code class="inline">fu-notes.com</code> 登記在你名下、你能登入網域註冊商後台自行改 DNS</strong> → 可照本手冊做。</li>
-      <li><strong>(b) 網域是 Teachify 提供/代管、你只能在 Teachify 後台設定</strong> → <strong>你改不了 DNS，第 5 步做不到</strong>。要嘛先向 Teachify 取得網域移轉／DNS 委派，要嘛<strong>改用一個你自己的新網域</strong>並公告客戶新網址。</li>
+      <li><strong>(b) 網域是 Teachify 提供/代管、你只能在 Teachify 後台設定</strong> → <strong>你改不了 DNS，第 4 步（換網域）做不到</strong>。要嘛先向 Teachify 取得網域移轉／DNS 委派，要嘛<strong>改用一個你自己的新網域</strong>並公告客戶新網址。</li>
       <li><strong>(c) 網域在別人（前員工/代理商）手上</strong> → 先取回控制權。</li>
     </ul>
     <p>沒通過這關（不是 a），先別進到步驟 4（換網域）——否則搬到一半才發現網址切不過去。<br>
@@ -297,7 +297,7 @@ node scripts/upload-materials.mjs "你的影片資料夾" --upload   # 正式上
 
   <div class="box tip">
     <p class="box-title">🆘 這些都是工程操作，不會用怎麼辦？</p>
-    <p>步驟 2、3、5 要在電腦終端機執行 <code class="inline">node ...</code> 指令，步驟 4 換網域要設定 DNS。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約 1 小時，含上傳影片），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
+    <p>步驟 2、3、5 要在電腦終端機執行 <code class="inline">node ...</code> 指令，步驟 4 換網域要設定 DNS。<strong>可以請一位懂電腦的人幫你跑一次</strong>（約 30 分鐘～1 小時，另加影片上傳時間），把這份說明直接給他看即可。跑完之後，日常經營（上架課程、看訂單）你自己在後台就能全掌握。</p>
   </div>
 
   <hr>
