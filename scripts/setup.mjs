@@ -99,26 +99,19 @@ async function runMigrations() {
     hasError = true;
     return;
   }
-  // 依相依順序執行；皆為冪等（IF NOT EXISTS / ADD COLUMN IF NOT EXISTS），enable_rls 最後
+  // 自動掃描 db/ 內所有 .sql（排除 schema.sql 參考檔），讓「未來新增的遷移檔」自動納入、永遠不會漏跑。
+  // 規則：init.sql 必最先（建立基礎表）；fix_token_rls.sql / enable_rls.sql 必最後（對外上鎖）。
+  // 其餘皆為冪等（IF NOT EXISTS / ADD COLUMN IF NOT EXISTS），彼此先後不影響結果，故依檔名排序即可。
+  const FIRST = ['init.sql'];
+  const LAST = ['fix_token_rls.sql', 'enable_rls.sql'];
+  const allSql = fs
+    .readdirSync(path.join(ROOT, 'db'))
+    .filter((f) => f.endsWith('.sql') && f !== 'schema.sql');
+  const middle = allSql.filter((f) => !FIRST.includes(f) && !LAST.includes(f)).sort();
   const order = [
-    'init.sql',
-    'update_users_schema.sql',
-    'add_instructor_to_courses.sql',
-    'add_course_custom_settings.sql',
-    'add_articles_table.sql',
-    'add_events_table.sql',
-    'create_announcements_table.sql',
-    'create_membership_tables.sql',
-    'initialize_site_settings.sql',
-    'add_performance_indexes.sql',
-    'add_rate_limiting.sql',
-    'add_auth_flows.sql',
-    'add_fulfilled_at.sql',
-    'add_token_security.sql',
-    'add_course_fields.sql',
-    'add_course_categories.sql',
-    'add_promotions.sql',
-    'enable_rls.sql',
+    ...FIRST.filter((f) => allSql.includes(f)),
+    ...middle,
+    ...LAST.filter((f) => allSql.includes(f)),
   ];
   const { default: pg } = await import('pg');
   const client = new pg.Client({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
