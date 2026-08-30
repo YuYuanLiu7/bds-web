@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bunny 影片費用估算器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  :root{
+    --ground:#f5f7fb; --surface:#fff; --surface-2:#eef2f9; --ink:#1a2130; --ink-soft:#55607a;
+    --line:#dde3ee; --brand:#21448e; --brand-soft:#e7edf8; --brand-ink:#21448e;
+    --warn:#a8560a; --warn-soft:#fbf0e0; --warn-line:#f0d3a8; --good:#1c7a45; --good-soft:#e5f3ea;
+    --radius:14px; --maxw:760px;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#0e131d; --surface:#161d2b; --surface-2:#1e2637; --ink:#e7ecf6; --ink-soft:#9aa7c0;
+    --line:#2b3446; --brand:#8fb0e6; --brand-soft:#1c2a44; --brand-ink:#bcd0f2;
+    --warn:#e6a95a; --warn-soft:#2e2416; --warn-line:#4a3a20; --good:#6cc78d; --good-soft:#16281d;}}
+  :root[data-theme="dark"]{
+    --ground:#0e131d; --surface:#161d2b; --surface-2:#1e2637; --ink:#e7ecf6; --ink-soft:#9aa7c0;
+    --line:#2b3446; --brand:#8fb0e6; --brand-soft:#1c2a44; --brand-ink:#bcd0f2;
+    --warn:#e6a95a; --warn-soft:#2e2416; --warn-line:#4a3a20; --good:#6cc78d; --good-soft:#16281d;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+    font-size:17px;line-height:1.8;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px 100px;}
+  header.hero{background:linear-gradient(160deg,#21448e 0%,#16305f 100%);color:#fff;padding:52px 20px 44px;text-align:center;}
+  header.hero h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(28px,6vw,42px);margin:0 0 12px;}
+  header.hero p{margin:0 auto;max-width:30em;opacity:.92;font-size:16px;}
+  h2{font-family:"Noto Serif TC",serif;font-weight:900;font-size:23px;margin:44px 0 8px;}
+  p{margin:10px 0;} strong{font-weight:700;}
+  code.inline{font-family:"JetBrains Mono",monospace;font-size:.9em;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;}
+  .box{border-radius:var(--radius);padding:16px 18px;margin:18px 0;border:1px solid var(--line);background:var(--surface);}
+  .box .box-title{font-weight:700;margin-bottom:6px;}
+  .box.tip{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 30%,transparent);}
+  .box.warn{background:var(--warn-soft);border-color:var(--warn-line);}
+  .box.warn .box-title{color:var(--warn);}
+  .box.good{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 35%,transparent);}
+  .box.good .box-title{color:var(--good);}
+
+  .calc{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;margin:20px 0;}
+  .field{margin:14px 0;}
+  .field label{display:block;font-weight:700;font-size:15px;margin-bottom:6px;}
+  .field .hint{font-weight:400;color:var(--ink-soft);font-size:13px;}
+  .field input,.field select{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:10px;
+    background:var(--surface-2);color:var(--ink);font-size:16px;font-family:inherit;}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--brand);}
+  .row{display:grid;gap:14px;}
+  @media(min-width:560px){.row.two{grid-template-columns:1fr 1fr;}}
+
+  .out{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:20px;}
+  .out .big{font-family:"Noto Serif TC",serif;font-weight:900;font-size:34px;color:var(--brand-ink);line-height:1.2;margin:2px 0;}
+  .out .sub{color:var(--ink-soft);font-size:14px;}
+  .line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px;}
+  .line:last-of-type{border-bottom:0;}
+  .line .v{font-weight:700;font-variant-numeric:tabular-nums;}
+  .rec{display:grid;gap:12px;margin-top:14px;}
+  @media(min-width:560px){.rec{grid-template-columns:1fr 1fr;}}
+  .rec .card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);}
+  .rec .card .t{font-size:13px;color:var(--ink-soft);font-weight:700;}
+  .rec .card .n{font-family:"Noto Serif TC",serif;font-weight:900;font-size:24px;color:var(--good);margin-top:2px;}
+  .footer{text-align:center;color:var(--ink-soft);font-size:14px;margin-top:44px;}
+  ul.plain{list-style:none;padding:0;margin:10px 0;}
+  ul.plain>li{padding:6px 0 6px 26px;position:relative;}
+  ul.plain>li::before{content:"•";position:absolute;left:6px;color:var(--brand-ink);font-weight:700;}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div>
+    <h1>Bunny 影片費用估算器</h1>
+    <p>填四個數字，馬上算出每月大概要花多少、建議儲值多少。不用自己算。</p>
+  </div>
+</header>
+<div class="wrap">
+
+  <div class="box tip">
+    <p class="box-title">先懂：錢花在哪</p>
+    <p>Bunny 收兩種錢：<strong>①「儲存」影片放著</strong>（很少）＋<strong>②「頻寬」學員看影片</strong>（主要成本，看大家看多少）。所以最關鍵的一格是「每人每月看幾小時」。</p>
+  </div>
+
+  <div class="calc">
+    <div class="row two">
+      <div class="field">
+        <label>課程數 <span class="hint">共幾門課</span></label>
+        <input id="courses" type="number" min="0" value="50" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>每門課時數 <span class="hint">平均幾小時</span></label>
+        <input id="hours" type="number" min="0" step="0.5" value="2" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label>常看的學員人數 <span class="hint">每月實際會看的人</span></label>
+        <input id="viewers" type="number" min="0" value="400" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>每人每月看幾小時 <span class="hint">最影響費用</span></label>
+        <input id="watch" type="number" min="0" step="0.5" value="5" inputmode="decimal">
+      </div>
+    </div>
+    <div class="field">
+      <label>觀眾主要所在地 <span class="hint">影響每 GB 遞送單價</span></label>
+      <select id="region">
+        <option value="0.03" selected>台灣／亞洲（約 US$0.03 / GB）</option>
+        <option value="0.01">歐洲／北美（約 US$0.01 / GB）</option>
+        <option value="0.02">混合（約 US$0.02 / GB）</option>
+      </select>
+    </div>
+
+    <div class="out" id="out">
+      <div class="sub">預估每月費用</div>
+      <div class="big" id="monthly">—</div>
+      <div class="sub" id="monthlyNtd"></div>
+
+      <div style="margin-top:16px;">
+        <div class="line"><span>① 影片儲存（放著）</span><span class="v" id="storage">—</span></div>
+        <div class="line"><span>② 頻寬（學員觀看）</span><span class="v" id="bandwidth">—</span></div>
+        <div class="line"><span>一年約</span><span class="v" id="yearly">—</span></div>
+      </div>
+
+      <div class="rec">
+        <div class="card">
+          <div class="t">建議先儲值（儲值制＝損失上限）</div>
+          <div class="n" id="topup">—</div>
+        </div>
+        <div class="card">
+          <div class="t">綁卡的話，用量警示設在</div>
+          <div class="n" id="alert">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>算法（想自己算也行）</h2>
+  <ul class="plain">
+    <li><strong>儲存 GB</strong> ＝ 課程數 × 每門時數 × 2.5（Bunny 會存多種畫質，約 2.5GB/小時）</li>
+    <li><strong>儲存費</strong> ＝ 儲存 GB × US$0.01／月</li>
+    <li><strong>頻寬 GB／月</strong> ＝ 常看人數 × 每人每月看幾小時 × 1.5（每小時遞送約 1.5GB）</li>
+    <li><strong>頻寬費</strong> ＝ 頻寬 GB × 單價（台灣約 US$0.03）</li>
+    <li><strong>每月 ≈ 儲存費 ＋ 頻寬費</strong>；建議儲值 ≈ 2 個月費用、警示線 ≈ 2 倍月費</li>
+  </ul>
+
+  <div class="box good">
+    <p class="box-title">✅ 最安全：用「儲值制」，不綁卡自動扣</p>
+    <p>先儲上面算出的「建議儲值」金額，用完再加值。這樣<strong>就算金鑰外洩，最多也只損失餘額</strong>，不會被灌爆成天價帳單。</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">⚠️ 這是估算，不是保證</p>
+    <ul class="plain" style="margin:6px 0 0;">
+      <li>最大變數是「大家實際看多少」，會隨月份浮動。</li>
+      <li>學員多用手機／較低畫質看 → 會比估的更省。</li>
+      <li>剛搬完、還沒很多人看 → 初期會低很多。</li>
+      <li>用量很大時 Bunny 有量大折扣 → 可能再更低。</li>
+      <li>NT$ 以 1 美元≈32 元粗估，實際依匯率。</li>
+    </ul>
+    <p style="margin-top:8px;">建議：營運 <strong>1～2 個月</strong>後看真實帳單，再回來重算、調整儲值與警示。</p>
+  </div>
+
+  <div class="footer"><p>此估算器供賣方交付買家評估影片成本之用。</p></div>
+</div>
+
+<script>
+  (function(){
+    var STORAGE_GB_PER_HR = 2.5;   // 含多種畫質的儲存量
+    var STORAGE_PRICE = 0.01;      // US$/GB/月
+    var DELIVER_GB_PER_HR = 1.5;   // 每小時遞送量
+    var USD_TO_NTD = 32;
+
+    var ids = ['courses','hours','viewers','watch','region'];
+    var el = {};
+    ids.forEach(function(k){ el[k] = document.getElementById(k); });
+    var out = {
+      monthly: document.getElementById('monthly'),
+      monthlyNtd: document.getElementById('monthlyNtd'),
+      storage: document.getElementById('storage'),
+      bandwidth: document.getElementById('bandwidth'),
+      yearly: document.getElementById('yearly'),
+      topup: document.getElementById('topup'),
+      alert: document.getElementById('alert')
+    };
+
+    function num(v){ var n = parseFloat(v); return (isFinite(n) && n > 0) ? n : 0; }
+    function usd(n){ return 'US$' + (n < 10 ? n.toFixed(1) : Math.round(n).toLocaleString()); }
+    function ntd(n){ return '約 NT$' + Math.round(n * USD_TO_NTD).toLocaleString(); }
+
+    function calc(){
+      var courses = num(el.courses.value);
+      var hours   = num(el.hours.value);
+      var viewers = num(el.viewers.value);
+      var watch   = num(el.watch.value);
+      var unit    = parseFloat(el.region.value) || 0.03;
+
+      var storageGB = courses * hours * STORAGE_GB_PER_HR;
+      var storageCost = storageGB * STORAGE_PRICE;
+      var bwGB = viewers * watch * DELIVER_GB_PER_HR;
+      var bwCost = bwGB * unit;
+      var monthly = storageCost + bwCost;
+      var yearly = monthly * 12;
+
+      // 建議儲值：約 2 個月，進位到最接近的 US$50（至少 50）
+      var topup = Math.max(50, Math.ceil((monthly * 2) / 50) * 50);
+      // 警示線：約 2 倍月費，進位到 US$10
+      var alertLine = Math.max(20, Math.ceil((monthly * 2) / 10) * 10);
+
+      out.monthly.textContent = usd(monthly);
+      out.monthlyNtd.textContent = ntd(monthly) + ' / 月';
+      out.storage.textContent = usd(storageCost) + '／月';
+      out.bandwidth.textContent = usd(bwCost) + '／月';
+      out.yearly.textContent = usd(yearly) + '（' + ntd(yearly) + '）';
+      out.topup.textContent = usd(topup);
+      out.alert.textContent = usd(alertLine) + '／月';
+    }
+
+    ids.forEach(function(k){
+      el[k].addEventListener('input', calc);
+      el[k].addEventListener('change', calc);
+    });
+    calc();
+  })();
+</script>
+</body>
+</html>
