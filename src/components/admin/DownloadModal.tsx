@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Save, FileText, Download, DollarSign, Tag, Globe, Settings, Eye } from 'lucide-react';
-import { uploadFile } from '@/lib/admin-upload';
+import { uploadLargeFile } from '@/lib/admin-upload';
 import { useToast } from '@/components/Toast';
 
 interface DownloadProduct {
@@ -74,11 +74,10 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 大小限制與 HEIC 轉換皆由共用上傳模組處理
+    // 數位商品多為影片/大型檔案 → 走大檔直傳（protected、5GB 上限，直接 PUT 到 Supabase，不經 Netlify）
     setUploading(true);
     try {
-      // 數位下載商品為付費內容 → 存 private bucket（protected），交付時才簽短效網址
-      const url = await uploadFile(file, 'protected');
+      const url = await uploadLargeFile(file, 'protected');
       setFormData(prev => ({ ...prev, file_url: url }));
     } catch (err) {
       console.error(err);
@@ -255,18 +254,22 @@ export default function DownloadModal({ product, isOpen, onClose, onSuccess }: D
               <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
                 <span className="flex items-center">
                   <Settings className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  數位商品檔案連結 <span className="text-[9px] font-semibold text-slate-400/80 normal-case ml-1.5">(限制 4.5MB 以下)</span>
+                  數位商品檔案連結
                 </span>
                 <label className="text-[9px] text-indigo-600 hover:text-indigo-800 font-black cursor-pointer select-none">
-                  {uploading ? '上傳中...' : '📸 上傳數位資源'}
-                  <input 
-                    type="file" 
+                  {uploading ? '上傳中...' : '📤 上傳數位資源'}
+                  <input
+                    type="file"
+                    accept="video/*,audio/*,.mkv,.flv,.avi,.wmv,.m4v,.mp3,.pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*"
                     onChange={handleFileUpload}
                     disabled={uploading}
-                    className="hidden" 
+                    className="hidden"
                   />
                 </label>
               </label>
+              <p className="text-[9px] text-slate-400 mb-1.5 font-medium leading-relaxed">
+                支援格式：影片 MP4/WEBM/MOV/AVI/M4V/MKV/WMV/FLV、音訊 MP3、文件 PDF/Word/Excel/PPT、圖片與 ZIP。影片單檔上限 5GB、建議 1080p。
+              </p>
               <input 
                 type="text" 
                 value={formData.file_url || ''}

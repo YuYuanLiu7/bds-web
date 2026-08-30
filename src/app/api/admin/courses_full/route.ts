@@ -13,10 +13,12 @@ export async function GET() {
     if (!auth.ok) return auth.res;
 
     // Parallel fetch for optimal database performance
+    // 課程優先依 sort_order（顯示順序）排序，其次以建立時間新到舊排列
     const [coursesRes, userCoursesRes, ordersRes] = await Promise.all([
       supabase
         .from('courses')
         .select('*, chapters(*)')
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false }),
       supabase
         .from('user_courses')
@@ -27,9 +29,21 @@ export async function GET() {
         .eq('status', 'paid')
     ]);
 
-    if (coursesRes.error) throw coursesRes.error;
+    // 相容處理：sort_order 欄位尚未遷移時，退回僅以建立時間排序
+    let coursesData = coursesRes.data;
+    let coursesError = coursesRes.error;
+    if (coursesError && coursesError.message.includes('does not exist')) {
+      const fallback = await supabase
+        .from('courses')
+        .select('*, chapters(*)')
+        .order('created_at', { ascending: false });
+      coursesData = fallback.data;
+      coursesError = fallback.error;
+    }
 
-    const courses = coursesRes.data || [];
+    if (coursesError) throw coursesError;
+
+    const courses = coursesData || [];
     const userCourses = userCoursesRes.data || [];
     const paidOrders = ordersRes.data || [];
 

@@ -2,11 +2,22 @@ import { supabase } from './supabase';
 import { Course, CourseWithChapters } from './types';
 
 export async function getPublishedCourses(): Promise<Course[]> {
-  const { data, error } = await supabase
+  // 優先依 sort_order（顯示順序）排序，其次以建立時間新到舊排列
+  let { data, error } = await supabase
     .from('courses')
     .select('*')
     .eq('is_published', true)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
+
+  // 相容處理：sort_order 欄位尚未遷移時，退回僅以建立時間排序
+  if (error && error.message.includes('does not exist')) {
+    ({ data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false }));
+  }
 
   if (error) {
     console.error('Error fetching courses:', error);

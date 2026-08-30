@@ -1,27 +1,11 @@
 import { requireAdmin } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { ALLOWED, UNSUPPORTED_TYPE_MESSAGE } from "@/lib/upload-allowed";
 import { NextResponse } from "next/server";
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-// 允許上傳的類型白名單：圖片、影片、簡報/文件（課程教材與數位下載商品）。
-// 明確排除 .svg / .html 等可被瀏覽器當作內容執行、造成儲存型 XSS 的類型；
-// 簡報/文件格式（pptx/ppt/key/doc/docx/xls/xlsx）不會被瀏覽器當程式執行，加入是安全的。
-const ALLOWED = new Map<string, string>([
-  ['jpg', 'image/jpeg'], ['jpeg', 'image/jpeg'], ['png', 'image/png'],
-  ['gif', 'image/gif'], ['webp', 'image/webp'],
-  ['mp4', 'video/mp4'], ['webm', 'video/webm'], ['mov', 'video/quicktime'],
-  ['pdf', 'application/pdf'], ['zip', 'application/zip'],
-  // 簡報與文件（課程教材常見格式）
-  ['ppt', 'application/vnd.ms-powerpoint'],
-  ['pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
-  ['key', 'application/vnd.apple.keynote'],
-  ['doc', 'application/msword'],
-  ['docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-  ['xls', 'application/vnd.ms-excel'],
-  ['xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-]);
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 伺服器端硬上限 50MB
 
 export async function POST(req: Request) {
@@ -42,7 +26,7 @@ export async function POST(req: Request) {
     const safeContentType = ALLOWED.get(rawExt);
     if (!safeContentType) {
       return NextResponse.json(
-        { error: "不支援的檔案類型。允許：JPG/PNG/GIF/WEBP、MP4/WEBM/MOV、PDF/ZIP" },
+        { error: UNSUPPORTED_TYPE_MESSAGE },
         { status: 400 }
       );
     }

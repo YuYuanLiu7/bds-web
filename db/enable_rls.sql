@@ -23,3 +23,14 @@ ALTER TABLE course_announcements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_reviews       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_comments      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rate_limits          ENABLE ROW LEVEL SECURITY;
+
+-- 後台改版新增的資料表（存在才鎖；用 DO 區塊避免表尚未建立時報錯）
+DO $$
+BEGIN
+  IF to_regclass('public.course_categories') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE course_categories ENABLE ROW LEVEL SECURITY';
+  END IF;
+  IF to_regclass('public.promotions') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE promotions ENABLE ROW LEVEL SECURITY';
+  END IF;
+END $$;

@@ -115,6 +115,9 @@ async function runMigrations() {
     'add_auth_flows.sql',
     'add_fulfilled_at.sql',
     'add_token_security.sql',
+    'add_course_fields.sql',
+    'add_course_categories.sql',
+    'add_promotions.sql',
     'enable_rls.sql',
   ];
   const { default: pg } = await import('pg');

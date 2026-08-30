@@ -15,9 +15,12 @@ import {
   MessageSquare, 
   Star,
   Upload,
-  Loader2
+  Loader2,
+  Users,
+  Search,
+  Presentation
 } from 'lucide-react';
-import { uploadFile } from '@/lib/admin-upload';
+import { uploadFile, uploadLargeFile } from '@/lib/admin-upload';
 import { useToast } from '@/components/Toast';
 
 interface Chapter {
@@ -25,21 +28,36 @@ interface Chapter {
   title: string;
   video_url: string;
   file_url?: string;
+  content_html?: string; // 圖文 / 簡報連結區塊（可貼簡報連結或補充說明）
   order_index: number;
 }
+
+// 課程類型：付費課程 / 免費課程（名單磁鐵）
+type CourseType = 'paid' | 'free';
 
 export interface Course {
   id?: string;
   title: string;
+  subtitle?: string;            // 課程副標題
   description: string;
   thumbnail_url: string;
   price: number;
   category: string;
+  slug?: string;                // 銷售網址代稱（組成 /courses/<slug>）
+  points?: string;              // 課程要點（多行）
+  total_hours?: string;         // 總課程時數
+  start_date?: string;          // 開課日期（YYYY-MM-DD）
+  course_type?: CourseType;     // paid / free
   instructor?: string;
   is_published?: boolean;
   is_hidden?: boolean;
+  is_featured?: boolean;        // 設為精選（暢銷課程標籤）
+  show_student_count?: boolean; // 是否顯示學員數
   allow_comments?: boolean;
   allow_ratings?: boolean;
+  seo_title?: string;           // 自訂 SEO 標題
+  seo_description?: string;     // 自訂 SEO 描述
+  seo_no_index?: boolean;       // true = 不要收錄（no-index）
   file_url?: string;
   video_url?: string;
   chapters: Chapter[];
@@ -60,15 +78,26 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
   const [localCoverPreview, setLocalCoverPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<Course>({
     title: '',
+    subtitle: '',
     description: '',
     thumbnail_url: '',
     price: 0,
     category: '業務新手村',
+    slug: '',
+    points: '',
+    total_hours: '',
+    start_date: '',
+    course_type: 'paid',
     instructor: 'BDS 團隊',
     is_published: true,
     is_hidden: false,
+    is_featured: false,
+    show_student_count: false,
     allow_comments: true,
     allow_ratings: true,
+    seo_title: '',
+    seo_description: '',
+    seo_no_index: false,
     file_url: '',
     video_url: '',
     chapters: []
@@ -81,30 +110,53 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
       if (course) {
         setFormData({
           ...course,
+          subtitle: course.subtitle || '',
+          slug: course.slug || '',
+          points: course.points || '',
+          total_hours: course.total_hours || '',
+          start_date: course.start_date ? String(course.start_date).slice(0, 10) : '',
+          course_type: course.course_type === 'free' ? 'free' : 'paid',
           instructor: course.instructor || 'BDS 團隊',
           is_published: course.is_published !== false,
           is_hidden: !!course.is_hidden,
+          is_featured: !!course.is_featured,
+          show_student_count: !!course.show_student_count,
           allow_comments: course.allow_comments !== false,
           allow_ratings: course.allow_ratings !== false,
+          seo_title: course.seo_title || '',
+          seo_description: course.seo_description || '',
+          seo_no_index: !!course.seo_no_index,
           file_url: course.file_url || '',
           video_url: course.video_url || '',
           chapters: (course.chapters || []).map(ch => ({
             ...ch,
-            file_url: ch.file_url || ''
+            file_url: ch.file_url || '',
+            content_html: ch.content_html || ''
           }))
         });
       } else {
         setFormData({
           title: '',
+          subtitle: '',
           description: '',
           thumbnail_url: '',
           price: 0,
           category: '業務新手村',
+          slug: '',
+          points: '',
+          total_hours: '',
+          start_date: '',
+          course_type: 'paid',
           instructor: 'BDS 團隊',
           is_published: true,
           is_hidden: false,
+          is_featured: false,
+          show_student_count: false,
           allow_comments: true,
           allow_ratings: true,
+          seo_title: '',
+          seo_description: '',
+          seo_no_index: false,
           file_url: '',
           video_url: '',
           chapters: []
@@ -122,7 +174,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
       ...formData,
       chapters: [
         ...formData.chapters,
-        { title: '', video_url: '', file_url: '', order_index: formData.chapters.length + 1 }
+        { title: '', video_url: '', file_url: '', content_html: '', order_index: formData.chapters.length + 1 }
       ]
     });
   };
@@ -155,9 +207,11 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
 
     setUploadingField(fieldKey);
     try {
-      // 封面/縮圖需公開顯示；課程檔、章節影片、章節教材屬付費內容 → 存 private bucket（protected）
-      const visibility = fieldKey === 'cover' ? 'public' : 'protected';
-      const url = await uploadFile(file, visibility);
+      // 封面/縮圖：小圖片走一般上傳（public、4.5MB 上限、含 HEIC 轉換）。
+      // 課程檔、章節影片、章節教材：屬付費大檔內容 → 走大檔直傳（protected、5GB 上限，直接 PUT 到 Supabase，不經 Netlify）。
+      const url = fieldKey === 'cover'
+        ? await uploadFile(file, 'public')
+        : await uploadLargeFile(file, 'protected');
       callback(url);
     } catch (err) {
       console.error(err);
@@ -261,7 +315,33 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                   placeholder="例如：半導體業務入門"
                 />
               </div>
-              
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程副標題</label>
+                <input
+                  type="text"
+                  value={formData.subtitle || ''}
+                  onChange={e => setFormData({...formData, subtitle: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition"
+                  placeholder="例如：從零開始建立你的業務開發系統"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">銷售網址代稱 (Slug)</label>
+                <input
+                  type="text"
+                  value={formData.slug || ''}
+                  onChange={e => setFormData({...formData, slug: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition"
+                  placeholder="例如：semiconductor-sales-101"
+                />
+                <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
+                  將組成銷售網址：https://bds.fu-notes.com/courses/
+                  <span className="font-bold text-gray-600">{formData.slug?.trim() || '<slug>'}</span>
+                </p>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程描述</label>
                 <textarea 
@@ -271,11 +351,22 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                   placeholder="請輸入課程詳細介紹..."
                 />
               </div>
-              
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程要點</label>
+                <textarea
+                  value={formData.points || ''}
+                  onChange={e => setFormData({...formData, points: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition min-h-[100px]"
+                  placeholder="每行一個要點，例如：&#10;學會客戶痛點分析&#10;掌握報價與談判技巧&#10;建立長期客戶關係"
+                />
+                <p className="text-[10px] text-gray-400 mt-1.5 font-medium">每行輸入一個課程要點，將於銷售頁條列呈現。</p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程分類</label>
-                  <select 
+                  <select
                     value={formData.category}
                     onChange={e => setFormData({...formData, category: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-bold transition bg-white cursor-pointer"
@@ -286,15 +377,62 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                     <option>讀書會</option>
                   </select>
                 </div>
-                
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">課程類型</label>
+                  <select
+                    value={formData.course_type || 'paid'}
+                    onChange={e => {
+                      const nextType = (e.target.value === 'free' ? 'free' : 'paid') as CourseType;
+                      // 免費課程（名單磁鐵）售價一律為 0
+                      setFormData(prev => ({
+                        ...prev,
+                        course_type: nextType,
+                        price: nextType === 'free' ? 0 : prev.price,
+                      }));
+                    }}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-bold transition bg-white cursor-pointer"
+                  >
+                    <option value="paid">付費課程</option>
+                    <option value="free">免費課程（名單磁鐵）</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 售價：免費課程時隱藏（售價固定為 0） */}
+              {formData.course_type !== 'free' && (
                 <div>
                   <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">售價 (NT$)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     required
+                    min={0}
                     value={formData.price}
-                    onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+                    onChange={e => setFormData({...formData, price: parseInt(e.target.value) || 0})}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">總課程時數</label>
+                  <input
+                    type="text"
+                    value={formData.total_hours || ''}
+                    onChange={e => setFormData({...formData, total_hours: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition"
+                    placeholder="例如：6 小時"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">開課日期</label>
+                  <input
+                    type="date"
+                    value={formData.start_date || ''}
+                    onChange={e => setFormData({...formData, start_date: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition bg-white cursor-pointer"
                   />
                 </div>
               </div>
@@ -313,7 +451,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
               {/* Course-wide Attachment File Upload */}
               <div>
                 <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider flex items-center justify-between">
-                  <span>課程教材檔案 (下載資源) <span className="text-[10px] font-semibold text-gray-400 normal-case ml-1.5">(限制 4.5MB 以下)</span></span>
+                  <span>課程教材檔案 (下載資源) <span className="text-[10px] font-semibold text-gray-400 normal-case ml-1.5">(PDF/Word/Excel/PPT/ZIP，單檔上限 5GB)</span></span>
                   {uploadingField === 'course_file' && <span className="text-[10px] text-blue-600 font-bold flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> 上傳中...</span>}
                 </label>
                 <div className="flex gap-2">
@@ -469,8 +607,83 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                       <p className="text-[10px] text-slate-400 mt-0.5 font-medium">開啟後學員可在課程首頁填寫評分、撰寫文字心得評價。</p>
                     </div>
                   </label>
+
+                  {/* is_featured：設為精選（暢銷課程標籤） */}
+                  <label className="flex items-start space-x-3 cursor-pointer select-none group">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.is_featured}
+                      onChange={e => setFormData({...formData, is_featured: e.target.checked})}
+                      className="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition flex items-center">
+                        <Star className="w-3.5 h-3.5 mr-1 text-orange-500 fill-orange-500/20" /> 設為精選課程
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-0.5 font-medium">開啟後會在銷售頁顯示「暢銷課程」標籤。</p>
+                    </div>
+                  </label>
+
+                  {/* show_student_count：是否顯示學員數（預設不顯示） */}
+                  <label className="flex items-start space-x-3 cursor-pointer select-none group">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.show_student_count}
+                      onChange={e => setFormData({...formData, show_student_count: e.target.checked})}
+                      className="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition flex items-center">
+                        <Users className="w-3.5 h-3.5 mr-1 text-emerald-500" /> 顯示學員數
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-0.5 font-medium">開啟後銷售頁會顯示已報名學員人數（預設不顯示）。</p>
+                    </div>
+                  </label>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-gray-100"></div>
+
+          {/* SEO Section (搜尋引擎最佳化) */}
+          <div className="space-y-5">
+            <h3 className="text-base font-extrabold text-gray-900 flex items-center">
+              <Search className="w-5 h-5 mr-2 text-teal-600" /> SEO 搜尋引擎設定
+            </h3>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">自訂 SEO 標題</label>
+              <input
+                type="text"
+                value={formData.seo_title || ''}
+                onChange={e => setFormData({...formData, seo_title: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition"
+                placeholder="留空則自動使用課程名稱"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">自訂 SEO 描述</label>
+              <textarea
+                value={formData.seo_description || ''}
+                onChange={e => setFormData({...formData, seo_description: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-semibold transition min-h-[80px]"
+                placeholder="留空則自動使用課程描述。建議 80～160 字，用於搜尋結果摘要。"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">搜尋引擎收錄</label>
+              <select
+                value={formData.seo_no_index ? 'noindex' : 'index'}
+                onChange={e => setFormData({...formData, seo_no_index: e.target.value === 'noindex'})}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-bold transition bg-white cursor-pointer"
+              >
+                <option value="index">允許收錄（預設）</option>
+                <option value="noindex">不要收錄（no-index）</option>
+              </select>
+              <p className="text-[10px] text-gray-400 mt-1.5 font-medium">「不要收錄」會加上 noindex，避免此頁出現在 Google 等搜尋結果中。</p>
             </div>
           </div>
 
@@ -517,7 +730,7 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                     {/* Row 2: Video (Link or Upload) */}
                     <div>
                       <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase flex justify-between items-center">
-                        <span>章節影片網址 (嵌入網址，支援 Bunny.net / YouTube / 直接上傳影片檔)</span>
+                        <span>章節影片網址 (嵌入網址，支援 Bunny.net / YouTube / 直接上傳影片檔：MP4/WEBM/MOV/AVI/M4V/MKV/WMV/FLV，單檔上限 5GB、建議 1080p)</span>
                         {uploadingField === `chapter-video-${index}` && <span className="text-[10px] text-blue-600 font-bold flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> 上傳影片中...</span>}
                       </label>
                       <div className="flex gap-2">
@@ -535,17 +748,34 @@ export default function CourseModal({ course, isOpen, onClose }: CourseModalProp
                           >
                             <Video className="w-3.5 h-3.5 mr-1" /> 上傳影片
                           </button>
-                          <input 
+                          <input
                             type="file"
-                            accept="video/*"
+                            accept="video/*,.mkv,.flv,.avi,.wmv,.m4v"
                             onChange={(e) => handleGenericUpload(e, `chapter-video-${index}`, (url) => handleChapterChange(index, 'video_url', url))}
                             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                           />
                         </div>
                       </div>
+                      {/* 支援格式說明 */}
+                      <p className="text-[10px] text-slate-400 mt-1.5 font-medium leading-relaxed">
+                        支援格式：影片 MP4 / MOV / AVI / M4V / WebM / MKV / WMV；音訊 MP3；文件 DOC / DOCX / PPT / PPTX / XLS / XLSX / PDF；圖片 JPG / PNG；壓縮 ZIP。影片單檔上限 5GB。
+                      </p>
                     </div>
 
-                    {/* Row 3: Chapter Material File (Link or Upload) */}
+                    {/* Row 3: 圖文 / 簡報連結區塊 (content_html) */}
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase flex items-center">
+                        <Presentation className="w-3.5 h-3.5 mr-1 text-violet-500" /> 圖文 / 簡報連結 (選填)
+                      </label>
+                      <textarea
+                        placeholder="可貼上簡報連結（Google 簡報 / Canva 等）或補充圖文說明，多行文字"
+                        value={chapter.content_html || ''}
+                        onChange={e => handleChapterChange(index, 'content_html', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none text-xs font-semibold focus:border-blue-500 bg-white min-h-[70px]"
+                      />
+                    </div>
+
+                    {/* Row 4: Chapter Material File (Link or Upload) */}
                     <div>
                       <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase flex justify-between items-center">
                         <span>本單元教材講義 (選填)</span>
