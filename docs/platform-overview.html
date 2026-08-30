@@ -104,8 +104,8 @@
     <div class="hero-meta">
       <span>🎓 完整賣課功能</span>
       <span>🔒 標準安全防護</span>
+      <span>🛡️ 通過安全體檢</span>
       <span>👥 學員零流失搬遷</span>
-      <span>🖨️ 可列印</span>
     </div>
   </div>
 </header>
@@ -179,6 +179,10 @@
   <span class="eyebrow">Part 3</span>
   <h2>資料與金流，有多安全</h2>
   <p>我們採用<strong>業界常見的標準安全做法</strong>來保護您和學員的資料。以下用白話說明：</p>
+  <div class="box good">
+    <p class="box-title">🛡️ 已做過完整安全體檢</p>
+    <p>本平台依<strong>國際通用的 OWASP 資安標準</strong>做過一輪完整檢查（登入、金流、權限、資料庫、影片保護等面向），並<strong>修正了發現的問題</strong>。下面列出的都是實際已經在運作的保護。（沒有任何系統能保證「零風險」，但該做的防護都做了。）</p>
+  </div>
 
   <div class="grid two">
     <div class="card">
@@ -187,6 +191,8 @@
         <li>密碼一律<strong>加密保存</strong>（bcrypt），連我們也看不到原始密碼</li>
         <li>Email 需驗證才能啟用，防假帳號</li>
         <li>登入、重設密碼有<strong>次數限制</strong>，擋密碼暴力嘗試</li>
+        <li>改密碼後，其他裝置的<strong>舊登入會自動失效</strong>（帳號被盜也能靠改密碼踢掉對方）</li>
+        <li>不會洩漏「某個 Email 有沒有在站上註冊過」</li>
       </ul>
     </div>
     <div class="card">
@@ -206,10 +212,11 @@
       </ul>
     </div>
     <div class="card">
-      <h3><span class="ic">🎞️</span>影片防外流</h3>
+      <h3><span class="ic">🎞️</span>付費內容防外流</h3>
       <ul class="feat">
-        <li>影片用<strong>限時簽章網址</strong>播放，連結過一陣子就失效</li>
-        <li>降低有人複製網址轉發給沒付費的人</li>
+        <li>付費<strong>影片、下載檔、課程教材</strong>都放在<strong>私有空間</strong>，不是公開網址</li>
+        <li>學員觀看/下載時才發<strong>會過期的短效連結</strong>，複製轉發給沒付費的人很快就失效</li>
+        <li>先驗證「這個人有沒有買」才發連結</li>
       </ul>
     </div>
     <div class="card">
