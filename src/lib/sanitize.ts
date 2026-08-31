@@ -1,68 +1,43 @@
-import sanitizeHtmlLib from 'sanitize-html';
+import { FilterXSS } from 'xss';
 
 /**
  * 富文本 HTML 消毒（防儲存型 XSS）。
  *
- * 取代先前的 isomorphic-dompurify——它會把整包 jsdom（12MB+）打包進
- * Cloudflare Worker，導致 handler 超過體積上限而部署失敗。
- * sanitize-html 不依賴 jsdom（改用 htmlparser2），體積小很多、可在 Workers 執行。
+ * 使用 js-xss（純 JS、無 jsdom、無 postcss），可在 Cloudflare Workers 執行且體積極小。
+ * 先前用 isomorphic-dompurify 會把 jsdom（18-20MB）打包進 Worker；改用 sanitize-html
+ * 又會帶進 postcss（Turbopack 產生雜湊模組名，Windows 本機建置解析失敗）。js-xss 兩者皆無。
  *
  * 允許清單對準 RichTextEditor / ArticleModal 的輸出：
  * 標題、粗斜體底線刪除線、清單、引用、連結、圖片、表格、文字色/底色/大小、縮排。
- * 一律過濾 <script>、on* 事件屬性、javascript: 等 XSS 向量。
+ * 一律過濾 <script>（連同內容）、on* 事件屬性、javascript: 等 XSS 向量；
+ * style 屬性交由 xss 內建 CSS 過濾器（cssfilter）以安全白名單處理（保留 color/背景/邊框等）。
  */
-const OPTIONS: sanitizeHtmlLib.IOptions = {
-  allowedTags: [
-    'p', 'div', 'span', 'br', 'hr',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'b', 'strong', 'i', 'em', 'u', 's', 'strike', 'del', 'ins',
-    'sub', 'sup', 'small', 'mark', 'font',
-    'ul', 'ol', 'li',
-    'blockquote', 'pre', 'code',
-    'a', 'img',
-    'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
-    'caption', 'colgroup', 'col',
-  ],
-  allowedAttributes: {
-    a: ['href', 'title', 'target', 'rel'],
-    img: ['src', 'alt', 'title', 'width', 'height'],
+const STYLED = ['style'];
+const filter = new FilterXSS({
+  whiteList: {
+    p: STYLED, div: STYLED, span: STYLED, br: [], hr: [],
+    h1: STYLED, h2: STYLED, h3: STYLED, h4: STYLED, h5: STYLED, h6: STYLED,
+    b: [], strong: [], i: [], em: [], u: [], s: [], strike: [], del: [], ins: [],
+    sub: [], sup: [], small: [], mark: [],
     font: ['color', 'size', 'face'],
+    ul: STYLED, ol: STYLED, li: STYLED,
+    blockquote: STYLED, pre: [], code: [],
+    a: ['href', 'title', 'target', 'rel'],
+    img: ['src', 'alt', 'title', 'width', 'height', 'style'],
     table: ['border', 'cellpadding', 'cellspacing', 'width', 'align', 'style'],
+    thead: [], tbody: [], tfoot: [],
+    tr: STYLED,
     td: ['colspan', 'rowspan', 'align', 'valign', 'width', 'style'],
     th: ['colspan', 'rowspan', 'align', 'valign', 'width', 'style'],
-    col: ['span', 'width', 'style'],
-    // 全域允許 style / align / dir，讓編輯器產生的 inline 樣式（顏色、底色、縮排）得以保留
-    '*': ['style', 'align', 'dir'],
+    caption: [], colgroup: [], col: ['span', 'width', 'style'],
   },
-  // 連結只允許安全協定（自動擋掉 javascript:）；圖片額外允許 data: 以支援貼上的內嵌圖
-  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
-  allowedSchemesByTag: { img: ['http', 'https', 'data'] },
-  // 只放行不具危險性的 CSS 屬性，值以白名單正則限制（擋掉 expression()、url() 等）
-  allowedStyles: {
-    '*': {
-      color: [/^#(?:[0-9a-fA-F]{3}){1,2}$/, /^rgb\(/, /^rgba\(/, /^[a-zA-Z]+$/],
-      'background-color': [/^#(?:[0-9a-fA-F]{3}){1,2}$/, /^rgb\(/, /^rgba\(/, /^[a-zA-Z]+$/],
-      'text-align': [/^(left|right|center|justify)$/],
-      'text-decoration': [/^(underline|line-through|none)$/],
-      'font-weight': [/^(normal|bold|[1-9]00)$/],
-      'font-style': [/^(normal|italic)$/],
-      'font-size': [/^\d+(?:\.\d+)?(px|em|rem|%|pt)$/],
-      width: [/^\d+(?:\.\d+)?(px|em|rem|%)$/],
-      height: [/^\d+(?:\.\d+)?(px|em|rem|%)$/],
-      'border': [/^[\w\s#().,%-]+$/],
-      'border-collapse': [/^(collapse|separate)$/],
-      'padding': [/^[\d\s.pxemrt%-]+$/],
-      'margin': [/^[\d\s.pxemrt%-]+$/],
-      'margin-left': [/^\d+(?:\.\d+)?(px|em|rem|%)$/],
-      'vertical-align': [/^(top|middle|bottom|baseline)$/],
-      'list-style-type': [/^[a-z-]+$/],
-    },
-  },
-  // 對外連結補上 rel（防 tabnabbing）；不強制加，交由內容決定
-  allowProtocolRelative: false,
-};
+  // script/style 標籤連同內容整段移除（其餘未列標籤只移除標籤、保留文字）
+  stripIgnoreTagBody: ['script', 'style'],
+  allowCommentTag: false,
+  css: {}, // 啟用 cssfilter 預設安全白名單（color/background/border/padding/font-* 等）
+});
 
 export function sanitizeHtml(dirty: string | null | undefined): string {
   if (!dirty) return '';
-  return sanitizeHtmlLib(dirty, OPTIONS);
+  return filter.process(dirty);
 }
