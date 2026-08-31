@@ -244,7 +244,7 @@
       <li><a href="#s3">步驟 3 · 設定影片（Bunny）</a></li>
       <li><a href="#s4">步驟 4 · 設定寄信（Resend）</a></li>
       <li><a href="#s5">步驟 5 · 設定刷卡（PayUni）</a></li>
-      <li><a href="#s6">步驟 6 · 把網站放上線（Netlify）</a></li>
+      <li><a href="#s6">步驟 6 · 把網站放上線（Netlify 或 Cloudflare）</a></li>
       <li><a href="#s7">步驟 7 · 建立你的管理員帳號</a></li>
       <li><a href="#s8">步驟 8 · 開門收客前的安全檢查（很重要）</a></li>
       <li><a href="#s9">步驟 9 · 開啟 Actions＋保活（必做）＋備份、通知（選配）</a></li>
@@ -554,15 +554,25 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
     <div class="step-head">
       <div class="step-num">6</div>
       <div>
-        <h2>把網站放上線（Netlify）</h2>
+        <h2>把網站放上線（Netlify 或 Cloudflare，二選一）</h2>
         <p class="sub"><span class="time-tag">約 30 分鐘</span>　這步做完就有一個能開的網址了</p>
       </div>
     </div>
 
-    <h3>6-1. 讓程式碼進到你的 GitHub</h3>
+    <div class="box tip">
+      <p class="box-title">🅰️🅱️ 先選一個放網站的平台（本系統兩個都支援）</p>
+      <ul class="plain" style="margin:6px 0 0;">
+        <li><strong>路線 A：Netlify</strong>——設定最簡單、最直覺。適合新手。免費額度（尤其每月建置次數）較小，網站更新很頻繁時可能會不夠用。</li>
+        <li><strong>路線 B：Cloudflare</strong>——免費額度大很多（建置次數、流量），且允許商業使用；但設定稍微技術一點，建議請工程師協助。</li>
+      </ul>
+      <p style="margin-top:8px;">兩條路的「環境變數（鑰匙）」完全一樣，差別只在「在哪裡匯入 repo、按哪個部署」。<strong>先做 6-1（共用），再挑 A 或 B。</strong></p>
+    </div>
+
+    <h3>6-1. 讓程式碼進到你的 GitHub（A、B 共用）</h3>
     <p>請賣方把專案<strong>轉移或複製到你的 GitHub 帳號</strong>底下（最簡單：賣方在 GitHub repo 的 <em>Settings → Transfer</em> 轉給你）。轉好後你的 GitHub 就會有一個 <code class="inline">bds-web</code> 之類的倉庫。</p>
 
-    <h3>6-2. 匯入到 Netlify</h3>
+    <h3>6-2. 路線 A：匯入到 Netlify</h3>
+    <p style="font-size:14px;color:var(--ink-soft);">（想用 Cloudflare 的人：跳過 6-2，改看下方「路線 B」；環境變數清單 6-3 兩條路共用。）</p>
     <ol class="dolist">
       <li>Netlify → <strong>Add new project → Import an existing project</strong>。</li>
       <li>選 <strong>GitHub</strong> → 授權 → 選你的那個倉庫。</li>
@@ -621,6 +631,21 @@ ENABLE_PAYMENT_SIMULATION  = false</pre>
       <li>完成後 Netlify 會給你一個網址（像 <code class="inline">xxxx.netlify.app</code>）。<strong>回到上面把 <code class="inline">NEXTAUTH_URL</code> 改成這個網址，再重新部署一次。</strong></li>
       <li>（之後有自己網域）到 <strong>Domain management</strong> 綁定你的網址，再把 <code class="inline">NEXTAUTH_URL</code> 改成它、重新部署。</li>
     </ol>
+
+    <h3>6-B. 路線 B：改用 Cloudflare（免費額度更大，稍技術，建議工程師）</h3>
+    <p>若選 Cloudflare（不做 Netlify），做完 6-1 後改照這裡：</p>
+    <ol class="dolist">
+      <li>註冊 <a href="https://cloudflare.com">Cloudflare</a> 免費帳號 → <strong>Workers &amp; Pages → Create → 連接 GitHub</strong>，選你的 <code class="inline">bds-web</code> 倉庫。</li>
+      <li>建置指令設為 <code class="inline">npm run cf:build</code>（本專案已內建；相容性旗標 <code class="inline">nodejs_compat</code> 已寫在 <code class="inline">wrangler.jsonc</code>，通常會自動套用）。</li>
+      <li>在 CF 專案 → <strong>Settings → Variables</strong>，把 <strong>6-3 那張清單的環境變數全部加進去</strong>（敏感值設為 <em>Secret</em>）；<code class="inline">NEXTAUTH_URL</code> 先填 Cloudflare 給你的 <code class="inline">*.workers.dev</code> 測試網址。</li>
+      <li>部署 → 用那個測試網址把功能點一遍（登入、看片、真卡買一筆、後台）。</li>
+      <li>（之後有自己網域）在 Cloudflare 綁定你的網域，再把 <code class="inline">NEXTAUTH_URL</code> 改成正式網域、重新部署。</li>
+    </ol>
+    <div class="box warn">
+      <p class="box-title">⚠️ 兩個平台擇一就好</p>
+      <p>同一個網域只能指向一個平台。<strong>先用測試網址確認新平台一切正常（尤其真卡刷一筆），再把網域切過去</strong>，然後才停用另一個。切換網域屬技術操作，建議工程師處理。</p>
+    </div>
+
     <div class="box good">
       <p class="box-title">✅ 完成後你會有</p>
       <p>一個可以打開的網站！先點進去看看首頁、課程頁有沒有正常顯示。</p>
