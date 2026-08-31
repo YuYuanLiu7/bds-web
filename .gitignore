@@ -51,3 +51,7 @@ next-env.d.ts
 
 # 安全稽核報告（內部用，等同攻擊地圖，勿進版控）
 SECURITY_AUDIT.md
+
+# OpenNext / Cloudflare
+.open-next/
+.wrangler/

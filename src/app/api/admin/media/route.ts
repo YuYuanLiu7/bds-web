@@ -54,7 +54,9 @@ export async function GET() {
       console.warn("Supabase Storage list warning, falling back to local files:", err);
     }
 
-    // Strategy B: Local uploads fallback
+    // Strategy B: Local uploads fallback（僅本機/有檔案系統的平台可用；
+    // Cloudflare Workers 等無檔案系統環境會拋錯，這裡整段以 try/catch 保護，失敗即回空清單）
+    try {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
     if (fs.existsSync(uploadsDir)) {
       const localFiles = fs.readdirSync(uploadsDir);
@@ -84,6 +86,9 @@ export async function GET() {
         });
 
       return NextResponse.json({ files, source: 'local' });
+    }
+    } catch (fsErr) {
+      console.warn('本機檔案備援不可用（可能為無檔案系統平台），略過：', fsErr);
     }
 
     return NextResponse.json({ files: [], source: 'none' });
@@ -128,11 +133,15 @@ export async function DELETE(req: Request) {
       console.warn("Supabase Storage delete failed or skipped:", err);
     }
 
-    // 2. Delete from Local directory if exists
-    const localPath = path.join(process.cwd(), 'public', 'uploads', fileName);
-    if (fs.existsSync(localPath)) {
-      fs.unlinkSync(localPath);
-      console.log(`Successfully deleted local file: ${localPath}`);
+    // 2. Delete from Local directory if exists（無檔案系統平台會拋錯，以 try/catch 保護）
+    try {
+      const localPath = path.join(process.cwd(), 'public', 'uploads', fileName);
+      if (fs.existsSync(localPath)) {
+        fs.unlinkSync(localPath);
+        console.log(`Successfully deleted local file: ${localPath}`);
+      }
+    } catch (fsErr) {
+      console.warn('本機刪檔略過（可能為無檔案系統平台）：', fsErr);
     }
 
     return NextResponse.json({ success: true });

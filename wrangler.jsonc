@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bds-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-06-01",
+  // nodejs_compat：讓 Workers 支援 node:crypto（金流 AES-GCM/簽章）等 Node API
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+  // 環境變數請於 Cloudflare 儀表板 → Workers & Pages → 專案 → Settings → Variables 設定
+  // （與 Netlify 相同那組：NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / NEXTAUTH_URL /
+  //  NEXTAUTH_SECRET / PAYUNI_* / RESEND_* / BUNNY_* 等），敏感值請設為 Secret。
+}

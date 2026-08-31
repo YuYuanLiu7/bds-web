@@ -49,8 +49,9 @@ export async function rateLimit(
  */
 export function clientIp(req: Request): string {
   const trusted =
+    req.headers.get("cf-connecting-ip") ||          // Cloudflare
     req.headers.get("x-nf-client-connection-ip") || // Netlify
-    req.headers.get("true-client-ip");              // Cloudflare / 部分 CDN
+    req.headers.get("true-client-ip");              // 部分 CDN
   if (trusted) return trusted.trim();
   const xff = req.headers.get("x-forwarded-for");
   if (xff) return xff.split(",")[0].trim();
