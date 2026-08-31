@@ -693,7 +693,7 @@ WHERE email = '你的信箱@example.com';</pre>
     </div>
     <ul class="plain">
       <li><strong>資料保護鎖有打開（資安最重要）：</strong>上面的 <code class="inline">npm run verify</code> 會自動檢查這項（「資料庫對外上鎖」）。若顯示未上鎖，代表步驟 2 最後的 <code class="inline">db/enable_rls.sql</code> 沒跑到——回步驟 2 把它整份再貼一次即可。</li>
-      <li>安全開關關好：Netlify 設定裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
+      <li>安全開關關好：部署平台（Netlify／Cloudflare）的環境變數裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
       <li>金流換正式：確認商家審核通過後，把 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 換成正式端點、金鑰換成正式那組，重新部署。</li>
       <li>網址填對：<code class="inline">NEXTAUTH_URL</code> 已改成你真正的網址（不是預設的假網址）。</li>
       <li>寄信正常（很重要）：<code class="inline">RESEND_FROM_EMAIL</code> 已改成自家已驗證網域（不是 <code class="inline">onboarding@resend.dev</code>）。實測：用<strong>另一個</strong>信箱到 <code class="inline">/signup</code> 註冊 → 該信箱能收到「驗證信」→ 點了能成功登入。收不到＝客戶也會收不到、無法登入。</li>
@@ -712,7 +712,7 @@ WHERE email = '你的信箱@example.com';</pre>
 
   <div class="box warn">
     <p class="box-title">📍 這一步是在「GitHub」做，不是 Netlify</p>
-    <p>下面的保活、備份、通知、自動續命，都是 <strong>GitHub</strong> 幫你在背景自動跑的工作，跟 Netlify（放網站的地方）是<strong>兩個不同網站</strong>。所以請打開你的 <strong>GitHub</strong>，不是 Netlify。</p>
+    <p>下面的保活、備份、通知、自動續命，都是 <strong>GitHub</strong> 幫你在背景自動跑的工作，跟「放網站的平台」（Netlify 或 Cloudflare）是<strong>不同的地方</strong>。所以這一步請打開你的 <strong>GitHub</strong>。</p>
   </div>
 
   <div class="step">
@@ -842,14 +842,14 @@ WHERE email = '你的信箱@example.com';</pre>
 <pre>https://你的新網站網址</pre>
     </div>
     <div class="box warn">
-      <p class="box-title">⚠️ 還沒換網域前，填 Netlify 臨時網址（搬家的人尤其注意）</p>
-      <p><strong>填「新網站現在真的打得開」的網址</strong>：還沒換網域前，就是 Netlify 給的臨時網址（像 <code class="inline">xxxx.netlify.app</code>）。等正式換好網域後，再回來把它改成你的網域（例 <code class="inline">https://myschool.com</code>）。</p>
+      <p class="box-title">⚠️ 還沒換網域前，填平台的臨時網址（搬家的人尤其注意）</p>
+      <p><strong>填「新網站現在真的打得開」的網址</strong>：還沒換網域前，就是部署平台給的臨時網址（Netlify 的 <code class="inline">xxxx.netlify.app</code> 或 Cloudflare 的 <code class="inline">xxxx.workers.dev</code>）。等正式換好網域後，再回來把它改成你的網域（例 <code class="inline">https://myschool.com</code>）。</p>
       <p style="margin-top:8px;"><strong>搬家情境特別注意：</strong>換網域完成前，<strong>千萬別填你舊站現在的網域</strong>（那個還指向舊 Teachify、還在營運的網址）——填了等於在監控舊站、而不是你的新站。要等《搬家手冊》換網域、新站穩定後才改成正式網域。</p>
     </div>
     <p style="font-size:15px;color:var(--ink-soft);">（確認 GitHub 帳號的 Email 通知有開：GitHub 預設會在排程工作「失敗」時寄信給你，等於網站掛掉就收到通知。）</p>
 
     <h3>② 金流開通失敗通知（用 Resend）</h3>
-    <p>最怕的狀況是「客戶付了錢，但系統沒開通」。發生時系統會<strong>主動寄一封警示信給你</strong>去手動補開通。在 Netlify 環境變數加一個信箱即可（不加則退回用你的客服信箱）：</p>
+    <p>最怕的狀況是「客戶付了錢，但系統沒開通」。發生時系統會<strong>主動寄一封警示信給你</strong>去手動補開通。在部署平台（Netlify／Cloudflare）的環境變數加一個信箱即可（不加則退回用你的客服信箱）：</p>
     <div class="paste">
       <div class="label"><span>Netlify 環境變數</span></div>
 <pre>ADMIN_ALERT_EMAIL = 你要收警示信的信箱</pre>
@@ -899,8 +899,8 @@ WHERE email = '你的信箱@example.com';</pre>
 
   <div class="box tip">
     <p class="box-title">🔁 改設定的重要小知識：程式會自動部署，改「環境變數」不會</p>
-    <p><strong>改程式碼</strong>（工程師 push 到 GitHub）→ Netlify 會<strong>自動重新編譯、自動上線</strong>，不用手動按。</p>
-    <p><strong>但只改「環境變數」</strong>（例如在 Netlify 改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效</strong>，要到 Netlify → <strong>Deploys → Trigger deploy</strong> 手動按一次（選 <em>Clear cache and deploy site</em>）新值才會套用。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
+    <p><strong>改程式碼</strong>（工程師 push 到 GitHub）→ 部署平台（Netlify／Cloudflare）會<strong>自動重新編譯、自動上線</strong>，不用手動按。</p>
+    <p><strong>但只改「環境變數」</strong>（例如改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效，要「重新部署」一次</strong>新值才會套用：Netlify 到 <strong>Deploys → Trigger deploy</strong>（選 <em>Clear cache and deploy site</em>）；Cloudflare 則在該專案重新部署（Deployments → Retry/Redeploy）。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
   </div>
 
   <div class="box tip">
