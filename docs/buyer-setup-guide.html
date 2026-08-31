@@ -634,30 +634,37 @@ ENABLE_PAYMENT_SIMULATION  = false</pre>
 
     <h3>6-B. 路線 B：改用 Cloudflare（免費額度更大，稍技術，建議工程師）</h3>
     <div class="box warn">
-      <p class="box-title">👷 這條路需要用到終端機與工程觀念，建議由工程師執行</p>
-      <p>本專案已內建 Cloudflare 設定檔（<code class="inline">wrangler.jsonc</code> 已含 <code class="inline">nodejs_compat</code> 旗標）與指令。下面兩種做法擇一；<strong>用指令的「做法一」最單純可靠</strong>。工程師可直接看 <a href="cloudflare-deploy-cheatsheet.html">《Cloudflare 部署小抄》</a>（複製即用的指令）。</p>
+      <p class="box-title">👷 這條路偏技術，建議由工程師執行；採「連 GitHub 自動部署」</p>
+      <p>本專案已內建 Cloudflare 設定檔（<code class="inline">wrangler.jsonc</code> 已含 <code class="inline">nodejs_compat</code> 旗標，你不用自己加）。我們統一用「連 GitHub」的方式——這樣<strong>以後每次工程師 push 更新，Cloudflare 都會自動重新部署</strong>，不用每次手動上傳。</p>
     </div>
     <div class="box warn">
-      <p class="box-title">🧨 一定要懂的一個雷：前端變數在「build 當下」就寫死</p>
-      <p>凡是 <code class="inline">NEXT_PUBLIC_</code> 開頭的變數（尤其 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code>、<code class="inline">NEXT_PUBLIC_PAYUNI_MERID</code>）是在<strong>編譯（build）時就被寫進前端</strong>的。如果 build 的環境沒有這些值，前端會用預設（沙盒）值——<strong>結果就是「刷卡看起來正常、卻打到測試端點、收不到真錢」</strong>。所以下面兩種做法都要確保 build 期讀得到這些值。</p>
+      <p class="box-title">💳 免費版塞不下：要先開 Workers Paid（約 US$5／月）</p>
+      <p>Cloudflare Workers 免費版「單一程式上限 3 MiB」，本站（完整 Next.js）會超過、部署會失敗（<code class="inline">exceeded the size limit of 3 MiB</code>）。請先開 <strong>Workers Paid（約 US$5／月，上限 10 MiB）</strong> 再部署。（仍比 Netlify 付費便宜、額度大方。）</p>
     </div>
-    <p><strong>做法一（在自己電腦 build＋部署）：</strong></p>
+    <p><strong>步驟（做完 6-1 後）：</strong></p>
     <ol class="dolist">
-      <li>做完 6-1（程式碼在你的 GitHub），把專案下載到電腦、於 <code class="inline">bds-web</code> 資料夾執行 <code class="inline">npm install</code>（需 <strong>Node 20 以上，建議 22</strong>）。</li>
-      <li><strong>先把 6-3 那張清單複製成 <code class="inline">bds-web/.env.local</code>（本機 build 要靠它）</strong>。特別確認 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 是<strong>正式端點</strong>、金流金鑰是正式那組，否則刷卡會走測試。</li>
-      <li>登入 Cloudflare：<code class="inline">npx wrangler login</code>（會開瀏覽器授權）。</li>
-      <li>第一次 build＋部署（<strong>要分兩步，cf:deploy 不會自動 build</strong>）：先 <code class="inline">npm run cf:build</code>，再 <code class="inline">npm run cf:deploy</code>。完成後終端機會給你一個 <code class="inline">https://bds-web.你的帳號.workers.dev</code> 測試網址。</li>
-      <li>到 Cloudflare 儀表板 → 你的 Worker → <strong>Settings → Variables and Secrets</strong>，把 <strong>6-3 清單裡「伺服器端」的變數</strong>加進去（<code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>、<code class="inline">NEXTAUTH_SECRET</code>、<code class="inline">PAYUNI_HASH_KEY/IV</code>、<code class="inline">RESEND_*</code>、<code class="inline">BUNNY_*</code> 等，敏感值設 <em>Secret</em>）；<code class="inline">NEXTAUTH_URL</code> 填上一步拿到的 <code class="inline">*.workers.dev</code> 網址。</li>
-      <li>把 <code class="inline">.env.local</code> 的 <code class="inline">NEXTAUTH_URL</code> 也改成該 workers.dev 網址，然後<strong>再 <code class="inline">npm run cf:build</code> 一次、再 <code class="inline">npm run cf:deploy</code></strong>。用該測試網址把功能點一遍（登入、看片、真卡買一筆、後台）。</li>
-      <li>（之後有自己網域）Worker → <strong>Settings → Domains &amp; Routes</strong> 綁你的網域；把 <code class="inline">.env.local</code> 與儀表板的 <code class="inline">NEXTAUTH_URL</code> 都改成正式網域，再 <code class="inline">npm run cf:build</code> ＋ <code class="inline">npm run cf:deploy</code>。</li>
-    </ol>
-    <p style="font-size:14px;color:var(--ink-soft);">※ 做法一日後只要改到任何 <code class="inline">NEXT_PUBLIC_</code> 值（如金流換正式），都要<strong>回本機重跑 <code class="inline">cf:build</code>＋<code class="inline">cf:deploy</code></strong>；只在儀表板改不會生效。</p>
-    <p><strong>做法二（連 GitHub、由 Cloudflare 自動 build，push 即部署，較省事）：</strong></p>
-    <ol class="dolist">
-      <li>Cloudflare → <strong>Workers &amp; Pages → Create → Import a repository</strong>，選你的倉庫。</li>
+      <li>Cloudflare → <strong>Workers &amp; Pages → Create → Import a repository</strong>，選你的 <code class="inline">bds-web</code> 倉庫。</li>
       <li>建置指令填 <code class="inline">npx opennextjs-cloudflare build</code>、部署指令填 <code class="inline">npx wrangler deploy</code>。</li>
-      <li><strong>填環境變數（填哪裡、哪些 key、值從哪來、哪個要設 Secret）</strong>：在 Cloudflare 該 Worker → <strong>Settings</strong> 的變數設定新增。完整對照表（含每個 key 的值來源與「一般／Secret」）請直接看 <a href="cloudflare-deploy-cheatsheet.html">《Cloudflare 部署小抄》</a> 的「環境變數：填哪裡、填什麼」一節；重點：<code class="inline">NODE_VERSION=22</code> 與 <code class="inline">NEXT_PUBLIC_</code> 開頭的設「一般（plaintext）」讓建置讀得到，敏感值設 <em>Secret</em>；<code class="inline">NEXTAUTH_URL</code> 先填部署後拿到的 <code class="inline">*.workers.dev</code>。</li>
-      <li>之後 push 到 GitHub 會自動重建部署；改 <code class="inline">NEXT_PUBLIC_</code> 變數後，到該 Worker → Deployments 觸發一次重建即可生效。</li>
+      <li>在該專案 → <strong>Settings</strong> 的變數設定，依下表新增環境變數（<strong>值＝你在 6-3「鑰匙收集表」填過的那些</strong>）。<strong>類型很重要</strong>：</li>
+    </ol>
+    <div class="tablewrap">
+      <table>
+        <tr><th>設「一般（Plaintext）」— build 期要讀，一定不能設成 Secret</th><th>設「Secret（加密）」— 伺服器機密</th></tr>
+        <tr>
+          <td><code class="inline">NEXT_PUBLIC_SUPABASE_URL</code>、<code class="inline">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>、<code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code>（<strong>正式端點</strong>）、<code class="inline">NEXT_PUBLIC_PAYUNI_MERID</code>、<code class="inline">NEXTAUTH_URL</code>、<code class="inline">PAYUNI_MERID</code>、<code class="inline">RESEND_FROM_EMAIL</code>、<code class="inline">BUNNY_STREAM_LIBRARY_ID</code>、<code class="inline">ENABLE_PAYMENT_SIMULATION</code>(=false)、<strong><code class="inline">NODE_VERSION</code>=22</strong>、（選填）<code class="inline">CONTACT_TO_EMAIL</code>／<code class="inline">ADMIN_ALERT_EMAIL</code></td>
+          <td><code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>、<code class="inline">NEXTAUTH_SECRET</code>、<code class="inline">PAYUNI_HASH_KEY</code>、<code class="inline">PAYUNI_HASH_IV</code>、<code class="inline">RESEND_API_KEY</code>、<code class="inline">BUNNY_TOKEN_AUTH_KEY</code>、<code class="inline">BUNNY_STREAM_API_KEY</code></td>
+        </tr>
+      </table>
+    </div>
+    <div class="box warn">
+      <p class="box-title">🧨 為什麼 <code class="inline">NEXT_PUBLIC_</code> 一定要設「一般」</p>
+      <p>這些值是在<strong>建置（build）當下就寫死進前端</strong>的。若設成 Secret，build 期讀不到 → 前端會用預設沙盒值 → <strong>刷卡看起來正常、卻打到測試端點、收不到真錢</strong>。所以 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 務必填「正式端點」且設「一般」。</p>
+    </div>
+    <ol class="dolist" start="4">
+      <li><code class="inline">NEXTAUTH_URL</code> 第一次先隨意填（例如暫填 <code class="inline">https://example.com</code>）→ 部署 → 取得 Cloudflare 給的 <code class="inline">*.workers.dev</code> 測試網址 → 回來把 <code class="inline">NEXTAUTH_URL</code> 改成它 → 到 <strong>Deployments</strong> 觸發一次重建。</li>
+      <li>用該測試網址把功能點一遍：登入、看片、<strong>真卡買一筆</strong>（確認金流走正式端點、收得到錢）、後台。</li>
+      <li>（之後有自己網域）該專案 → <strong>Settings → Domains &amp; Routes</strong> 綁你的網域；把 <code class="inline">NEXTAUTH_URL</code> 改成正式網域，再到 Deployments 觸發重建。</li>
+      <li>日後工程師 push 到 GitHub 會<strong>自動重建部署</strong>；只改環境變數（尤其 <code class="inline">NEXT_PUBLIC_</code>）時，要到 <strong>Deployments</strong> 手動觸發一次重建才生效。</li>
     </ol>
     <div class="box warn">
       <p class="box-title">⚠️ 兩個平台擇一就好</p>
@@ -918,7 +925,7 @@ WHERE email = '你的信箱@example.com';</pre>
   <div class="box tip">
     <p class="box-title">🔁 改設定的重要小知識：程式會自動部署，改「環境變數」不會</p>
     <p><strong>改程式碼</strong>（工程師 push 到 GitHub）→ 部署平台（Netlify／Cloudflare）會<strong>自動重新編譯、自動上線</strong>，不用手動按。</p>
-    <p><strong>但只改「環境變數」</strong>（例如改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效，要「重新部署」一次</strong>新值才會套用：Netlify 到 <strong>Deploys → Trigger deploy</strong>（選 <em>Clear cache and deploy site</em>）；Cloudflare 若用「做法二（連 GitHub）」到該 Worker 觸發一次重建、若用「做法一（本機 CLI）」則回電腦重跑 <code class="inline">npm run cf:build</code>＋<code class="inline">npm run cf:deploy</code>。<strong>特別是 <code class="inline">NEXT_PUBLIC_</code> 開頭的值（如金流正式端點）改了一定要重新 build</strong>，否則前端還是舊值。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
+    <p><strong>但只改「環境變數」</strong>（例如改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效，要「重新部署」一次</strong>新值才會套用：Netlify 到 <strong>Deploys → Trigger deploy</strong>（選 <em>Clear cache and deploy site</em>）；Cloudflare 到該 Worker 的 <strong>Deployments</strong> 觸發一次重建。<strong>特別是 <code class="inline">NEXT_PUBLIC_</code> 開頭的值（如金流正式端點）改了一定要重新部署</strong>，否則前端還是舊值。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
   </div>
 
   <div class="box tip">
