@@ -10,7 +10,7 @@
     "test": "vitest run",
     "setup": "node scripts/setup.mjs",
     "verify": "node scripts/verify.mjs",
-    "cf:build": "opennextjs-cloudflare build",
+    "cf:build": "opennextjs-cloudflare build && node scripts/strip-og-trace.mjs && opennextjs-cloudflare build --skipNextBuild",
     "cf:preview": "opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare deploy"
   },

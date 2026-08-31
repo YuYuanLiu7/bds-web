@@ -12,14 +12,6 @@ if (process.env.NEXTAUTH_URL) {
 }
 
 const nextConfig: NextConfig = {
-  // 本站未使用動態 OG 圖片（ImageResponse / opengraph-image），
-  // 將 @vercel/og 的 resvg.wasm(1.3MB)+yoga.wasm 從伺服器追蹤中排除，
-  // 避免被打包進 Cloudflare Worker、撐大體積。
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/next/dist/compiled/@vercel/og/**',
-    ],
-  },
   images: {
     remotePatterns: [
       {
