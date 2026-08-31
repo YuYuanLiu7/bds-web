@@ -19,7 +19,7 @@ interface RichTextEditorProps {
  * 可重用富文本（WYSIWYG）編輯器：標題 H1–H4、清單、粗/斜/底線/刪除線、文字大小、
  * 文字色/底色、連結、插圖（上傳）、表格、引用、縮排。輸出 HTML 存回 onChange。
  * 採 contentEditable + document.execCommand（與 ArticleModal 相同的成熟做法）。
- * 顯示端請務必用 DOMPurify 淨化後再 render，避免儲存型 XSS。
+ * 顯示端請務必用 sanitizeHtml（src/lib/sanitize.ts）淨化後再 render，避免儲存型 XSS。
  */
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const ref = useRef<HTMLDivElement>(null);

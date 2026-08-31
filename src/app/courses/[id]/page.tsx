@@ -9,7 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 import CourseReviews from '@/components/CourseReviews';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 // 課程簡介現在是富文本（HTML）；顯示前一律淨化，metadata 用純文字。
 function stripHtml(html: string | null | undefined): string {
@@ -82,14 +82,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </h1>
             <div
               className="text-lg text-gray-600 mb-8 leading-relaxed prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.description || '') }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(course.description || '') }}
             />
             {course.points && stripHtml(course.points) && (
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-gray-900 mb-3">課程重點</h2>
                 <div
                   className="text-base text-gray-600 leading-relaxed prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-li:my-1"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.points) }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(course.points) }}
                 />
               </div>
             )}

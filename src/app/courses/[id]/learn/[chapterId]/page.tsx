@@ -12,7 +12,7 @@ import ChapterCompleteButton from "@/components/ChapterCompleteButton";
 import { isBunnyVideo, signBunnyEmbedUrl } from "@/lib/bunny";
 import { signStorageUrl } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export default async function ChapterPage({ params }: { params: Promise<{ id: string, chapterId: string }> }) {
   const { id, chapterId } = await params;
@@ -172,7 +172,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             {chapterContentHtml && (
               <div
                 className="prose prose-invert max-w-none mt-4 text-sm text-gray-300 leading-relaxed prose-a:text-blue-400"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chapterContentHtml) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(chapterContentHtml) }}
               />
             )}
 
@@ -189,7 +189,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
                       </div>
                       <div
                         className="text-sm text-gray-400 leading-relaxed prose prose-invert max-w-none prose-a:text-blue-400"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(a.content || '') }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(a.content || '') }}
                       />
                     </div>
                   ))}
