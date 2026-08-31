@@ -656,7 +656,7 @@ ENABLE_PAYMENT_SIMULATION  = false</pre>
     <ol class="dolist">
       <li>Cloudflare → <strong>Workers &amp; Pages → Create → Import a repository</strong>，選你的倉庫。</li>
       <li>建置指令填 <code class="inline">npx opennextjs-cloudflare build</code>、部署指令填 <code class="inline">npx wrangler deploy</code>。</li>
-      <li>環境變數：加 <code class="inline">NODE_VERSION=22</code>；把 6-3 清單全部加入，其中 <strong><code class="inline">NEXT_PUBLIC_</code> 開頭的請設為「一般變數（plaintext）」</strong>（這樣 build 期才讀得到、才會正確編進前端），敏感的伺服器端變數設為 <em>Secret</em>。<code class="inline">NEXTAUTH_URL</code> 先填部署後拿到的 <code class="inline">*.workers.dev</code>。</li>
+      <li><strong>填環境變數（填哪裡、哪些 key、值從哪來、哪個要設 Secret）</strong>：在 Cloudflare 該 Worker → <strong>Settings</strong> 的變數設定新增。完整對照表（含每個 key 的值來源與「一般／Secret」）請直接看 <a href="cloudflare-deploy-cheatsheet.html">《Cloudflare 部署小抄》</a> 的「環境變數：填哪裡、填什麼」一節；重點：<code class="inline">NODE_VERSION=22</code> 與 <code class="inline">NEXT_PUBLIC_</code> 開頭的設「一般（plaintext）」讓建置讀得到，敏感值設 <em>Secret</em>；<code class="inline">NEXTAUTH_URL</code> 先填部署後拿到的 <code class="inline">*.workers.dev</code>。</li>
       <li>之後 push 到 GitHub 會自動重建部署；改 <code class="inline">NEXT_PUBLIC_</code> 變數後，到該 Worker → Deployments 觸發一次重建即可生效。</li>
     </ol>
     <div class="box warn">

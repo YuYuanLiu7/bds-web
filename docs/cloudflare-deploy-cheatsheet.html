@@ -46,6 +46,52 @@
     <p>2. <strong><code class="inline">NEXT_PUBLIC_*</code> 在 build 當下就寫死進前端</strong>（尤其 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code>）。本機 build 就要有 <code class="inline">.env.local</code>、且填<strong>正式金流端點</strong>，否則刷卡會靜默走 sandbox、收不到真錢。</p>
   </div>
 
+  <div class="box warn">
+    <p class="box-title">💳 免費版部署不了：需開 Workers Paid（US$5/月）</p>
+    <p>Cloudflare Workers <strong>免費版腳本上限 3 MiB</strong>，本站（完整 Next.js）壓縮後約 4～5 MiB 會超過、部署會失敗（錯誤 <code class="inline">exceeded the size limit of 3 MiB</code>）。請先在 Cloudflare 開 <strong>Workers Paid（約 US$5/月，上限 10 MiB）</strong> 再部署。</p>
+  </div>
+
+  <div class="box">
+    <p class="box-title">🔌 兩種做法的差別（先搞懂再選）</p>
+    <p><strong>做法一（本機 CLI）</strong>：從你電腦上傳，<strong>不會連動 GitHub、不會自動部署</strong>；每次更新都要回電腦重跑 <code class="inline">cf:build</code>＋<code class="inline">cf:deploy</code>。</p>
+    <p><strong>做法二（連 GitHub）</strong>：push 到 GitHub 就自動重建部署，較省事。</p>
+  </div>
+
+  <h2>環境變數：填哪裡、填什麼</h2>
+  <p><strong>填在哪裡？</strong></p>
+  <ul style="margin:6px 0;padding-left:22px;">
+    <li><strong>做法一：</strong>把 <code class="inline">NEXT_PUBLIC_</code> 開頭的填在本機 <code class="inline">bds-web/.env.local</code>（build 期要用）；<strong>伺服器端</strong>的值填在 Cloudflare 儀表板 → 你的 Worker → <strong>Settings → Variables and Secrets</strong>（執行期要用，敏感的選 <em>Secret/Encrypt</em>）。</li>
+    <li><strong>做法二：</strong>全部填在 Cloudflare 專案的變數設定；其中 <code class="inline">NEXT_PUBLIC_</code> 與 <code class="inline">NODE_VERSION</code> 要放到「<strong>建置(Build)也讀得到</strong>」的一般變數（Plaintext），敏感的伺服器值設 Secret。</li>
+  </ul>
+  <p><strong>要填哪些？值哪裡來？</strong>（值＝你在《開站手冊》步驟 6-3「鑰匙收集表」填過的那些）</p>
+  <div style="overflow-x:auto;">
+  <table style="border-collapse:collapse;width:100%;font-size:13.5px;">
+    <thead><tr style="text-align:left;border-bottom:1px solid var(--line);">
+      <th style="padding:6px 8px;">變數名稱</th><th style="padding:6px 8px;">值（從哪來）</th><th style="padding:6px 8px;">類型</th></tr></thead>
+    <tbody>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NEXT_PUBLIC_SUPABASE_URL</td><td style="padding:5px 8px;">Supabase 專案網址</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NEXT_PUBLIC_SUPABASE_ANON_KEY</td><td style="padding:5px 8px;">Supabase anon 公開金鑰</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NEXT_PUBLIC_PAYUNI_UPP_URL</td><td style="padding:5px 8px;"><strong>正式端點</strong> https://api.payuni.com.tw/api/upp</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NEXT_PUBLIC_PAYUNI_MERID</td><td style="padding:5px 8px;">PayUni 商店代號</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NEXTAUTH_URL</td><td style="padding:5px 8px;">部署後的 *.workers.dev；換網域後改正式網域</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NEXTAUTH_SECRET</td><td style="padding:5px 8px;">你產生的隨機字串</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">SUPABASE_SERVICE_ROLE_KEY</td><td style="padding:5px 8px;">Supabase service_role 金鑰</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">PAYUNI_MERID</td><td style="padding:5px 8px;">PayUni 商店代號</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">PAYUNI_HASH_KEY</td><td style="padding:5px 8px;">PayUni HashKey</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">PAYUNI_HASH_IV</td><td style="padding:5px 8px;">PayUni HashIV</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">RESEND_API_KEY</td><td style="padding:5px 8px;">Resend API 金鑰</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">RESEND_FROM_EMAIL</td><td style="padding:5px 8px;">no-reply@你的網域（已驗證）</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">BUNNY_STREAM_LIBRARY_ID</td><td style="padding:5px 8px;">Bunny 影片庫 ID</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">BUNNY_TOKEN_AUTH_KEY</td><td style="padding:5px 8px;">Bunny 播放防盜金鑰</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">BUNNY_STREAM_API_KEY</td><td style="padding:5px 8px;">Bunny 上傳 API 金鑰</td><td style="padding:5px 8px;"><strong>Secret</strong></td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">ENABLE_PAYMENT_SIMULATION</td><td style="padding:5px 8px;"><code class="inline">false</code>（正式站必須 false）</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">CONTACT_TO_EMAIL / ADMIN_ALERT_EMAIL</td><td style="padding:5px 8px;">你的客服／警示信箱（選填）</td><td style="padding:5px 8px;">一般</td></tr>
+      <tr><td style="padding:5px 8px;font-family:monospace;">NODE_VERSION</td><td style="padding:5px 8px;"><code class="inline">22</code>（<strong>只有做法二 CI 需要</strong>）</td><td style="padding:5px 8px;">一般</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:13.5px;color:var(--ink-soft);">※ 「一般＝Plaintext（明文）」、「Secret＝加密、存了看不到」。<code class="inline">NEXT_PUBLIC_</code> 一定要「一般」，否則 build 期讀不到、前端會用錯值（金流會走測試端點）。</p>
+
   <h2>前置</h2>
   <ol>
     <li>Node <strong>22</strong>（20 以上）、已安裝 git。</li>
@@ -89,7 +135,7 @@ npm run cf:deploy</pre>
   <ol>
     <li>Cloudflare → <strong>Workers &amp; Pages → Create → Import a repository</strong>，選你的倉庫。</li>
     <li>Build command：<code class="inline">npx opennextjs-cloudflare build</code>；Deploy command：<code class="inline">npx wrangler deploy</code>。</li>
-    <li>環境變數：加 <code class="inline">NODE_VERSION=22</code>；<strong><code class="inline">NEXT_PUBLIC_*</code> 設為一般變數（plaintext）</strong>好讓 build 期讀得到，伺服器端敏感值設 Secret；<code class="inline">NEXTAUTH_URL</code> 先填 workers.dev。</li>
+    <li>環境變數：<strong>照上面「環境變數：填哪裡、填什麼」那張表</strong>逐一新增（在該 Worker 的 Settings 變數設定）；<code class="inline">NODE_VERSION=22</code> 與 <code class="inline">NEXT_PUBLIC_*</code> 設「一般（plaintext）」讓 build 讀得到，敏感值設 Secret；<code class="inline">NEXTAUTH_URL</code> 先填 workers.dev。</li>
     <li>之後 push 到 GitHub 自動重建；改 <code class="inline">NEXT_PUBLIC_*</code> 後到 Deployments 觸發一次重建。</li>
   </ol>
 
