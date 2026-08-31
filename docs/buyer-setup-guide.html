@@ -662,14 +662,14 @@ ENABLE_PAYMENT_SIMULATION  = false</pre>
     </div>
     <div class="box good">
       <p class="box-title">⚡ 想更快？右邊「Secret」那一整欄，可用一行指令整包匯入</p>
-      <p>你電腦上的 <code class="inline">.env.local</code> 已經把所有鑰匙填好了。<strong>右邊「Secret（機密）」那一欄不用一個一個貼</strong>，可以用工具一次全部上傳（<strong>左邊「一般」那欄仍要手動貼</strong>，因為它們 build 期才用得到，這個指令不管 build）。</p>
-      <p style="margin-top:8px;"><strong>做法（要先完成上面第 1～3 步、按過第一次部署，讓 Worker <code class="inline">bds-web</code> 先存在）：</strong>在專案資料夾打開終端機，執行這兩行：</p>
+      <p>你電腦上的 <code class="inline">.env.local</code> 已經把所有鑰匙填好了。<strong>右邊「Secret（機密）」那一欄不用一個一個貼</strong>，可以用工具一次全部上傳。（<strong>左邊「一般」那欄還是要在儀表板手動設</strong>——因為那是 build 期才讀得到的，這個指令只處理執行期機密、不影響 build。）</p>
+      <p style="margin-top:8px;"><strong>⚠️ 順序很重要：這步要等「第一次部署之後」才能做</strong>（Worker <code class="inline">bds-web</code> 要先存在，見下方第 4 步）。正確順序：<strong>先設好左邊「一般」欄 → 做下方第 4 步的第一次部署 → 再回來跑這兩行 → 到 Deployments 重新部署一次</strong>。做法：在專案資料夾打開終端機，執行：</p>
       <div class="paste">
         <div class="label"><span>一次匯入所有機密（讀你填好的 .env.local）</span><span class="where">電腦 → 專案資料夾終端機</span></div>
 <pre>npx wrangler login
 npx wrangler secret bulk .env.local</pre>
       </div>
-      <p style="margin-top:8px;font-size:14px;color:var(--ink-soft);">說明：<code class="inline">wrangler secret bulk</code> 會讀 <code class="inline">KEY=VALUE</code> 格式，一次最多 100 個。它會把 <code class="inline">.env.local</code> <strong>整包</strong>當機密上傳（那 4 個 <code class="inline">NEXT_PUBLIC_</code> 也會一起上去、無害）——但它們<strong>仍必須另外在上面「一般」欄設定</strong>，build 才讀得到。上傳完到 <strong>Deployments</strong> 重新部署一次即生效。</p>
+      <p style="margin-top:8px;font-size:14px;color:var(--ink-soft);">說明：<code class="inline">wrangler secret bulk</code> 會讀 <code class="inline">KEY=VALUE</code> 格式，一次最多 100 個，並把 <code class="inline">.env.local</code> <strong>整包</strong>當「執行期機密」上傳（連左欄那幾個也會一起上去，屬正常）。重點：那 4 個 <code class="inline">NEXT_PUBLIC_</code> <strong>仍必須另外在儀表板「一般」欄設定、且讓 build 期讀得到</strong>，否則刷卡會走測試端點（見上方 🧨）。上傳完到 <strong>Deployments</strong> 重新部署一次即生效。</p>
     </div>
     <ol class="dolist" start="4">
       <li><code class="inline">NEXTAUTH_URL</code> 第一次先隨意填（例如暫填 <code class="inline">https://example.com</code>）→ 部署 → 取得 Cloudflare 給的 <code class="inline">*.workers.dev</code> 測試網址 → 回來把 <code class="inline">NEXTAUTH_URL</code> 改成它 → 到 <strong>Deployments</strong> 觸發一次重建。</li>
