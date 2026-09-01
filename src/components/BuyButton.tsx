@@ -84,7 +84,7 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
     <div className="mb-4">
       {/* 折扣碼輸入區 */}
       <div className="mb-3">
-        <label className="block text-xs font-bold text-gray-500 mb-1.5">折扣碼（選填）</label>
+        <label className="block text-xs font-bold text-slate-500 mb-1.5">折扣碼（選填）</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -95,13 +95,13 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
               if (applied) setApplied(null);
             }}
             placeholder="輸入折扣碼"
-            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm font-mono uppercase outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+            className="flex-1 px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-mono uppercase outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
           />
           <button
             type="button"
             onClick={handleApplyCoupon}
             disabled={applying}
-            className="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm transition disabled:opacity-55 whitespace-nowrap"
+            className="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition disabled:opacity-55 whitespace-nowrap"
           >
             {applying ? '驗證中...' : '套用'}
           </button>
@@ -116,7 +116,7 @@ export default function BuyButton({ courseId, courseName, amount }: BuyButtonPro
       <button
         onClick={handleBuy}
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-blue-200 shadow-lg disabled:bg-gray-400"
+        className="w-full bg-primary text-white py-4 rounded-lg font-bold text-lg hover:bg-primary-hover transition shadow-md disabled:bg-slate-400"
       >
         {loading
           ? '處理中...'

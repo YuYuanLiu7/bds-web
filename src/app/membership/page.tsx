@@ -53,28 +53,23 @@ export default async function MembershipPage() {
   }
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
-      
-      {/* Premium Ambient Background Glows */}
-      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
-      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-amber-100/25 rounded-full blur-[130px] pointer-events-none -z-10"></div>
-      
+    <div className="bg-slate-50 min-h-screen pb-16 font-sans relative overflow-hidden">
+
       {/* Header */}
-      <div 
+      <div
         style={{ backgroundColor: primaryColor }}
         className="w-full text-white py-16 px-6 relative overflow-hidden select-none"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.08),transparent)] pointer-events-none"></div>
         <div className="max-w-[1200px] mx-auto space-y-4 relative z-10">
           <Link 
             href="/"
-            className="inline-flex items-center text-xs font-bold text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-xl transition duration-200"
+            className="inline-flex items-center text-xs font-bold text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-lg transition duration-200"
           >
             <ArrowLeft className="w-3.5 h-3.5 mr-1" /> 回首頁
           </Link>
           <div className="space-y-2">
-            <span className="text-[10px] uppercase font-black tracking-widest text-white/50 block">專屬學習訂閱制方案</span>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight">會員方案</h1>
+            <span className="text-xs uppercase font-bold tracking-widest text-white/50 block">專屬學習訂閱制方案</span>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight">會員方案</h1>
             <p className="text-white/70 text-xs md:text-sm font-semibold max-w-xl leading-relaxed">
               選擇適合您的學習與訂閱方案，解鎖全站精選硬體、半導體與醫材產業實戰課程，為您的職涯躍升持續賦能。
             </p>
@@ -87,7 +82,7 @@ export default async function MembershipPage() {
         
         {/* Title */}
         <div className="max-w-2xl mx-auto space-y-3 mb-16 select-none">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900">開啟您的產業黃金職涯</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900">開啟您的產業黃金職涯</h2>
           <p className="text-xs md:text-sm text-slate-600 font-bold leading-relaxed">
             我們提供彈性的付費訂閱與單次買斷方案。無論您是業務新手，還是資深商務開發專家，都能在這裡找到為您量身打造的專屬解法。
           </p>
@@ -102,7 +97,7 @@ export default async function MembershipPage() {
             currentUserPlanId={currentUserPlanId}
           />
         ) : (
-          <div className="max-w-xl mx-auto py-20 text-center text-slate-400 italic font-semibold select-none bg-slate-50/50 border border-dashed border-slate-200 rounded-3xl">
+          <div className="max-w-xl mx-auto py-20 text-center text-slate-400 italic font-semibold select-none bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl">
             目前尚無開放中的方案，敬請期待！
           </div>
         )}

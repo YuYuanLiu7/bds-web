@@ -18,13 +18,13 @@ export default function Footer() {
         
         {/* Support Email */}
         <div className="flex items-center justify-center space-x-2 text-sm text-slate-500 hover:text-slate-800 transition">
-          <Mail className="w-4.5 h-4.5" />
+          <Mail className="w-4 h-4" />
           <a href="mailto:bydoingso@gmail.com" className="font-semibold">
             客服信箱：bydoingso@gmail.com
           </a>
         </div>
 
-        <hr className="border-slate-200" />
+        <div className="border-t border-slate-200" />
 
         {/* Copyright & Policy links */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 font-semibold gap-3">

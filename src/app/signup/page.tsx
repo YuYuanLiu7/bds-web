@@ -51,40 +51,40 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-200">
+          <div className="bg-primary p-3 rounded-2xl shadow-sm">
             <UserPlus className="w-10 h-10 text-white" />
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-6 text-center text-2xl font-bold text-slate-900">
           加入 BDS 學習平台
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-slate-500">
           已有帳號？{' '}
-          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/login" className="text-primary hover:underline">
             立即登入
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 text-sm">
+              <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg px-4 py-3 text-sm">
                 {error}
               </div>
             )}
-            
+
             <div>
-              <label htmlFor="signup-name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="signup-name" className="block text-sm font-medium text-slate-700 mb-1">
                 真實姓名
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
                   id="signup-name"
@@ -93,19 +93,19 @@ export default function SignupPage() {
                   autoComplete="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                  className="w-full pl-10 pr-3 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   placeholder="王小明"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="signup-email" className="block text-sm font-medium text-slate-700 mb-1">
                 電子郵件
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
                   id="signup-email"
@@ -114,19 +114,19 @@ export default function SignupPage() {
                   autoComplete="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                  className="w-full pl-10 pr-3 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   placeholder="name@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="signup-password" className="block text-sm font-medium text-slate-700 mb-1">
                 設定密碼
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
                   id="signup-password"
@@ -136,14 +136,14 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="block w-full pl-10 pr-11 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                  className="w-full pl-10 pr-11 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   placeholder="至少 6 位字元"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? '隱藏密碼' : '顯示密碼'}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -154,9 +154,10 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:bg-gray-400 shadow-blue-200"
+                aria-busy={loading}
+                className="w-full flex justify-center items-center bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
               >
-                {loading ? '處理中...' : (
+                {loading ? '處理中…' : (
                   <span className="flex items-center">
                     建立帳號 <ArrowRight className="ml-2 w-4 h-4" />
                   </span>
@@ -166,10 +167,10 @@ export default function SignupPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-slate-500">
               點擊「建立帳號」即表示您同意我們的
               <br />
-              <Link href="/privacy#terms" className="underline">服務條款</Link> 與 <Link href="/privacy#privacy" className="underline">隱私權政策</Link>
+              <Link href="/privacy#terms" className="text-primary hover:underline">服務條款</Link> 與 <Link href="/privacy#privacy" className="text-primary hover:underline">隱私權政策</Link>
             </p>
           </div>
         </div>

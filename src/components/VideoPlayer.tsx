@@ -52,7 +52,7 @@ export default function VideoPlayer({ url }: VideoPlayerProps) {
 
   if (!embedUrl) {
     return (
-      <div className="aspect-video bg-gray-900 flex items-center justify-center text-white">
+      <div className="aspect-video bg-slate-900 flex items-center justify-center text-white">
         <p>無法播放此影片格式</p>
       </div>
     );

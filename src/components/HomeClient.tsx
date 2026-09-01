@@ -75,21 +75,20 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
 
   if (maintenance) {
     return (
-      <div className="min-h-[70vh] w-full flex items-center justify-center p-6 bg-slate-50 relative overflow-hidden select-none">
-        <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-indigo-200/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="relative bg-white/80 backdrop-blur-md border border-slate-200/80 p-8 md:p-12 rounded-3xl max-w-md w-full shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+      <div className="min-h-[70vh] w-full flex items-center justify-center p-6 bg-slate-50 select-none">
+        <div className="bg-white border border-slate-200 p-8 md:p-12 rounded-2xl max-w-md w-full shadow-md text-center space-y-6">
           <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto">
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-black text-slate-800">平台升級維護中</h1>
-            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+            <h1 className="text-xl font-bold text-slate-800">平台升級維護中</h1>
+            <p className="text-sm text-slate-500 leading-relaxed">
               {mMsg}
             </p>
           </div>
-          <div className="text-[10px] text-slate-400 font-bold border-t border-slate-100 pt-4">
+          <div className="text-xs text-slate-400 font-semibold border-t border-slate-100 pt-4">
             BDS By Doing So 營運團隊 敬上
           </div>
         </div>
@@ -99,7 +98,25 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
 
   return (
     <div className="w-full flex flex-col bg-white">
-      
+
+      {/* 0. Hero 文字標題與主要 CTA */}
+      <section className="max-w-[1200px] mx-auto w-full px-6 pt-12 md:pt-16 text-center select-none">
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
+          {settings.slogan || 'BDS By Doing So'}
+        </h1>
+        <p className="mt-3 text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          專為硬體・半導體・醫材產業打造的業務開發與銷售課程
+        </p>
+        <div className="mt-6">
+          <Link
+            href="/courses"
+            className="inline-flex items-center bg-primary hover:bg-primary-hover text-white rounded-lg px-6 py-3 font-semibold transition"
+          >
+            瀏覽課程
+          </Link>
+        </div>
+      </section>
+
       {/* 1. Hero Carousel Banner Slider */}
       {slides.length > 0 && (
         <section className="relative w-full overflow-hidden select-none bg-slate-50">
@@ -182,23 +199,23 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
         
         {/* Categories Tab Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-12 border-b border-slate-100 pb-5 gap-4">
-          <h2 className="text-2xl font-black text-slate-800 flex items-center select-none">
+          <h2 className="text-2xl font-bold text-slate-800 flex items-center select-none">
             <span className="w-1.5 h-6 bg-[var(--brand)] rounded-full mr-2.5"></span>
             所有課程
           </h2>
-          
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold select-none">
+
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold select-none">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                style={{ 
+                style={{
                   backgroundColor: selectedCategory === cat ? primaryColor : 'transparent',
                   color: selectedCategory === cat ? '#ffffff' : '#64748B'
                 }}
-                className={`px-4 py-2 rounded-xl transition border border-transparent ${
-                  selectedCategory === cat 
-                    ? 'shadow-sm font-extrabold' 
+                className={`px-4 py-2 rounded-lg transition border border-transparent ${
+                  selectedCategory === cat
+                    ? 'shadow-sm font-bold'
                     : 'bg-slate-50 hover:bg-slate-100 hover:text-slate-800'
                 } cursor-pointer`}
               >
@@ -214,7 +231,7 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
             {filteredCourses.map((course) => (
               <div 
                 key={course.id}
-                className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-200/50 transition duration-300"
+                className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-300 transition duration-300"
               >
                 {/* Thumbnail Cover */}
                 <Link href={`/courses/${course.id}`} className="block relative aspect-[16/9] w-full overflow-hidden bg-slate-50">
@@ -223,7 +240,7 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-xs text-white px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase select-none">
+                  <div className="absolute top-3 left-3 bg-black/50 text-white px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide uppercase select-none">
                     {course.category}
                   </div>
                 </Link>
@@ -231,21 +248,21 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col text-left space-y-4">
                   <div className="space-y-1.5">
-                    <Link 
+                    <Link
                       href={`/courses/${course.id}`}
-                      className="block font-black text-slate-800 hover:text-[var(--brand)] transition leading-snug line-clamp-2"
+                      className="block font-bold text-slate-800 hover:text-[var(--brand)] transition leading-snug line-clamp-2"
                     >
                       {course.title}
                     </Link>
-                    <span className="block text-slate-400 font-semibold text-[11px]">
+                    <span className="block text-slate-400 font-semibold text-xs">
                       講師：{course.instructor}
                     </span>
                   </div>
 
                   {/* Pricing Footer */}
                   <div className="flex items-center justify-between pt-1 select-none">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">學習費用</span>
-                    <span style={{ color: primaryColor }} className="text-lg font-black">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">學習費用</span>
+                    <span style={{ color: primaryColor }} className="text-lg font-bold">
                       {course.price === 0 ? '免費領取' : `NT$ ${course.price.toLocaleString()}`}
                     </span>
                   </div>
@@ -254,7 +271,7 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
             ))}
           </div>
         ) : (
-          <div className="py-20 text-center text-slate-400 italic font-semibold select-none bg-slate-50/50 border border-dashed border-slate-100 rounded-3xl">
+          <div className="py-20 text-center text-slate-400 italic font-semibold select-none bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
             此分類下目前尚無公開課程，敬請期待！
           </div>
         )}

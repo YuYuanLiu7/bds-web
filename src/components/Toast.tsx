@@ -50,7 +50,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const styles: Record<ToastType, { ring: string; icon: React.ReactNode }> = {
     success: { ring: 'border-emerald-200', icon: <CheckCircle className="w-5 h-5 text-emerald-500" /> },
     error: { ring: 'border-rose-200', icon: <AlertCircle className="w-5 h-5 text-rose-500" /> },
-    info: { ring: 'border-slate-200', icon: <Info className="w-5 h-5 text-indigo-500" /> },
+    info: { ring: 'border-slate-200', icon: <Info className="w-5 h-5 text-primary" /> },
   };
 
   return (
@@ -61,7 +61,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             role="status"
-            className={`pointer-events-auto flex items-start gap-2.5 bg-white border ${styles[t.type].ring} shadow-lg rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 animate-in slide-in-from-top-2 fade-in duration-200`}
+            className={`pointer-events-auto flex items-start gap-2.5 bg-white border ${styles[t.type].ring} shadow-lg rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 animate-in fade-in duration-200`}
           >
             <span className="shrink-0 mt-0.5">{styles[t.type].icon}</span>
             <p className="flex-1 leading-relaxed break-words">{t.message}</p>

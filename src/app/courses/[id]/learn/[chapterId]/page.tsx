@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";
-import { ChevronLeft, Play, Check } from "lucide-react";
+import { ChevronLeft, Play, Check, Megaphone } from "lucide-react";
 import LearnExtraDetails from "@/components/LearnExtraDetails";
 import ChapterCompleteButton from "@/components/ChapterCompleteButton";
 import { isBunnyVideo, signBunnyEmbedUrl } from "@/lib/bunny";
@@ -94,15 +94,15 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
       <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none -z-10"></div>
       {/* Sidebar - Course Content */}
       <div className="w-full lg:w-80 border-r border-slate-800/80 flex flex-col h-1/3 lg:h-full bg-slate-950/70 backdrop-blur-md relative z-10">
-        <div className="p-4 border-b border-gray-800">
-          <Link href={`/courses/${id}`} className="flex items-center text-gray-400 hover:text-white transition mb-4 text-sm">
+        <div className="p-4 border-b border-slate-800">
+          <Link href={`/courses/${id}`} className="flex items-center text-slate-400 hover:text-white transition mb-4 text-sm">
             <ChevronLeft className="w-4 h-4 mr-1" /> 返回課程介紹
           </Link>
           <h2 className="font-bold text-lg line-clamp-2">{course.title}</h2>
           {/* 本課程整體進度（已完成章節數 / 總章節數） */}
           {totalChapters > 0 && (
             <div className="mt-3">
-              <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+              <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
                 <span>本課程進度</span>
                 <span>{completedCount}/{totalChapters}（{progressPercent}%）</span>
               </div>
@@ -122,12 +122,12 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             <Link
               key={chapter.id}
               href={`/courses/${id}/learn/${chapter.id}`}
-              className={`flex items-center p-4 hover:bg-gray-800 transition border-b border-gray-800/50 ${chapter.id === chapterId ? 'bg-blue-900/30 border-l-4 border-l-blue-500' : ''}`}
+              className={`flex items-center p-4 hover:bg-slate-800 transition border-b border-slate-800/50 ${chapter.id === chapterId ? 'bg-primary/20 border-l-4 border-l-primary' : ''}`}
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${isDone ? 'bg-emerald-500' : chapter.id === chapterId ? 'bg-blue-500' : 'bg-gray-700'}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${isDone ? 'bg-emerald-500' : chapter.id === chapterId ? 'bg-primary' : 'bg-slate-700'}`}>
                 {isDone ? <Check className="w-3.5 h-3.5" strokeWidth={3} /> : <Play className="w-3 h-3 fill-white" />}
               </div>
-              <span className={`text-sm ${chapter.id === chapterId ? 'text-white font-medium' : 'text-gray-400'}`}>
+              <span className={`text-sm ${chapter.id === chapterId ? 'text-white font-medium' : 'text-slate-400'}`}>
                 {index + 1}. {chapter.title}
               </span>
             </Link>
@@ -143,7 +143,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             {videoUrl ? (
               <VideoPlayer url={videoUrl} />
             ) : (
-              <div className="aspect-video bg-gray-800 flex items-center justify-center italic text-gray-500">
+              <div className="aspect-video bg-slate-800 flex items-center justify-center italic text-slate-500">
                 本章節尚未上傳影片
               </div>
             )}
@@ -159,10 +159,10 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
                 initialCompleted={completedSet.has(currentChapter.id)}
               />
             </div>
-            <div className="h-px bg-gray-800 w-full mb-6"></div>
+            <div className="h-px bg-slate-800 w-full mb-6"></div>
             {(currentChapter as { description?: string | null }).description ? (
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">
+                <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-line">
                   {(currentChapter as { description?: string | null }).description}
                 </p>
               </div>
@@ -171,7 +171,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             {/* 章節圖文 / 簡報連結（後台 content_html，淨化後顯示） */}
             {chapterContentHtml && (
               <div
-                className="prose prose-invert max-w-none mt-4 text-sm text-gray-300 leading-relaxed prose-a:text-blue-400"
+                className="prose prose-invert max-w-none mt-4 text-sm text-slate-300 leading-relaxed prose-a:text-blue-400"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(chapterContentHtml) }}
               />
             )}
@@ -179,16 +179,16 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
             {/* 課程公告（後台發佈，學員可見） */}
             {announcements.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">📢 課程公告</h2>
+                <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><Megaphone className="w-5 h-5 text-slate-300" /> 課程公告</h2>
                 <div className="space-y-3">
                   {announcements.map((a, i) => (
                     <div key={i} className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
                       <div className="flex items-baseline justify-between gap-3 mb-1">
                         <div className="font-bold text-white text-sm">{a.title}</div>
-                        <div className="text-[11px] text-slate-500 flex-shrink-0">{(a.created_at || '').slice(0, 10)}</div>
+                        <div className="text-xs text-slate-500 flex-shrink-0">{(a.created_at || '').slice(0, 10)}</div>
                       </div>
                       <div
-                        className="text-sm text-gray-400 leading-relaxed prose prose-invert max-w-none prose-a:text-blue-400"
+                        className="text-sm text-slate-400 leading-relaxed prose prose-invert max-w-none prose-a:text-blue-400"
                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(a.content || '') }}
                       />
                     </div>

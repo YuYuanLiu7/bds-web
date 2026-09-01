@@ -46,59 +46,56 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-950 via-[#0B0F19] to-indigo-950/40 text-white font-sans relative">
-      <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none"></div>
-
-      <div className="max-w-md w-full space-y-8 bg-slate-900/80 backdrop-blur-md p-10 rounded-2xl shadow-2xl border border-slate-800 relative z-10">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-8">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center p-3 bg-indigo-600/10 text-indigo-400 rounded-xl mb-4 border border-indigo-500/20">
+          <div className="inline-flex items-center justify-center p-3 bg-primary/10 text-primary rounded-xl mb-4">
             <KeyRound className="w-8 h-8" />
           </div>
-          <h2 className="text-3xl font-extrabold text-white">
+          <h2 className="text-2xl font-bold text-slate-900">
             忘記密碼
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-slate-500">
             輸入您的註冊信箱，我們將向您發送密碼重設連結。
           </p>
         </div>
 
         {success ? (
           <div className="space-y-6 text-center">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-emerald-400 text-sm flex flex-col items-center space-y-2">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-emerald-600 text-sm flex flex-col items-center space-y-2">
+              <CheckCircle className="w-8 h-8 text-emerald-500" />
               <span>{message}</span>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-slate-500">
               如果幾分鐘內沒有收到信件，請檢查您的垃圾郵件匣，或確認信箱是否填寫正確。
             </p>
             <Link
               href="/login"
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center"
+              className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-semibold transition flex items-center justify-center"
             >
               返回登入頁面
             </Link>
           </div>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-rose-400 text-sm text-center">
+              <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg px-4 py-3 text-sm text-center">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
                 電子郵件信箱
               </label>
-              <div className="relative rounded-md shadow-sm">
+              <div className="relative">
                 <input
                   id="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                  className="w-full px-3 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   placeholder="name@example.com"
                 />
               </div>
@@ -108,10 +105,13 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition disabled:bg-gray-700 disabled:text-gray-400 shadow-lg shadow-blue-500/25"
+                aria-busy={loading}
+                className="w-full flex justify-center items-center gap-2 bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
               >
                 {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" /> 處理中…
+                  </>
                 ) : (
                   '發送重設密碼連結'
                 )}
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center mt-4">
               <Link
                 href="/login"
-                className="inline-flex items-center text-sm text-gray-400 hover:text-white transition"
+                className="inline-flex items-center text-sm text-primary hover:underline transition"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" /> 返回登入
               </Link>

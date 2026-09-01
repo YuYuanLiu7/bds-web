@@ -142,29 +142,29 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
         const isCurrentPlan = currentUserPlanId === plan.id;
         const isLoading = loadingPlanId === plan.id;
 
-        // Dynamic price font color/gradient based on price level
+        // 依價格級距決定價格字色：高階方案統一使用品牌主色實色（移除漸層字）
         let priceStyleClass = "text-slate-950"; // default
         if (plan.price >= 20000) {
-          // Extremely premium gold gradient for the lifetime plan (NT$ 25,000+)
-          priceStyleClass = "bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-500 bg-clip-text text-transparent";
+          // 頂級（買斷/終身）方案：主色實色
+          priceStyleClass = "text-primary";
         } else if (plan.price >= 5000) {
-          // High-end brand-indigo gradient for the annual plan (NT$ 9,500)
-          priceStyleClass = "bg-gradient-to-r from-[var(--primary-color,#21448e)] to-indigo-600 bg-clip-text text-transparent";
+          // 高階（年度）方案：主色實色
+          priceStyleClass = "text-primary";
         }
 
         return (
           <div 
             key={plan.id}
-            className={`rounded-3xl p-8 border flex flex-col justify-between relative transition-all duration-300 text-left hover:-translate-y-1.5 ${
-              plan.is_popular 
-                ? 'border-indigo-500/80 bg-white/95 backdrop-blur-md shadow-lg hover:shadow-2xl ring-1 ring-indigo-500/20 scale-100 lg:scale-[1.03] z-10' 
-                : 'border-slate-200/70 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-xl hover:border-slate-300'
+            className={`rounded-2xl p-8 border flex flex-col justify-between relative transition-colors duration-200 text-left ${
+              plan.is_popular
+                ? 'border-primary bg-white shadow-md ring-1 ring-primary/20 scale-100 lg:scale-[1.03] z-10'
+                : 'border-slate-200 bg-white shadow-sm hover:border-slate-300'
             }`}
           >
             {plan.is_popular && (
               <span 
                 style={{ backgroundColor: primaryColor }}
-                className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white px-4 py-1 rounded-full text-[9px] font-black tracking-widest uppercase flex items-center shadow-xs select-none"
+                className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white px-4 py-1 rounded-md text-xs font-bold tracking-widest uppercase flex items-center shadow-sm select-none"
               >
                 <Sparkles className="w-3.5 h-3.5 mr-1" /> 最受歡迎方案
               </span>
@@ -173,14 +173,14 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
             <div className="space-y-6">
               {/* Plan Header */}
               <div className="space-y-1.5 select-none">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">{plan.title}</h3>
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">{plan.title}</h3>
                 <p className="text-xs text-slate-700 font-bold leading-relaxed">{plan.description}</p>
               </div>
 
               {/* Price Display */}
               <div className="flex items-baseline py-4 border-t border-b border-slate-100 select-none">
-                <span className="text-sm font-black text-slate-500 mr-1.5">NT$</span>
-                <span className={`text-4xl font-black tracking-tight ${priceStyleClass}`}>
+                <span className="text-sm font-bold text-slate-500 mr-1.5">NT$</span>
+                <span className={`text-4xl font-bold tracking-tight ${priceStyleClass}`}>
                   {plan.price.toLocaleString()}
                 </span>
                 <span className="text-xs font-extrabold text-slate-500 ml-1.5">/ {plan.period}</span>
@@ -188,7 +188,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
 
               {/* Features List */}
               <div className="space-y-3 pt-2">
-                <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest select-none">方案包含權益：</h4>
+                <h4 className="text-xs font-bold text-slate-600 uppercase tracking-widest select-none">方案包含權益：</h4>
                 <ul className="space-y-2.5 text-xs text-slate-700 font-bold leading-relaxed">
                   {plan.features && plan.features.map((feat, fIdx) => (
                     <li key={fIdx} className="flex items-start">
@@ -216,7 +216,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
                     ? '#E2E8F0' 
                     : 'transparent'
                 }}
-                className={`w-full py-3.5 rounded-2xl font-black text-xs transition duration-200 border text-center shadow-xs active:scale-95 cursor-pointer disabled:cursor-not-allowed`}
+                className={`w-full py-3.5 rounded-lg font-bold text-xs transition duration-200 border text-center shadow-sm cursor-pointer disabled:cursor-not-allowed`}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
@@ -235,18 +235,18 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
 
       {/* BDS 測試沙盒金流模擬器彈窗 */}
       {showSimulateModal && simulatingPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto font-sans">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto font-sans">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-md overflow-hidden my-auto max-h-[90vh] flex flex-col animate-in fade-in duration-200 text-left">
             
             {/* Header */}
             <div className="px-6 py-4.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-black text-[10px] uppercase tracking-wider">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider">
                 <Terminal className="w-3.5 h-3.5 mr-1" /> BDS 金流測試沙盒 (Sandbox)
               </span>
               <button
                 onClick={() => setShowSimulateModal(false)}
                 aria-label="關閉視窗"
-                className="p-1.5 hover:bg-slate-200 rounded-full transition text-gray-400 cursor-pointer"
+                className="p-1.5 hover:bg-slate-200 rounded-full transition text-slate-400 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -256,17 +256,17 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
             <div className="p-6 space-y-5">
               
               <div className="space-y-1 select-none">
-                <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider">您正在訂閱會員方案：</span>
-                <h3 className="text-base font-black text-slate-900 leading-snug">{simulatingPlan.title}</h3>
-                <div className="text-sm font-black text-indigo-600 mt-1">NT$ {simulatingPlan.price.toLocaleString()} / {simulatingPlan.period}</div>
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">您正在訂閱會員方案：</span>
+                <h3 className="text-base font-bold text-slate-900 leading-snug">{simulatingPlan.title}</h3>
+                <div className="text-sm font-bold text-primary mt-1">NT$ {simulatingPlan.price.toLocaleString()} / {simulatingPlan.period}</div>
               </div>
 
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 select-none">
-                <div className="text-xs font-black text-slate-800 flex items-center">
+                <div className="text-xs font-bold text-slate-800 flex items-center">
                   <ShieldCheck className="w-4 h-4 text-emerald-500 mr-1.5 shrink-0" />
                   目前偵測為開發測試環境
                 </div>
-                <p className="text-[10px] font-semibold text-slate-400 leading-normal">
+                <p className="text-xs font-semibold text-slate-400 leading-normal">
                   系統偵測到您在開發環境。您可以點選下方按鈕進行「一鍵模擬支付」秒速開通，或是嘗試呼叫 PayUni 真實沙盒跳轉網頁。
                 </p>
               </div>
@@ -276,7 +276,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
                 <button
                   disabled={simulateLoading}
                   onClick={() => executeSimulatedPayment(simulatingPlan)}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs shadow-md transition flex items-center justify-center cursor-pointer active:scale-98 disabled:opacity-50"
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center cursor-pointer disabled:opacity-50"
                 >
                   {simulateLoading ? (
                     <span className="flex items-center">
@@ -291,7 +291,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
                 <button
                   disabled={simulateLoading}
                   onClick={() => executeRealPayUni(simulatingPlan)}
-                  className="w-full py-3 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold text-xs transition flex items-center justify-center cursor-pointer active:scale-98"
+                  className="w-full py-3 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-bold text-xs transition flex items-center justify-center cursor-pointer"
                 >
                   🔵 嘗試呼叫 PayUni 金流跳轉 (需配置密鑰)
                 </button>
@@ -299,7 +299,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
                 <button
                   disabled={simulateLoading}
                   onClick={executeFailedPayment}
-                  className="w-full py-3 border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-100 rounded-xl font-bold text-xs transition flex items-center justify-center cursor-pointer active:scale-98"
+                  className="w-full py-3 border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-100 rounded-lg font-bold text-xs transition flex items-center justify-center cursor-pointer"
                 >
                   🔴 模擬刷卡失敗
                 </button>
@@ -311,7 +311,7 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end select-none">
               <button
                 onClick={() => setShowSimulateModal(false)}
-                className="px-4 py-2 border border-slate-200 text-slate-500 hover:bg-slate-100 rounded-xl font-bold text-xs transition cursor-pointer"
+                className="px-4 py-2 border border-slate-200 text-slate-500 hover:bg-slate-100 rounded-lg font-bold text-xs transition cursor-pointer"
               >
                 關閉
               </button>

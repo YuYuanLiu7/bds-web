@@ -44,13 +44,13 @@ export default function Navbar() {
       {announcement && !dismissed && (
         <div 
           style={{ backgroundColor: primaryColor }}
-          className="text-white text-[11px] md:text-xs font-bold py-2 px-6 flex items-center justify-between select-none relative z-[1001] animate-in slide-in-from-top duration-200"
+          className="text-white text-xs font-bold py-2 px-6 flex items-center justify-between select-none relative z-[1001] animate-in fade-in duration-200"
         >
           <div className="flex-1 text-center truncate pr-6">
             {announcement.url ? (
               <Link href={announcement.url} className="hover:underline flex items-center justify-center space-x-1.5">
                 <span>{announcement.content}</span>
-                <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded font-black">點此查看 ↗</span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-md font-bold">點此查看 ↗</span>
               </Link>
             ) : (
               <span>{announcement.content}</span>
@@ -66,7 +66,7 @@ export default function Navbar() {
           </button>
         </div>
       )}
-      <nav className="sticky top-0 bg-white border-b border-slate-100 z-[1000] shadow-xs select-none">
+      <nav className="sticky top-0 bg-white border-b border-slate-100 z-[1000] shadow-sm select-none">
         <div className="max-w-[1200px] mx-auto h-16 md:h-20 px-6 flex items-center justify-between">
         
         {/* Left: Brand Logo & Slogan */}
@@ -104,7 +104,7 @@ export default function Navbar() {
               課程 <ChevronDown className="w-3.5 h-3.5 ml-1" />
             </button>
             {showCourseDropdown && (
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 bg-white border border-slate-100 rounded-xl shadow-lg p-2 w-48 z-[2000] animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 bg-white border border-slate-100 rounded-xl shadow-lg p-2 w-48 z-[2000] animate-in fade-in duration-150">
                 {categories.length > 0 ? categories.map((cat) => (
                   <Link key={cat.id} href={`/categories/${encodeURIComponent(cat.slug || cat.name)}`} className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
                     {cat.name}
@@ -143,33 +143,31 @@ export default function Navbar() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
                 Hi, {userName}
               </span>
-              <Link 
+              <Link
                 href={isAdmin ? "/admin" : "/my-courses"}
-                style={{ background: primaryColor }}
-                className="text-white px-5 py-2.5 rounded-xl font-bold transition shadow-xs hover:opacity-90 active:scale-95 flex items-center"
+                className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg font-bold transition shadow-sm active:scale-95 flex items-center"
               >
-                <User className="w-4 h-4 mr-1.5" /> 
+                <User className="w-4 h-4 mr-1.5" />
                 {isAdmin ? "管理後台 ↗" : "我的學習"}
               </Link>
-              <button 
+              <button
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className="text-slate-400 hover:text-red-500 font-bold transition flex items-center cursor-pointer border border-transparent hover:border-red-100 rounded-lg px-2 py-1.5"
+                className="text-slate-400 hover:text-rose-500 font-bold transition flex items-center cursor-pointer border border-transparent hover:border-rose-100 rounded-lg px-2 py-1.5"
               >
                 <LogOut className="w-4 h-4 mr-1" /> 登出
               </button>
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <Link 
-                href="/login" 
-                className="text-slate-500 hover:text-slate-900 font-bold px-4 py-2.5 rounded-xl transition hover:bg-slate-50"
+              <Link
+                href="/login"
+                className="text-slate-500 hover:text-slate-900 font-bold px-4 py-2.5 rounded-lg transition hover:bg-slate-50"
               >
                 登入
               </Link>
-              <Link 
-                href="/signup" 
-                style={{ background: primaryColor }}
-                className="text-white px-6 py-2.5 rounded-xl font-bold transition shadow-xs hover:opacity-90 active:scale-95 text-center block"
+              <Link
+                href="/signup"
+                className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg font-bold transition shadow-sm active:scale-95 text-center block"
               >
                 註冊
               </Link>
@@ -191,7 +189,7 @@ export default function Navbar() {
 
       {/* Mobile Sidebar/Drawer Menu */}
       {showMobileMenu && (
-        <div className="md:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-4 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-4 animate-in fade-in duration-200">
           <Link href="/courses" className="block text-slate-600 hover:text-slate-900 font-bold">
             所有課程
           </Link>
@@ -229,32 +227,30 @@ export default function Navbar() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
                   目前登入：{userName}
                 </div>
-                <Link 
+                <Link
                   href={isAdmin ? "/admin" : "/courses"}
-                  style={{ background: primaryColor }}
-                  className="w-full text-white py-3 rounded-xl font-bold block text-center shadow-xs"
+                  className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-bold block text-center shadow-sm"
                 >
                   {isAdmin ? "管理後台 ↗" : "我的學習"}
                 </Link>
-                <button 
+                <button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="w-full text-center text-slate-500 hover:text-slate-800 font-bold py-2 border border-slate-200 rounded-xl block cursor-pointer"
+                  className="w-full text-center text-slate-500 hover:text-rose-500 font-bold py-2 border border-slate-200 hover:border-rose-200 rounded-lg block cursor-pointer"
                 >
                   登出帳戶
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                <Link 
+                <Link
                   href="/login"
-                  className="text-slate-600 border border-slate-200 py-3 rounded-xl font-bold block text-center"
+                  className="text-slate-600 border border-slate-200 py-3 rounded-lg font-bold block text-center"
                 >
                   登入
                 </Link>
-                <Link 
+                <Link
                   href="/signup"
-                  style={{ background: primaryColor }}
-                  className="text-white py-3 rounded-xl font-bold block text-center"
+                  className="bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-bold block text-center"
                 >
                   註冊
                 </Link>

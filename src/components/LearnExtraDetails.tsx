@@ -101,14 +101,14 @@ export default function LearnExtraDetails({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Chapter File */}
             {chapterFileUrl && (
-              <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center justify-between shadow-sm backdrop-blur-xs">
+              <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center justify-between shadow-sm">
                 <div className="flex items-center space-x-3 overflow-hidden mr-2">
                   <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
                     <FileText className="w-5 h-5 text-indigo-400" />
                   </div>
                   <div className="overflow-hidden">
                     <div className="font-bold text-xs text-white truncate">本單元教材講義</div>
-                    <div className="text-[10px] text-slate-400 truncate">專屬本影片單元的學習資源</div>
+                    <div className="text-xs text-slate-400 truncate">專屬本影片單元的學習資源</div>
                   </div>
                 </div>
                 <a 
@@ -124,14 +124,14 @@ export default function LearnExtraDetails({
 
             {/* Course File */}
             {courseFileUrl && (
-              <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center justify-between shadow-sm backdrop-blur-xs">
+              <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center justify-between shadow-sm">
                 <div className="flex items-center space-x-3 overflow-hidden mr-2">
                   <div className="w-9 h-9 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
                     <FileText className="w-5 h-5 text-teal-400" />
                   </div>
                   <div className="overflow-hidden">
                     <div className="font-bold text-xs text-white truncate">本課程總體教材</div>
-                    <div className="text-[10px] text-slate-400 truncate">包含課程所有章節的整合學習資源</div>
+                    <div className="text-xs text-slate-400 truncate">包含課程所有章節的整合學習資源</div>
                   </div>
                 </div>
                 <a 
@@ -154,7 +154,7 @@ export default function LearnExtraDetails({
           <h3 className="text-lg font-bold text-white flex items-center">
             <MessageSquare className="w-5 h-5 mr-2 text-indigo-400" /> 問題與討論
           </h3>
-          <span className="text-[11px] text-slate-500 font-bold bg-slate-900 px-2.5 py-1 rounded-md">
+          <span className="text-xs text-slate-500 font-bold bg-slate-900 px-2.5 py-1 rounded-md">
             {filteredComments.length} 則留言
           </span>
         </div>
@@ -164,7 +164,7 @@ export default function LearnExtraDetails({
             {/* New Comment Input */}
             <form onSubmit={handleSubmitComment} className="bg-slate-900/50 border border-slate-800 p-4 rounded-xl space-y-3">
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold">
+                <div className="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
                   {studentName?.charAt(0) || 'U'}
                 </div>
                 <span className="text-xs font-bold text-slate-300">{studentName}</span>
@@ -176,13 +176,13 @@ export default function LearnExtraDetails({
                   value={newComment}
                   onChange={e => setNewComment(e.target.value)}
                   placeholder="提問或分享心得...（留言將在管理員審核後公開）"
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-indigo-500 transition"
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition"
                 />
                 <button
                   type="submit"
                   disabled={!newComment.trim()}
                   aria-label="送出留言"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"
+                  className="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-xs font-bold transition flex items-center cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -204,17 +204,17 @@ export default function LearnExtraDetails({
                   {/* Student Header */}
                   <div className="flex justify-between items-center text-xs">
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 rounded-md bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-[10px]">
+                      <div className="w-6 h-6 rounded-md bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
                         {comment.student?.charAt(0) || 'U'}
                       </div>
                       <span className="font-bold text-slate-200">{comment.student}</span>
                       {comment.status === 'pending' && (
-                        <span className="text-[9px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-md font-bold">
+                        <span className="text-xs bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-md font-bold">
                           待審核
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-500 flex items-center font-medium">
+                    <span className="text-xs text-slate-500 flex items-center font-medium">
                       <Clock className="w-3 h-3 mr-1" /> {comment.date}
                     </span>
                   </div>
@@ -230,11 +230,11 @@ export default function LearnExtraDetails({
                       <div className="flex justify-between items-center text-xs">
                         <div className="flex items-center space-x-1.5">
                           <CornerDownRight className="w-3.5 h-3.5 text-indigo-400" />
-                          <span className="font-bold text-indigo-400 flex items-center bg-indigo-500/10 px-1.5 py-0.5 rounded-md text-[9px]">
+                          <span className="font-bold text-indigo-400 flex items-center bg-indigo-500/10 px-1.5 py-0.5 rounded-md text-xs">
                             <ShieldCheck className="w-3 h-3 mr-1" /> 管理員回覆
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-medium">
+                        <span className="text-xs text-slate-500 font-medium">
                           {comment.replyDate}
                         </span>
                       </div>

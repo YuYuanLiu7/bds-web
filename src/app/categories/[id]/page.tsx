@@ -49,29 +49,24 @@ export default async function CategoryPage({ params }: PageProps) {
   );
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 via-gray-50/80 to-slate-100 min-h-screen pb-16 font-sans relative overflow-hidden">
-      
-      {/* Premium Ambient Background Glows */}
-      <div className="absolute top-[320px] left-[5%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none -z-10"></div>
-      <div className="absolute top-[580px] right-[5%] w-[550px] h-[550px] bg-sky-200/20 rounded-full blur-[130px] pointer-events-none -z-10"></div>
-      
+    <div className="bg-slate-50 min-h-screen pb-16 font-sans">
+
       {/* Category Hero Header */}
-      <div 
+      <div
         style={{ backgroundColor: primaryColor }}
-        className="w-full text-white py-16 md:py-24 px-6 relative overflow-hidden select-none"
+        className="w-full text-white py-16 md:py-24 px-6 select-none"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.08),transparent)] pointer-events-none"></div>
-        <div className="max-w-[1200px] mx-auto space-y-4 relative z-10">
-          <Link 
+        <div className="max-w-[1200px] mx-auto space-y-4">
+          <Link
             href="/"
-            className="inline-flex items-center text-xs font-bold text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-xl transition duration-200"
+            className="inline-flex items-center text-xs font-semibold text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-lg transition duration-200"
           >
             <ArrowLeft className="w-3.5 h-3.5 mr-1" /> 回首頁
           </Link>
           <div className="space-y-2">
-            <span className="text-[10px] uppercase font-black tracking-widest text-white/50 block">分類課程專區</span>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight">{readableCategory}</h1>
-            <p className="text-white/70 text-xs md:text-sm font-semibold max-w-xl leading-relaxed">
+            <span className="text-xs uppercase font-bold tracking-widest text-white/60 block">分類課程專區</span>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight">{readableCategory}</h1>
+            <p className="text-white/70 text-sm font-medium max-w-xl leading-relaxed">
               深耕硬體、半導體與醫材產業，提供業界資深專家多年精煉的核心銷售理論與實戰思維。
             </p>
           </div>
@@ -81,11 +76,11 @@ export default async function CategoryPage({ params }: PageProps) {
       {/* Courses Grid Content */}
       <div className="max-w-[1200px] mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4 select-none">
-          <h2 className="text-lg font-black text-slate-800 flex items-center">
+          <h2 className="text-lg font-bold text-slate-800 flex items-center">
             <span className="w-1.5 h-5 bg-[var(--brand)] rounded-full mr-2" style={{ backgroundColor: primaryColor }}></span>
             精選課程 ({filteredCourses.length})
           </h2>
-          <span className="text-xs text-slate-400 font-bold">由 BDS 編輯團隊嚴選</span>
+          <span className="text-xs text-slate-400 font-semibold">由 BDS 編輯團隊嚴選</span>
         </div>
 
         {filteredCourses.length > 0 ? (
@@ -93,7 +88,7 @@ export default async function CategoryPage({ params }: PageProps) {
             {filteredCourses.map((course) => (
               <div 
                 key={course.id}
-                className="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/70 overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 transition-all duration-300"
+                className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-300 transition duration-300"
               >
                 {/* Thumbnail Cover */}
                 <Link href={`/courses/${course.id}`} className="block relative aspect-[16/9] w-full overflow-hidden bg-slate-50">
@@ -102,7 +97,7 @@ export default async function CategoryPage({ params }: PageProps) {
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-xs text-white px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase select-none">
+                  <div className="absolute top-3 left-3 bg-black/50 text-white px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide uppercase select-none">
                     {course.category}
                   </div>
                 </Link>
@@ -110,13 +105,13 @@ export default async function CategoryPage({ params }: PageProps) {
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col text-left space-y-4">
                   <div className="space-y-1.5">
-                    <Link 
+                    <Link
                       href={`/courses/${course.id}`}
-                      className="block font-black text-slate-800 hover:text-[var(--brand)] transition leading-snug line-clamp-2"
+                      className="block font-bold text-slate-800 hover:text-[var(--brand)] transition leading-snug line-clamp-2"
                     >
                       {course.title}
                     </Link>
-                    <span className="block text-slate-400 font-semibold text-[11px]">
+                    <span className="block text-slate-400 font-semibold text-xs">
                       講師：{course.instructor}
                     </span>
                   </div>
@@ -141,13 +136,13 @@ export default async function CategoryPage({ params }: PageProps) {
 
                   {/* Pricing and Action */}
                   <div className="flex items-center justify-between pt-1 select-none">
-                    <span className="text-base font-extrabold text-slate-800">
+                    <span className="text-base font-bold text-slate-800">
                       {course.price === 0 ? '免費學習' : `NT$ ${course.price.toLocaleString()}`}
                     </span>
-                    <Link 
+                    <Link
                       href={`/courses/${course.id}`}
                       style={{ color: primaryColor, borderColor: `${primaryColor}20` }}
-                      className="text-xs font-black border hover:bg-slate-50 px-4 py-2 rounded-xl transition duration-200"
+                      className="text-xs font-semibold border hover:bg-slate-50 px-4 py-2 rounded-lg transition duration-200"
                     >
                       立即選購
                     </Link>
@@ -157,18 +152,18 @@ export default async function CategoryPage({ params }: PageProps) {
             ))}
           </div>
         ) : (
-          <div className="text-center bg-white/90 backdrop-blur-md border border-slate-200/70 rounded-3xl p-16 select-none shadow-sm max-w-xl mx-auto space-y-4">
+          <div className="text-center bg-white border border-slate-200 rounded-2xl p-16 select-none shadow-sm max-w-xl mx-auto space-y-4">
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
               <BookOpen className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-extrabold text-slate-800 text-base">此分類目前尚無發布課程</h3>
-              <p className="text-slate-400 text-xs font-semibold">我們正在精心籌備這個分類的實戰課程，敬請期待！</p>
+              <h3 className="font-bold text-slate-800 text-base">此分類目前尚無發布課程</h3>
+              <p className="text-slate-400 text-sm font-medium">我們正在精心籌備這個分類的實戰課程，敬請期待！</p>
             </div>
-            <Link 
+            <Link
               href="/"
               style={{ backgroundColor: primaryColor }}
-              className="inline-block text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs transition hover:opacity-90 active:scale-95"
+              className="inline-block text-white text-sm font-semibold px-6 py-2.5 rounded-lg shadow-sm transition hover:opacity-90"
             >
               回首頁看看其他課程
             </Link>

@@ -75,43 +75,40 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-950 via-[#0B0F19] to-indigo-950/40 text-white font-sans relative">
-      <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none"></div>
-
-      <div className="max-w-md w-full space-y-8 bg-slate-900/80 backdrop-blur-md p-10 rounded-2xl shadow-2xl border border-slate-800 relative z-10">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-8">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center p-3 bg-blue-600/10 text-blue-400 rounded-xl mb-4 border border-blue-500/20">
+          <div className="inline-flex items-center justify-center p-3 bg-primary/10 text-primary rounded-xl mb-4">
             <Lock className="w-8 h-8" />
           </div>
-          <h2 className="text-3xl font-extrabold text-white">
+          <h2 className="text-2xl font-bold text-slate-900">
             設定新密碼
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
-            請為您的帳號 `{email}` 設定一個新的安全密碼。
+          <p className="mt-2 text-sm text-slate-500">
+            請為您的帳號 {email} 設定一個新的安全密碼。
           </p>
         </div>
 
         {success ? (
           <div className="space-y-6 text-center">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-emerald-400 text-sm flex flex-col items-center space-y-2">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-emerald-600 text-sm flex flex-col items-center space-y-2">
+              <CheckCircle className="w-8 h-8 text-emerald-500" />
               <span>{message}</span>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-slate-500">
               即將自動為您跳轉至登入頁面...
             </p>
             <Link
               href="/login"
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center"
+              className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-semibold transition flex items-center justify-center"
             >
               立即登入
             </Link>
           </div>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-rose-400 text-sm text-center flex items-center justify-center gap-2">
+              <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg px-4 py-3 text-sm text-center flex items-center justify-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -119,22 +116,22 @@ function ResetPasswordContent() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   電子郵件
                 </label>
                 <input
                   type="text"
                   disabled
                   value={email || ''}
-                  className="block w-full px-4 py-3 bg-slate-800/40 border border-slate-700/60 rounded-xl text-gray-450 focus:outline-none sm:text-sm cursor-not-allowed opacity-60"
+                  className="w-full px-3 py-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-400 focus:outline-none cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
                   輸入新密碼
                 </label>
-                <div className="relative rounded-md shadow-sm">
+                <div className="relative">
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -142,13 +139,14 @@ function ResetPasswordContent() {
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-4 pr-10 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                    className="w-full pl-3 pr-10 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                     placeholder="至少 6 位字元"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+                    aria-label={showPassword ? '隱藏密碼' : '顯示密碼'}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -156,10 +154,10 @@ function ResetPasswordContent() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-1">
                   確認新密碼
                 </label>
-                <div className="relative rounded-md shadow-sm">
+                <div className="relative">
                   <input
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -167,13 +165,14 @@ function ResetPasswordContent() {
                     minLength={6}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full pl-4 pr-10 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                    className="w-full pl-3 pr-10 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                     placeholder="再次輸入您的新密碼"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+                    aria-label={showConfirmPassword ? '隱藏密碼' : '顯示密碼'}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
                   >
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -185,10 +184,13 @@ function ResetPasswordContent() {
               <button
                 type="submit"
                 disabled={loading || !token || !email}
-                className="w-full flex justify-center py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition disabled:bg-gray-700 disabled:text-gray-400 shadow-lg shadow-blue-500/25"
+                aria-busy={loading}
+                className="w-full flex justify-center items-center gap-2 bg-primary hover:bg-primary-hover text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
               >
                 {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" /> 處理中…
+                  </>
                 ) : (
                   '更新帳密並重設密碼'
                 )}
@@ -204,8 +206,8 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     }>
       <ResetPasswordContent />

@@ -35,10 +35,10 @@ export default function CoursesClient({ courses }: CoursesClientProps) {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-5 py-2 rounded-full text-xs font-black transition duration-200 border shadow-xs cursor-pointer ${
+            className={`px-5 py-2 rounded-lg text-xs font-semibold transition duration-200 border shadow-sm cursor-pointer ${
               cat === activeCategory
                 ? 'bg-[var(--brand)] border-[var(--brand)] text-white'
-                : 'bg-white/80 backdrop-blur-md text-slate-600 border-slate-200/70 hover:border-[var(--brand)] hover:text-[var(--brand)]'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-[var(--brand)] hover:text-[var(--brand)]'
             }`}
           >
             {cat}
