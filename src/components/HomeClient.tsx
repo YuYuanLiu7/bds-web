@@ -10,6 +10,7 @@ import type { SiteSettings } from '@/lib/site-settings';
 import { Course } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
 import { useSettings } from '@/components/SettingsProvider';
+import CourseCoverflow from '@/components/CourseCoverflow';
 
 // 僅取用到的 session 欄位；目前首頁未直接使用 session，保留以維持呼叫端介面相容
 interface SessionLike {
@@ -193,6 +194,9 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
           </Link>
         </section>
       )}
+
+      {/* 2.5 精選課程 3D 封面流展示（業主指定的 coverflow 樣式；資料為真實課程） */}
+      <CourseCoverflow courses={courses} sectionLabel="精選課程" />
 
       {/* 3. Dynamic Courses List Grid */}
       <section className="max-w-[1200px] mx-auto w-full px-6 py-12 md:py-16">
