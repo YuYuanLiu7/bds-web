@@ -27,7 +27,7 @@ jobs:
       RCLONE_CONFIG_BASE64: ${{ secrets.RCLONE_CONFIG_BASE64 }}
       RCLONE_REMOTE: ${{ secrets.RCLONE_REMOTE }}
     steps:
-      - name: 以 pg_dump 匯出資料庫（用 postgres:16 容器避免版本不符）
+      - name: 以 pg_dump 匯出資料庫（用 postgres:17 容器；須與 Supabase 伺服器主版本相符）
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
@@ -35,7 +35,7 @@ jobs:
           mkdir -p backup
           STAMP="$(date +%Y%m%d-%H%M%S)"
           FILE="bds-backup-${STAMP}.sql"
-          docker run --rm -e PGCONN="$SUPABASE_DB_URL" postgres:16-alpine \
+          docker run --rm -e PGCONN="$SUPABASE_DB_URL" postgres:17-alpine \
             sh -c 'pg_dump "$PGCONN" --no-owner --no-privileges' > "backup/${FILE}"
           gzip "backup/${FILE}"
           echo "備份完成：${FILE}.gz（$(du -h backup/${FILE}.gz | cut -f1)）"
