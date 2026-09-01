@@ -142,14 +142,14 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
         const isCurrentPlan = currentUserPlanId === plan.id;
         const isLoading = loadingPlanId === plan.id;
 
-        // 依價格級距決定價格字色：高階方案統一使用品牌主色實色（移除漸層字）
+        // 依價格級距給不同方案專屬的漸層價格字（高階方案的質感亮點）
         let priceStyleClass = "text-slate-950"; // default
         if (plan.price >= 20000) {
-          // 頂級（買斷/終身）方案：主色實色
-          priceStyleClass = "text-primary";
+          // 頂級（買斷/終身）方案：金色漸層
+          priceStyleClass = "bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-500 bg-clip-text text-transparent";
         } else if (plan.price >= 5000) {
-          // 高階（年度）方案：主色實色
-          priceStyleClass = "text-primary";
+          // 高階（年度）方案：品牌藍→靛漸層
+          priceStyleClass = "bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent";
         }
 
         return (
