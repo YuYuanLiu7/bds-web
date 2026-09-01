@@ -6,6 +6,7 @@ import { authOptions, SessionUser } from "@/lib/auth";
 import { getMembershipStatus } from "@/lib/entitlements";
 import { supabase } from "@/lib/supabase";
 import MembershipList from "@/components/MembershipList";
+import HeroSheen from "@/components/HeroSheen";
 
 export const revalidate = 0;
 
@@ -60,6 +61,7 @@ export default async function MembershipPage() {
         style={{ backgroundColor: primaryColor }}
         className="w-full text-white py-16 px-6 relative overflow-hidden select-none"
       >
+        <HeroSheen />
         <div className="max-w-[1200px] mx-auto space-y-4 relative z-10">
           <Link 
             href="/"

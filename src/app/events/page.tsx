@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { useSettings } from '@/components/SettingsProvider';
+import HeroSheen from '@/components/HeroSheen';
 import { useToast } from '@/components/Toast';
 import { 
   Calendar, 
@@ -157,7 +158,7 @@ export default function EventsPage() {
         style={{ backgroundColor: primaryColor }}
         className="w-full text-white py-16 px-6 relative overflow-hidden select-none"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.08),transparent)] pointer-events-none"></div>
+        <HeroSheen />
         <div className="max-w-[1200px] mx-auto space-y-4 relative z-10">
           <Link 
             href="/"

@@ -3,6 +3,7 @@ import { getSiteSettingsServer } from "@/lib/site-settings";
 import Link from 'next/link';
 import { Star, Users, ArrowLeft, BookOpen } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
+import HeroSheen from '@/components/HeroSheen';
 
 export const revalidate = 0;
 
@@ -54,9 +55,10 @@ export default async function CategoryPage({ params }: PageProps) {
       {/* Category Hero Header */}
       <div
         style={{ backgroundColor: primaryColor }}
-        className="w-full text-white py-16 md:py-24 px-6 select-none"
+        className="w-full text-white py-16 md:py-24 px-6 select-none relative overflow-hidden"
       >
-        <div className="max-w-[1200px] mx-auto space-y-4">
+        <HeroSheen />
+        <div className="max-w-[1200px] mx-auto space-y-4 relative">
           <Link
             href="/"
             className="inline-flex items-center text-xs font-semibold text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-lg transition duration-200"
