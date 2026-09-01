@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import NotificationBell from "@/components/admin/NotificationBell";
 
 export default async function AdminLayout({
   children,
@@ -58,7 +59,10 @@ export default async function AdminLayout({
             <Link href="/admin/news" className="hidden lg:inline text-slate-500 hover:text-slate-900 font-medium transition">
               產品新訊
             </Link>
-            
+
+            {/* 通知鈴鐺（真實待辦：待開通訂單、待審留言）*/}
+            <NotificationBell />
+
             {/* Separator */}
             <div className="h-4 w-px bg-slate-200"></div>
 
