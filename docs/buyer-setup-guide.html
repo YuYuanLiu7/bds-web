@@ -222,7 +222,7 @@
     <p class="box-title">👋 先看這裡（30 秒）</p>
     <p>這個網站可以：<strong>賣線上課程、賣數位檔案、收月費會員、刷卡收錢、寄通知信、放防盜影片</strong>。你會有一個專屬的「後台」，之後上架課程、看訂單都在那裡點一點就好。</p>
     <p>架設要用到 <strong>6 個服務</strong>（像積木一樣拼起來，多數免費）。全部弄好大約要花 <strong>3～5 小時</strong>，但<strong>不是一次做完</strong>——中間有幾關要「等別人審核」，所以請分幾天做，不要趕。</p>
-    <p style="font-size:14px;color:#64748b;">※ 誠實說明：這 6 個大多有免費額度，但 <strong>Bunny（影片）依用量計費、需綁定付款方式</strong>（會依觀看/儲存量實際扣款），<strong>PayUni（金流）每筆交易收手續費</strong>。其餘（Supabase、Netlify、Resend、GitHub）在你的用量內通常免費。<br>想先抓 Bunny 每月大概多少、要儲值多少？用 <a href="bunny-cost-calculator.html">Bunny 影片費用估算器</a> 填幾個數字即可。</p>
+    <p style="font-size:14px;color:#64748b;">※ 誠實說明：這 6 個大多有免費額度，但 <strong>Bunny（影片）依用量計費、需綁定付款方式</strong>（會依觀看/儲存量實際扣款），<strong>PayUni（金流）每筆交易收手續費</strong>。其餘（Supabase、Cloudflare、Resend、GitHub）在你的用量內通常免費。<br>想先抓 Bunny 每月大概多少、要儲值多少？用 <a href="bunny-cost-calculator.html">Bunny 影片費用估算器</a> 填幾個數字即可。</p>
   </div>
 
   <div class="box warn">
@@ -244,7 +244,7 @@
       <li><a href="#s3">步驟 3 · 設定影片（Bunny）</a></li>
       <li><a href="#s4">步驟 4 · 設定寄信（Resend）</a></li>
       <li><a href="#s5">步驟 5 · 設定刷卡（PayUni）</a></li>
-      <li><a href="#s6">步驟 6 · 把網站放上線（Netlify 或 Cloudflare）</a></li>
+      <li><a href="#s6">步驟 6 · 把網站放上線（Cloudflare）</a></li>
       <li><a href="#s7">步驟 7 · 建立你的管理員帳號</a></li>
       <li><a href="#s8">步驟 8 · 開門收客前的安全檢查（很重要）</a></li>
       <li><a href="#s9">步驟 9 · 開啟 Actions＋保活（必做）＋備份、通知（選配）</a></li>
@@ -264,7 +264,7 @@
 
   <div class="box warn">
     <p class="box-title">🧭 開始前，先懂兩件事（會讓你少卡很多）</p>
-    <p><strong>① 網站的按鈕名稱可能跟這裡寫的不一樣。</strong>Supabase、Netlify、Resend 這些網站常常改版、換名字、甚至改成英文。<strong>請認「你要做的事」而不是死記按鈕名字</strong>——例如要找「API 金鑰」，畫面上可能叫 <em>API Keys</em>、<em>Project API</em>、<em>Publishable key</em>…只要是「一串拿來當通行證的字」就對了。找不到一模一樣的字不用慌，找意思最接近的。</p>
+    <p><strong>① 網站的按鈕名稱可能跟這裡寫的不一樣。</strong>Supabase、Cloudflare、Resend 這些網站常常改版、換名字、甚至改成英文。<strong>請認「你要做的事」而不是死記按鈕名字</strong>——例如要找「API 金鑰」，畫面上可能叫 <em>API Keys</em>、<em>Project API</em>、<em>Publishable key</em>…只要是「一串拿來當通行證的字」就對了。找不到一模一樣的字不用慌，找意思最接近的。</p>
     <p><strong>② 看到「複製／抄下某個值」，就貼到你的「鑰匙收集表」。</strong>不是複製了就好——要<strong>先貼到一個記事本存起來</strong>，最後步驟 6 會一次把它們全部貼進網站平台。下面步驟 0 有一張現成的表格，先複製到你的記事本。</p>
   </div>
 
@@ -347,7 +347,7 @@ NEXTAUTH_URL    = ____________   （部署後才會有，先空著）
         <tr><th>服務</th><th>它負責什麼（白話）</th></tr>
         <tr><td><a href="https://github.com">GitHub</a></td><td>放程式碼的倉庫（網站上線平台會從這裡讀程式）。</td></tr>
         <tr><td><a href="https://supabase.com">Supabase</a></td><td>資料庫＝記住會員、訂單、課程的地方。</td></tr>
-        <tr><td><a href="https://netlify.com">Netlify</a></td><td>把網站真正「放上網」讓大家看得到。</td></tr>
+        <tr><td><a href="https://dash.cloudflare.com">Cloudflare</a></td><td>把網站真正「放上網」讓大家看得到。</td></tr>
         <tr><td><a href="https://bunny.net">Bunny.net</a></td><td>放課程影片，並防止被人偷連結盜看。</td></tr>
         <tr><td><a href="https://resend.com">Resend</a></td><td>幫系統寄信（購買成功通知、聯絡表單）。</td></tr>
         <tr><td><a href="https://www.payuni.com.tw">PayUni 統一金流</a></td><td>刷卡 / ATM 收錢。<span class="gate">要等審核</span></td></tr>
@@ -554,33 +554,36 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
     <div class="step-head">
       <div class="step-num">6</div>
       <div>
-        <h2>把網站放上線（Netlify 或 Cloudflare，二選一）</h2>
-        <p class="sub"><span class="time-tag">約 30 分鐘</span>　這步做完就有一個能開的網址了</p>
+        <h2>把網站放上線（Cloudflare）</h2>
+        <p class="sub"><span class="time-tag">約 30 分鐘</span>　從頭到尾都在 Cloudflare 做完，不用跳來跳去</p>
       </div>
     </div>
 
-    <div class="box tip">
-      <p class="box-title">🅰️🅱️ 先選一個放網站的平台（本系統兩個都支援）</p>
-      <ul class="plain" style="margin:6px 0 0;">
-        <li><strong>路線 A：Netlify</strong>——設定最簡單、最直覺。適合新手。免費額度（尤其每月建置次數）較小，網站更新很頻繁時可能會不夠用。</li>
-        <li><strong>路線 B：Cloudflare</strong>——免費額度大很多（建置次數、流量），且允許商業使用；但設定稍微技術一點，建議請工程師協助。</li>
-      </ul>
-      <p style="margin-top:8px;">兩條路的「環境變數（鑰匙）」完全一樣，差別只在「在哪裡匯入 repo、按哪個部署」。<strong>先做 6-1（共用），再挑 A 或 B。</strong></p>
+    <div class="box good">
+      <p class="box-title">💚 用免費版就好（$0／月）</p>
+      <p>本站已特別做過瘦身，體積符合 Cloudflare Workers <strong>免費版</strong>上限，<strong>不必開付費版</strong>。這條路用「連 GitHub 自動部署」——以後工程師一 push 更新，Cloudflare 就自動重新上線。整段建議由工程師執行。</p>
     </div>
 
-    <h3>6-1. 讓程式碼進到你的 GitHub（A、B 共用）</h3>
+    <h3>6-1. 把程式碼放進你的 GitHub</h3>
     <p>請賣方把專案<strong>轉移或複製到你的 GitHub 帳號</strong>底下（最簡單：賣方在 GitHub repo 的 <em>Settings → Transfer</em> 轉給你）。轉好後你的 GitHub 就會有一個 <code class="inline">bds-web</code> 之類的倉庫。</p>
 
-    <h3>6-2. 路線 A：匯入到 Netlify</h3>
-    <p style="font-size:14px;color:var(--ink-soft);">（想用 Cloudflare 的人：跳過 6-2，改看下方「路線 B」；環境變數清單 6-3 兩條路共用。）</p>
+    <h3>6-2. 在 Cloudflare 連上這個倉庫</h3>
     <ol class="dolist">
-      <li>Netlify → <strong>Add new project → Import an existing project</strong>。</li>
-      <li>選 <strong>GitHub</strong> → 授權 → 選你的那個倉庫。</li>
-      <li>先<strong>不要急著按 Deploy</strong>，先做下面 6-3 填設定。</li>
+      <li>Cloudflare → <strong>Workers &amp; Pages → Create → Import a repository</strong>，選你的 <code class="inline">bds-web</code>。</li>
+      <li><strong>建置指令（Build command）</strong>填：<code class="inline">npm run cf:build</code></li>
+      <li><strong>部署指令（Deploy command）</strong>填：<code class="inline">npx opennextjs-cloudflare deploy -- --keep-vars</code></li>
+      <li>先<strong>不要急著部署</strong>，先做下面 6-3 把鑰匙填好。</li>
     </ol>
+    <div class="box warn">
+      <p class="box-title">⚠️ 部署指令一定要有 <code class="inline">--keep-vars</code></p>
+      <p>少了它，<strong>每次部署都會把你在儀表板填的鑰匙清光</strong>，網站就連不到資料庫、收不到錢。專案已內建 Cloudflare 設定檔（<code class="inline">wrangler.jsonc</code>，含 <code class="inline">nodejs_compat</code>），其餘不用動。</p>
+    </div>
 
-    <h3>6-3. 把所有鑰匙貼進去</h3>
-    <p>進 <strong>Project configuration → Environment variables</strong>。把前面各步驟抄下的值全部加進來（有「Import from a .env file」可整份貼更快）。完整清單如下：</p>
+    <h3>6-3. 填鑰匙（你的 <code class="inline">.env.local</code> 已經有全部的值，照著搬）</h3>
+    <p>Cloudflare 把鑰匙分成<strong>兩個地方</strong>放（這是它的規定，跳不掉）。我列超清楚，照做就好。</p>
+    <p style="margin-top:10px;"><strong>🗄️ 地方 1：執行時的鑰匙（網站「跑起來」要用）</strong><br>
+    位置：你的 Worker → <strong>Settings → Variables and Secrets</strong>。把下面<strong>全部</strong>加進去。其中這 7 個機密，類型請選 <strong>Secret（加密）</strong>、其餘選 <strong>Text</strong>：<br>
+    <code class="inline">NEXTAUTH_SECRET</code>、<code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>、<code class="inline">PAYUNI_HASH_KEY</code>、<code class="inline">PAYUNI_HASH_IV</code>、<code class="inline">RESEND_API_KEY</code>、<code class="inline">BUNNY_TOKEN_AUTH_KEY</code>、<code class="inline">BUNNY_STREAM_API_KEY</code>。</p>
     <div class="box warn">
       <p class="box-title">⚠️ 重要：只填「值」，不要把括號裡的說明文字打進去</p>
       <p>下面每行 <code class="inline">=</code> 右邊若是「括號說明」，那是<strong>叫你填自己的值</strong>，不是要你照打。標「留空」的欄位，就整格<strong>空白</strong>（連說明都別輸入）。<br>
@@ -626,61 +629,42 @@ ENABLE_PAYMENT_SIMULATION  = false</pre>
       <p class="box-title">💡 NEXTAUTH_SECRET 怎麼產生？</p>
       <p>它只是一段很長的隨機亂碼（網站拿來加密登入用）。最簡單：打開網頁 <a href="https://generate-secret.vercel.app/32">generate-secret.vercel.app/32</a>，把畫面上那串複製貼上即可。</p>
     </div>
+    <p style="margin-top:14px;"><strong>🏗️ 地方 2：建置時的鑰匙（要「烤進」網頁的公開值）</strong><br>
+    位置：同一個 Worker → <strong>Settings → Build → Variables and secrets</strong>。這裡<strong>只加下面這 5 個</strong>（把地方 1 那幾個公開值再貼一次，類型都選 <strong>Text</strong>）：</p>
+    <div class="paste">
+      <div class="label"><span>建置區只加這 5 個</span><span class="where">Settings → Build → Variables and secrets</span></div>
+<pre>NEXT_PUBLIC_SUPABASE_URL       = 你的值
+NEXT_PUBLIC_SUPABASE_ANON_KEY  = 你的值
+NEXT_PUBLIC_PAYUNI_MERID       = 你的值
+NEXT_PUBLIC_PAYUNI_UPP_URL     = 你的值（正式端點）
+NODE_VERSION                   = 22</pre>
+    </div>
+    <div class="box warn">
+      <p class="box-title">🤔 為什麼同樣的值要貼兩次？</p>
+      <p>Cloudflare 的「建置網頁」和「跑網站」是<strong>分開的兩個階段</strong>，各看各的鑰匙。這 5 個公開值兩個階段都會用到，所以兩邊都要有；其餘鑰匙只有跑網站時才用，放地方 1 就好。</p>
+    </div>
+
+    <div class="box warn">
+      <p class="box-title">🧨 最容易踩的雷：<code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 要填「正式端點」</p>
+      <p>這個值會被<strong>寫死進網頁</strong>。填錯或漏填，<strong>刷卡看起來正常、卻打到測試、收不到真錢</strong>。正式收客時務必改成 PayUni 給的<strong>正式</strong>網址（不是 <code class="inline">sandbox</code> 那個），而且地方 1、地方 2 兩邊都要改。</p>
+    </div>
+
+    <h3>6-4. 第一次部署，再補上網址</h3>
     <ol class="dolist">
-      <li>全部貼好後，按 <strong>Deploy</strong>（部署）。等幾分鐘。</li>
-      <li>完成後 Netlify 會給你一個網址（像 <code class="inline">xxxx.netlify.app</code>）。<strong>回到上面把 <code class="inline">NEXTAUTH_URL</code> 改成這個網址，再重新部署一次。</strong></li>
-      <li>（之後有自己網域）到 <strong>Domain management</strong> 綁定你的網址，再把 <code class="inline">NEXTAUTH_URL</code> 改成它、重新部署。</li>
+      <li>回專案首頁按 <strong>部署（Deploy / Create and deploy）</strong>，等幾分鐘。</li>
+      <li>完成後 Cloudflare 給你一個測試網址，像 <code class="inline">https://bds-web.xxx.workers.dev</code>。</li>
+      <li>回<strong>地方 1（Variables and Secrets）</strong>，把 <code class="inline">NEXTAUTH_URL</code> 填成這個網址。</li>
+      <li>到 <strong>Deployments</strong> 按一次<strong>重新部署</strong>，新網址才會生效。</li>
     </ol>
 
-    <h3>6-B. 路線 B：改用 Cloudflare（免費額度更大，稍技術，建議工程師）</h3>
-    <div class="box warn">
-      <p class="box-title">👷 這條路偏技術，建議由工程師執行；採「連 GitHub 自動部署」</p>
-      <p>本專案已內建 Cloudflare 設定檔（<code class="inline">wrangler.jsonc</code> 已含 <code class="inline">nodejs_compat</code> 旗標，你不用自己加）。我們統一用「連 GitHub」的方式——這樣<strong>以後每次工程師 push 更新，Cloudflare 都會自動重新部署</strong>，不用每次手動上傳。</p>
-    </div>
-    <div class="box warn">
-      <p class="box-title">💳 免費版塞不下：要先開 Workers Paid（約 US$5／月）</p>
-      <p>Cloudflare Workers 免費版「單一程式上限 3 MiB」，本站（完整 Next.js）會超過、部署會失敗（<code class="inline">exceeded the size limit of 3 MiB</code>）。請先開 <strong>Workers Paid（約 US$5／月，上限 10 MiB）</strong> 再部署。（仍比 Netlify 付費便宜、額度大方。）</p>
-    </div>
-    <p><strong>步驟（做完 6-1 後）：</strong></p>
+    <h3>6-5. 開門收錢前，一定要真卡測一筆</h3>
+    <p>用測試網址把重點點一遍：<strong>登入 → 看影片 → 真的刷一張卡買一筆（確認收得到錢）→ 進後台</strong>。這是最重要的驗收。</p>
+
+    <h3>6-6. （之後有自己網域再做）綁定網域</h3>
     <ol class="dolist">
-      <li>Cloudflare → <strong>Workers &amp; Pages → Create → Import a repository</strong>，選你的 <code class="inline">bds-web</code> 倉庫。</li>
-      <li>建置指令填 <code class="inline">npm run cf:build</code>、部署指令填 <code class="inline">npx wrangler deploy</code>。（<code class="inline">cf:build</code> 會自動移除本站沒用到的 OG 圖片元件，讓體積符合免費版上限。）</li>
-      <li>在該專案 → <strong>Settings</strong> 的變數設定，依下表新增環境變數（<strong>值＝你在 6-3「鑰匙收集表」填過的那些</strong>）。<strong>類型很重要</strong>：</li>
+      <li>Worker → <strong>Settings → Domains &amp; Routes</strong> 綁你的網域。</li>
+      <li>把 <code class="inline">NEXTAUTH_URL</code> 改成正式網域 → 到 Deployments 重新部署。</li>
     </ol>
-    <div class="tablewrap">
-      <table>
-        <tr><th>設「一般（Plaintext）」— build 期要讀，一定不能設成 Secret</th><th>設「Secret（加密）」— 伺服器機密</th></tr>
-        <tr>
-          <td><code class="inline">NEXT_PUBLIC_SUPABASE_URL</code>、<code class="inline">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>、<code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code>（<strong>正式端點</strong>）、<code class="inline">NEXT_PUBLIC_PAYUNI_MERID</code>、<code class="inline">NEXTAUTH_URL</code>、<code class="inline">PAYUNI_MERID</code>、<code class="inline">RESEND_FROM_EMAIL</code>、<code class="inline">BUNNY_STREAM_LIBRARY_ID</code>、<code class="inline">ENABLE_PAYMENT_SIMULATION</code>(=false)、<strong><code class="inline">NODE_VERSION</code>=22</strong>、（選填）<code class="inline">CONTACT_TO_EMAIL</code>／<code class="inline">ADMIN_ALERT_EMAIL</code></td>
-          <td><code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>、<code class="inline">NEXTAUTH_SECRET</code>、<code class="inline">PAYUNI_HASH_KEY</code>、<code class="inline">PAYUNI_HASH_IV</code>、<code class="inline">RESEND_API_KEY</code>、<code class="inline">BUNNY_TOKEN_AUTH_KEY</code>、<code class="inline">BUNNY_STREAM_API_KEY</code></td>
-        </tr>
-      </table>
-    </div>
-    <div class="box warn">
-      <p class="box-title">🧨 為什麼 <code class="inline">NEXT_PUBLIC_</code> 一定要設「一般」</p>
-      <p>這些值是在<strong>建置（build）當下就寫死進前端</strong>的。若設成 Secret，build 期讀不到 → 前端會用預設沙盒值 → <strong>刷卡看起來正常、卻打到測試端點、收不到真錢</strong>。所以 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 務必填「正式端點」且設「一般」。</p>
-    </div>
-    <div class="box good">
-      <p class="box-title">⚡ 想更快？右邊「Secret」那一整欄，可用一行指令整包匯入</p>
-      <p>你電腦上的 <code class="inline">.env.local</code> 已經把所有鑰匙填好了。<strong>右邊「Secret（機密）」那一欄不用一個一個貼</strong>，可以用工具一次全部上傳。（<strong>左邊「一般」那欄還是要在儀表板手動設</strong>——因為那是 build 期才讀得到的，這個指令只處理執行期機密、不影響 build。）</p>
-      <p style="margin-top:8px;"><strong>⚠️ 順序很重要：這步要等「第一次部署之後」才能做</strong>（Worker <code class="inline">bds-web</code> 要先存在，見下方第 4 步）。正確順序：<strong>先設好左邊「一般」欄 → 做下方第 4 步的第一次部署 → 再回來跑這兩行 → 到 Deployments 重新部署一次</strong>。做法：在專案資料夾打開終端機，執行：</p>
-      <div class="paste">
-        <div class="label"><span>一次匯入所有機密（讀你填好的 .env.local）</span><span class="where">電腦 → 專案資料夾終端機</span></div>
-<pre>npx wrangler login
-npx wrangler secret bulk .env.local</pre>
-      </div>
-      <p style="margin-top:8px;font-size:14px;color:var(--ink-soft);">說明：<code class="inline">wrangler secret bulk</code> 會讀 <code class="inline">KEY=VALUE</code> 格式，一次最多 100 個，並把 <code class="inline">.env.local</code> <strong>整包</strong>當「執行期機密」上傳（連左欄那幾個也會一起上去，屬正常）。重點：那 4 個 <code class="inline">NEXT_PUBLIC_</code> <strong>仍必須另外在儀表板「一般」欄設定、且讓 build 期讀得到</strong>，否則刷卡會走測試端點（見上方 🧨）。上傳完到 <strong>Deployments</strong> 重新部署一次即生效。</p>
-    </div>
-    <ol class="dolist" start="4">
-      <li><code class="inline">NEXTAUTH_URL</code> 第一次先隨意填（例如暫填 <code class="inline">https://example.com</code>）→ 部署 → 取得 Cloudflare 給的 <code class="inline">*.workers.dev</code> 測試網址 → 回來把 <code class="inline">NEXTAUTH_URL</code> 改成它 → 到 <strong>Deployments</strong> 觸發一次重建。</li>
-      <li>用該測試網址把功能點一遍：登入、看片、<strong>真卡買一筆</strong>（確認金流走正式端點、收得到錢）、後台。</li>
-      <li>（之後有自己網域）該專案 → <strong>Settings → Domains &amp; Routes</strong> 綁你的網域；把 <code class="inline">NEXTAUTH_URL</code> 改成正式網域，再到 Deployments 觸發重建。</li>
-      <li>日後工程師 push 到 GitHub 會<strong>自動重建部署</strong>；只改環境變數（尤其 <code class="inline">NEXT_PUBLIC_</code>）時，要到 <strong>Deployments</strong> 手動觸發一次重建才生效。</li>
-    </ol>
-    <div class="box warn">
-      <p class="box-title">⚠️ 兩個平台擇一就好</p>
-      <p>同一個網域只能指向一個平台。<strong>先用測試網址確認新平台一切正常（尤其真卡刷一筆），再把網域切過去</strong>，然後才停用另一個。切換網域屬技術操作，建議工程師處理。</p>
-    </div>
 
     <div class="box good">
       <p class="box-title">✅ 完成後你會有</p>
@@ -729,7 +713,7 @@ WHERE email = '你的信箱@example.com';</pre>
     </div>
     <ul class="plain">
       <li><strong>資料保護鎖有打開（資安最重要）：</strong>上面的 <code class="inline">npm run verify</code> 會自動檢查這項（「資料庫對外上鎖」）。若顯示未上鎖，代表步驟 2 最後的 <code class="inline">db/enable_rls.sql</code> 沒跑到——回步驟 2 把它整份再貼一次即可。</li>
-      <li>安全開關關好：部署平台（Netlify／Cloudflare）的環境變數裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
+      <li>安全開關關好：部署平台（Cloudflare）的環境變數裡 <code class="inline">ENABLE_PAYMENT_SIMULATION</code> 必須是 <code class="inline">false</code>（不然有人能免費開通會員）。</li>
       <li>金流換正式：確認商家審核通過後，把 <code class="inline">NEXT_PUBLIC_PAYUNI_UPP_URL</code> 換成正式端點、金鑰換成正式那組，重新部署。</li>
       <li>網址填對：<code class="inline">NEXTAUTH_URL</code> 已改成你真正的網址（不是預設的假網址）。</li>
       <li>寄信正常（很重要）：<code class="inline">RESEND_FROM_EMAIL</code> 已改成自家已驗證網域（不是 <code class="inline">onboarding@resend.dev</code>）。實測：用<strong>另一個</strong>信箱到 <code class="inline">/signup</code> 註冊 → 該信箱能收到「驗證信」→ 點了能成功登入。收不到＝客戶也會收不到、無法登入。</li>
@@ -747,8 +731,8 @@ WHERE email = '你的信箱@example.com';</pre>
   <p class="eyebrow" id="s9">步驟 9</p>
 
   <div class="box warn">
-    <p class="box-title">📍 這一步是在「GitHub」做，不是 Netlify</p>
-    <p>下面的保活、備份、通知、自動續命，都是 <strong>GitHub</strong> 幫你在背景自動跑的工作，跟「放網站的平台」（Netlify 或 Cloudflare）是<strong>不同的地方</strong>。所以這一步請打開你的 <strong>GitHub</strong>。</p>
+    <p class="box-title">📍 這一步是在「GitHub」做，不是放網站的平台</p>
+    <p>下面的保活、備份、通知、自動續命，都是 <strong>GitHub</strong> 幫你在背景自動跑的工作，跟「放網站的平台」（Cloudflare）是<strong>不同的地方</strong>。所以這一步請打開你的 <strong>GitHub</strong>。</p>
   </div>
 
   <div class="step">
@@ -879,15 +863,15 @@ WHERE email = '你的信箱@example.com';</pre>
     </div>
     <div class="box warn">
       <p class="box-title">⚠️ 還沒換網域前，填平台的臨時網址（搬家的人尤其注意）</p>
-      <p><strong>填「新網站現在真的打得開」的網址</strong>：還沒換網域前，就是部署平台給的臨時網址（Netlify 的 <code class="inline">xxxx.netlify.app</code> 或 Cloudflare 的 <code class="inline">xxxx.workers.dev</code>）。等正式換好網域後，再回來把它改成你的網域（例 <code class="inline">https://myschool.com</code>）。</p>
+      <p><strong>填「新網站現在真的打得開」的網址</strong>：還沒換網域前，就是 Cloudflare 給的臨時網址（<code class="inline">xxxx.workers.dev</code>）。等正式換好網域後，再回來把它改成你的網域（例 <code class="inline">https://myschool.com</code>）。</p>
       <p style="margin-top:8px;"><strong>搬家情境特別注意：</strong>換網域完成前，<strong>千萬別填你舊站現在的網域</strong>（那個還指向舊 Teachify、還在營運的網址）——填了等於在監控舊站、而不是你的新站。要等《搬家手冊》換網域、新站穩定後才改成正式網域。</p>
     </div>
     <p style="font-size:15px;color:var(--ink-soft);">（確認 GitHub 帳號的 Email 通知有開：GitHub 預設會在排程工作「失敗」時寄信給你，等於網站掛掉就收到通知。）</p>
 
     <h3>② 金流開通失敗通知（用 Resend）</h3>
-    <p>最怕的狀況是「客戶付了錢，但系統沒開通」。發生時系統會<strong>主動寄一封警示信給你</strong>去手動補開通。在部署平台（Netlify／Cloudflare）的環境變數加一個信箱即可（不加則退回用你的客服信箱）：</p>
+    <p>最怕的狀況是「客戶付了錢，但系統沒開通」。發生時系統會<strong>主動寄一封警示信給你</strong>去手動補開通。在部署平台（Cloudflare）的環境變數加一個信箱即可（不加則退回用你的客服信箱）：</p>
     <div class="paste">
-      <div class="label"><span>部署平台環境變數（Netlify／Cloudflare）</span></div>
+      <div class="label"><span>部署平台環境變數（Cloudflare）</span></div>
 <pre>ADMIN_ALERT_EMAIL = 你要收警示信的信箱</pre>
     </div>
     <div class="box tip">
@@ -935,8 +919,8 @@ WHERE email = '你的信箱@example.com';</pre>
 
   <div class="box tip">
     <p class="box-title">🔁 改設定的重要小知識：程式會自動部署，改「環境變數」不會</p>
-    <p><strong>改程式碼</strong>（工程師 push 到 GitHub）→ 部署平台（Netlify／Cloudflare）會<strong>自動重新編譯、自動上線</strong>，不用手動按。</p>
-    <p><strong>但只改「環境變數」</strong>（例如改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效，要「重新部署」一次</strong>新值才會套用：Netlify 到 <strong>Deploys → Trigger deploy</strong>（選 <em>Clear cache and deploy site</em>）；Cloudflare 到該 Worker 的 <strong>Deployments</strong> 觸發一次重建。<strong>特別是 <code class="inline">NEXT_PUBLIC_</code> 開頭的值（如金流正式端點）改了一定要重新部署</strong>，否則前端還是舊值。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
+    <p><strong>改程式碼</strong>（工程師 push 到 GitHub）→ 部署平台（Cloudflare）會<strong>自動重新編譯、自動上線</strong>，不用手動按。</p>
+    <p><strong>但只改「環境變數」</strong>（例如改 <code class="inline">NEXTAUTH_URL</code>、換金流正式金鑰、換寄件網域）→ <strong>不會自動生效，要「重新部署」一次</strong>新值才會套用：到該 Worker 的 <strong>Deployments</strong> 觸發一次重建（或 push 一個小改動）。<strong>特別是 <code class="inline">NEXT_PUBLIC_</code> 開頭的值（如金流正式端點）改了一定要重新部署</strong>，否則前端還是舊值。這是最常被忽略、卻常讓人以為「改了怎麼沒用」的點。</p>
   </div>
 
   <div class="box tip">
@@ -955,7 +939,7 @@ WHERE email = '你的信箱@example.com';</pre>
       <tr><th>服務</th><th>免費大概到哪、用完的「症狀」</th><th>怎麼看用量 / 何時升級</th></tr>
       <tr><td><strong>Resend 寄信</strong></td><td>免費約每月 3,000 封、每天 100 封。用完時<strong>信寄不出去</strong>——新客戶收不到驗證信＝<strong>無法登入</strong>（很有感）。</td><td>Resend 後台看用量；學員多、寄信量大時升級付費方案。</td></tr>
       <tr><td><strong>Supabase 資料庫</strong></td><td>免費約 500MB 資料、儲存與流量有限；超過時讀寫會變慢或被擋。</td><td>Supabase 後台 → Usage 看用量；學員/資料成長到接近上限就升級。</td></tr>
-      <tr><td><strong>放網站平台（Netlify／Cloudflare）</strong></td><td>免費有流量/建置額度；爆量時可能被限流或無法重新建置。</td><td>各自後台看用量：Netlify 用量頁；Cloudflare 在該 Worker 的 Metrics。額度不夠再升級或改用另一平台。</td></tr>
+      <tr><td><strong>放網站平台（Cloudflare）</strong></td><td>免費有流量/建置額度；爆量時可能被限流或無法重新建置。</td><td>Cloudflare 在該 Worker 的 <strong>Metrics</strong> 看用量；額度不夠再升級方案。</td></tr>
       <tr><td><strong>Bunny 影片</strong></td><td><strong>這個本來就不是免費的</strong>——按影片儲存與觀看流量計費（費用通常不高，但<strong>要綁定付款方式，會實際扣款</strong>）。</td><td>Bunny 後台看帳單；隨觀看量成長費用會增加，屬正常營運成本。</td></tr>
     </table>
   </div>
@@ -965,7 +949,7 @@ WHERE email = '你的信箱@example.com';</pre>
   <div class="tablewrap">
     <table>
       <tr><th>症狀</th><th>先看哪裡</th></tr>
-      <tr><td>整個網站打不開</td><td>① 部署平台（Netlify／Cloudflare）最近一次部署是否成功　② Supabase 是否在（免費版睡著了→保活有沒有在跑）　③ 網域是否過期</td></tr>
+      <tr><td>整個網站打不開</td><td>① 部署平台（Cloudflare）最近一次部署是否成功　② Supabase 是否在（免費版睡著了→保活有沒有在跑）　③ 網域是否過期</td></tr>
       <tr><td>客戶說沒收到驗證信/通知信</td><td>Resend：額度是否用完、寄件網域是否還是 Verified</td></tr>
       <tr><td>影片播不出來</td><td>Bunny：帳戶是否欠費、該影片是否還在、防盜開關是否還開著</td></tr>
       <tr><td>刷卡失敗</td><td>PayUni：是否已換成正式金鑰與正式端點、商店狀態是否正常</td></tr>
