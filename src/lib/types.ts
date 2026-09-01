@@ -5,6 +5,7 @@ export interface Course {
   thumbnail_url: string | null;
   price: number;
   category: string | null;
+  instructor?: string | null;          // 授課講師（courses.instructor，後台可設）
   is_published: boolean;
   is_hidden?: boolean;
   allow_comments?: boolean;

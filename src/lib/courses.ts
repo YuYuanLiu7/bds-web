@@ -1,5 +1,19 @@
 import { supabase } from './supabase';
-import { Course, CourseWithChapters } from './types';
+import { Course, CourseWithChapters, CourseCategory } from './types';
+
+// 取得課程分類（course_categories）。供導覽列「課程」下拉與分類頁使用，
+// 讓後台新增／改名分類能即時反映（不再寫死）。
+export async function getCourseCategoriesServer(): Promise<CourseCategory[]> {
+  const { data, error } = await supabase
+    .from('course_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) {
+    console.error('Error fetching course categories:', error.message);
+    return [];
+  }
+  return data || [];
+}
 
 export async function getPublishedCourses(): Promise<Course[]> {
   // 優先依 sort_order（顯示順序）排序，其次以建立時間新到舊排列

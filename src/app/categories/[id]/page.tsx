@@ -1,4 +1,4 @@
-import { getPublishedCourses } from "@/lib/courses";
+import { getPublishedCourses, getCourseCategoriesServer } from "@/lib/courses";
 import { getSiteSettingsServer } from "@/lib/site-settings";
 import Link from 'next/link';
 import { Star, Users, ArrowLeft, BookOpen } from 'lucide-react';
@@ -15,19 +15,18 @@ export default async function CategoryPage({ params }: PageProps) {
   
   // 1. Fetch visual settings and courses from the server
   const settings = await getSiteSettingsServer();
-  const courses = await getPublishedCourses();
-  
-  // 2. Map Category ID to human-readable text
-  const categoryMap: { [key: string]: string } = {
-    'novice': '業務新手村',
-    'industry': '線上產業講座',
-    'job': '職場升級',
-    'bookclub': '讀書會',
-    'fireside': '爐邊對談',
-    'firesidechats': '爐邊對談'
-  };
+  const [courses, categories] = await Promise.all([
+    getPublishedCourses(),
+    getCourseCategoriesServer(),
+  ]);
 
-  const readableCategory = categoryMap[id.toLowerCase()] || decodeURIComponent(id);
+  // 以真實分類（course_categories）解析網址參數：可為 slug、名稱或 id；
+  // 對不到就以參數本身當分類名稱，確保不再因寫死對照表而落入空頁。
+  const decoded = decodeURIComponent(id);
+  const matchedCategory = categories.find(
+    (c) => c.slug === decoded || c.name === decoded || c.id === decoded
+  );
+  const readableCategory = matchedCategory?.name || decoded;
   const primaryColor = settings.primaryColor || '#21448e';
 
   // 僅顯示資料庫中的真實課程；無資料時呈現空狀態，不再以示範課程魚目混珠
@@ -37,7 +36,7 @@ export default async function CategoryPage({ params }: PageProps) {
     price: c.price,
     category: c.category || '精選',
     thumbnail_url: c.thumbnail_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
-    instructor: 'BDS 團隊',
+    instructor: c.instructor || 'BDS 團隊',
     rating: undefined as number | undefined,
     students: undefined as number | undefined
   }));

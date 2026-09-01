@@ -7,6 +7,7 @@ import Providers from "@/components/Providers";
 import { SettingsProvider, type PublicSettings } from "@/components/SettingsProvider";
 import { ToastProvider } from "@/components/Toast";
 import { getSiteSettingsServer, getJsonSetting, SETTINGS_DEFAULTS } from "@/lib/site-settings";
+import { getCourseCategoriesServer } from "@/lib/courses";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,12 +77,13 @@ export const metadata: Metadata = {
 // 公開設定於伺服器端取得一次（取代各前端元件/各頁的重複 fetch）
 async function loadPublicSettings(): Promise<PublicSettings> {
   try {
-    const [visual, announcements, general, faqs, pages] = await Promise.all([
+    const [visual, announcements, general, faqs, pages, categories] = await Promise.all([
       getSiteSettingsServer(),
       getJsonSetting("announcements", SETTINGS_DEFAULTS.announcements),
       getJsonSetting("general", SETTINGS_DEFAULTS.general),
       getJsonSetting("faqs", SETTINGS_DEFAULTS.faqs),
       getJsonSetting("pages", SETTINGS_DEFAULTS.pages),
+      getCourseCategoriesServer(),
     ]);
     return {
       visual: {
@@ -96,10 +98,11 @@ async function loadPublicSettings(): Promise<PublicSettings> {
       general: general || {},
       faqs: Array.isArray(faqs) ? faqs : [],
       pages: Array.isArray(pages) ? pages : [],
+      categories: Array.isArray(categories) ? categories : [],
     };
   } catch (err) {
     console.warn("Failed to load public settings in layout:", err);
-    return { visual: { primaryColor: "#21448e", logoUrl: "", slogan: "" }, announcements: [], general: {}, faqs: [], pages: [] };
+    return { visual: { primaryColor: "#21448e", logoUrl: "", slogan: "" }, announcements: [], general: {}, faqs: [], pages: [], categories: [] };
   }
 }
 

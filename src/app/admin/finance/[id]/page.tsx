@@ -44,7 +44,9 @@ interface OrderDetail {
   status?: string;
   created_at?: string;
   updated_at?: string;
-  amount?: number;
+  amount?: number;            // 實收金額（已折後）
+  discount_amount?: number;   // 折抵金額（使用折扣碼時）
+  coupon_code?: string;       // 使用的折扣碼
   payment_type?: string;
   users?: OrderUser;
   courses?: OrderCourse;
@@ -219,11 +221,11 @@ export default function OrderDetailPage() {
                 <div className="space-y-3 pt-2 text-xs font-semibold text-slate-500">
                   <div className="flex justify-between">
                     <span>商品小計</span>
-                    <span className="text-slate-800 font-bold">NT$ {(order.amount ?? 0).toLocaleString()}</span>
+                    <span className="text-slate-800 font-bold">NT$ {((order.amount ?? 0) + (order.discount_amount ?? 0)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>優惠折扣</span>
-                    <span className="text-slate-400">- NT$ 0</span>
+                    <span>優惠折扣{order.coupon_code ? `（${order.coupon_code}）` : ''}</span>
+                    <span className={order.discount_amount ? 'text-rose-500 font-bold' : 'text-slate-400'}>- NT$ {(order.discount_amount ?? 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between border-t border-slate-100 pt-3 text-sm font-extrabold text-slate-800">
                     <span className="flex items-center text-slate-600">

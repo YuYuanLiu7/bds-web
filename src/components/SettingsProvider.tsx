@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
+import type { CourseCategory } from '@/lib/types';
 
 export interface VisualSettings {
   primaryColor: string;
@@ -27,6 +28,7 @@ export interface PublicSettings {
   general: { siteStatus?: string; maintenanceMessage?: string; [k: string]: unknown };
   faqs: { q: string; a: string }[];
   pages: CmsPage[];
+  categories: CourseCategory[];
 }
 
 const DEFAULTS: PublicSettings = {
@@ -35,6 +37,7 @@ const DEFAULTS: PublicSettings = {
   general: {},
   faqs: [],
   pages: [],
+  categories: [],
 };
 
 const SettingsContext = createContext<PublicSettings>(DEFAULTS);

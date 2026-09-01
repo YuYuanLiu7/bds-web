@@ -53,7 +53,7 @@ export default function AdminGlobalSettingsPage() {
             <Sliders className="w-6.5 h-6.5 mr-2 text-indigo-600" />
             全站設定
           </h1>
-          <p className="text-slate-400 text-xs mt-1 font-semibold">自訂您的網站網域、Email 寄件服務、頁尾聲明及全站基礎防護機制。</p>
+          <p className="text-slate-400 text-xs mt-1 font-semibold">自訂您的網站網域與 Email 寄件服務。</p>
         </div>
       </div>
 

@@ -52,7 +52,11 @@ export default function AdminHelpPage() {
             <MessageSquare className="w-4 h-4 text-indigo-500 mr-2" /> 線上客戶支援
           </h2>
           <p className="text-slate-400 text-xs leading-relaxed font-semibold">
-            如果您有任何技術問題、系統異常或帳務疑問，歡迎直接聯繫我們的客服團隊。
+            遇到問題時，先查看右側的「常見問題」。與帳務、寄件網域、客服信箱等相關的設定，可到
+            <Link href="/admin/settings" className="text-indigo-600 hover:underline font-bold">設定</Link>
+            與
+            <Link href="/admin/global-settings" className="text-indigo-600 hover:underline font-bold">全站設定</Link>
+            頁面調整。
           </p>
         </div>
 

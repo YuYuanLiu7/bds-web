@@ -57,7 +57,7 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
     price: c.price,
     category: c.category || '精選',
     thumbnail_url: c.thumbnail_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
-    instructor: 'BDS 團隊'
+    instructor: c.instructor || 'BDS 團隊'
   }));
 
   // 分類清單由實際課程的 category 動態產生，避免硬編字串與資料不符

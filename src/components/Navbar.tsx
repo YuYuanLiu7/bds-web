@@ -16,7 +16,7 @@ import {
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const { visual, announcements } = useSettings();
+  const { visual, announcements, categories } = useSettings();
   const [showCourseDropdown, setShowCourseDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMobileCourseDropdown, setShowMobileCourseDropdown] = useState(false);
@@ -105,21 +105,15 @@ export default function Navbar() {
             </button>
             {showCourseDropdown && (
               <div className="absolute top-5 left-1/2 -translate-x-1/2 bg-white border border-slate-100 rounded-xl shadow-lg p-2 w-48 z-[2000] animate-in fade-in slide-in-from-top-1 duration-150">
-                <Link href="/categories/novice" className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
-                  業務新手村
-                </Link>
-                <Link href="/categories/industry" className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
-                  線上產業講座
-                </Link>
-                <Link href="/categories/job" className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
-                  職場升級三部曲
-                </Link>
-                <Link href="/categories/bookclub" className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
-                  讀書會
-                </Link>
-                <Link href="/categories/fireside" className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
-                  爐邊對談
-                </Link>
+                {categories.length > 0 ? categories.map((cat) => (
+                  <Link key={cat.id} href={`/categories/${encodeURIComponent(cat.slug || cat.name)}`} className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                    {cat.name}
+                  </Link>
+                )) : (
+                  <Link href="/courses" className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                    所有課程
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -211,11 +205,11 @@ export default function Navbar() {
             </button>
             {showMobileCourseDropdown && (
               <div className="pl-4 space-y-2 border-l border-slate-100">
-                <Link href="/categories/novice" className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">業務新手村</Link>
-                <Link href="/categories/industry" className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">線上產業講座</Link>
-                <Link href="/categories/job" className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">職場升級三部曲</Link>
-                <Link href="/categories/bookclub" className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">讀書會</Link>
-                <Link href="/categories/fireside" className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">爐邊對談</Link>
+                {categories.length > 0 ? categories.map((cat) => (
+                  <Link key={cat.id} href={`/categories/${encodeURIComponent(cat.slug || cat.name)}`} className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">{cat.name}</Link>
+                )) : (
+                  <Link href="/courses" className="block text-xs font-semibold text-slate-500 hover:text-slate-900 py-1">所有課程</Link>
+                )}
               </div>
             )}
           </div>
