@@ -155,10 +155,10 @@ export default function MembershipList({ plans, primaryColor, session, currentUs
         return (
           <div 
             key={plan.id}
-            className={`rounded-2xl p-8 border flex flex-col justify-between relative transition-colors duration-200 text-left ${
+            className={`rounded-2xl p-8 border flex flex-col justify-between relative transition-all duration-300 text-left hover:-translate-y-1.5 ${
               plan.is_popular
-                ? 'border-primary bg-white shadow-md ring-1 ring-primary/20 scale-100 lg:scale-[1.03] z-10'
-                : 'border-slate-200 bg-white shadow-sm hover:border-slate-300'
+                ? 'border-primary bg-white shadow-md ring-1 ring-primary/20 scale-100 lg:scale-[1.03] z-10 hover:shadow-xl'
+                : 'border-slate-200 bg-white shadow-sm hover:shadow-xl hover:border-slate-300'
             }`}
           >
             {plan.is_popular && (

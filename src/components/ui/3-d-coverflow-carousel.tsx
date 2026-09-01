@@ -147,7 +147,7 @@ export function CoverFlowCarousel({
 
   return (
     <section
-      className={`relative w-full min-h-[760px] flex items-center justify-center overflow-hidden py-12 select-none ${className}`}
+      className={`relative w-full min-h-[600px] flex items-center justify-center overflow-hidden py-12 select-none ${className}`}
       style={{
         backgroundColor: "#0c0a09",
         color: "#ffffff",
@@ -203,8 +203,8 @@ export function CoverFlowCarousel({
 
         {/* 3D Coverflow Stage */}
         <div
-          className="relative w-full h-[520px] flex justify-center items-center mb-8"
-          style={{ perspective: "1400px" }}
+          className="relative w-full h-[400px] flex justify-center items-center mb-8"
+          style={{ perspective: "1600px" }}
         >
           {items.map((item, idx) => {
             const offset = (idx - currentIndex + total) % total;
@@ -222,22 +222,22 @@ export function CoverFlowCarousel({
               zIndex = 30;
               filter = "brightness(1)";
             } else if (offset === 1) {
-              transform = "translateX(285px) scale(0.84) rotateY(-24deg)";
+              transform = "translateX(380px) scale(0.82) rotateY(-22deg)";
               opacity = 0.65;
               zIndex = 20;
               filter = "brightness(0.75)";
             } else if (offset === 2) {
-              transform = "translateX(510px) scale(0.68) rotateY(-38deg)";
+              transform = "translateX(680px) scale(0.66) rotateY(-34deg)";
               opacity = 0.38;
               zIndex = 10;
               filter = "brightness(0.55) blur(1px)";
             } else if (offset === total - 1) {
-              transform = "translateX(-285px) scale(0.84) rotateY(24deg)";
+              transform = "translateX(-380px) scale(0.82) rotateY(22deg)";
               opacity = 0.65;
               zIndex = 20;
               filter = "brightness(0.75)";
             } else if (offset === total - 2) {
-              transform = "translateX(-510px) scale(0.68) rotateY(38deg)";
+              transform = "translateX(-680px) scale(0.66) rotateY(34deg)";
               opacity = 0.38;
               zIndex = 10;
               filter = "brightness(0.55) blur(1px)";
@@ -249,8 +249,8 @@ export function CoverFlowCarousel({
                 onClick={() => !isCenter && goToSlide(idx)}
                 style={{
                   position: "absolute",
-                  width: "330px",
-                  height: "500px",
+                  width: "min(92vw, 480px)",
+                  height: "min(57.5vw, 300px)",
                   borderRadius: "18px",
                   overflow: "hidden",
                   backgroundColor: "#171311",
