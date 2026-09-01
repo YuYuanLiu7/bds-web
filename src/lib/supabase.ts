@@ -13,10 +13,33 @@ let client: SupabaseClient | null = null;
  * 為了在沒有設定環境變數的情況下（例如本地 npm run build 或 CI/CD 環境中）也能編譯成功，
  * 環境變數為空時使用佔位網址與金鑰，避免 Supabase SDK 拋出 initialization 錯誤。
  */
+/**
+ * 穩健解析 Supabase 網址：
+ * - 去除前後空白
+ * - 若少了 http(s):// 前綴自動補上 https://（常見的貼錯）
+ * - 仍非合法網址時退回佔位網址（避免 createClient 直接拋錯導致整個 build 崩潰）
+ */
+function resolveSupabaseUrl(): string {
+  const PLACEHOLDER = 'https://placeholder-project.supabase.co';
+  const raw = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+  if (!raw) return PLACEHOLDER;
+  const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const u = new URL(candidate);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return candidate;
+  } catch {
+    /* 落到下方告警 */
+  }
+  console.error(
+    `[supabase] NEXT_PUBLIC_SUPABASE_URL 不是有效網址（${raw}），暫用佔位網址；` +
+      '請至部署平台將它填成完整網址（含 https://，例：https://xxxx.supabase.co）後重新部署。'
+  );
+  return PLACEHOLDER;
+}
+
 export function getSupabase(): SupabaseClient {
   if (!client) {
-    const supabaseUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
+    const supabaseUrl = resolveSupabaseUrl();
 
     // 安全防呆：啟用 RLS 後，伺服器端必須使用 service_role 金鑰才能正常讀寫；
     // 若正式環境只設了 anon 金鑰，所有查詢會讀到空資料（看似壞掉），
