@@ -49,11 +49,16 @@ export default async function ChapterPage({ params }: { params: Promise<{ id: st
   //    - 其他外部網址（YouTube/Vimeo）：signStorageUrl 原樣返回，交由播放器處理。
   let videoUrl = currentChapter.video_url || '';
   if (videoUrl) {
-    if (isBunnyVideo(videoUrl)) {
-      const signed = signBunnyEmbedUrl(videoUrl);
-      if (signed) videoUrl = signed;
-    } else {
-      videoUrl = await signStorageUrl(videoUrl);
+    try {
+      if (isBunnyVideo(videoUrl)) {
+        const signed = await signBunnyEmbedUrl(videoUrl);
+        if (signed) videoUrl = signed;
+      } else {
+        videoUrl = await signStorageUrl(videoUrl);
+      }
+    } catch (e) {
+      // 簽章失敗時退回原始網址，確保上課頁不會整頁崩潰（頂多影片需重試）
+      console.error('影片網址簽發失敗，改用原始網址：', e);
     }
   }
 

@@ -1,4 +1,20 @@
-import crypto from 'crypto';
+// 以 Web Crypto（Cloudflare Workers 原生、Node 18+ 亦內建 globalThis.crypto）計算 SHA-256，
+// 取代 Node 專屬的 crypto.createHash——後者在 Cloudflare Workers 執行時不保證可用，
+// 會於「播放頁簽發 Bunny token」時拋出例外導致整個上課頁崩潰。
+async function sha256(input: string): Promise<ArrayBuffer> {
+  return globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+}
+function toHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+function toBase64Url(buf: ArrayBuffer): string {
+  let bin = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
 
 // ⚠️ 皆為「伺服器端」機密，切勿加 NEXT_PUBLIC_ 前綴、勿外洩到瀏覽器
 const LIBRARY_ID = process.env.BUNNY_STREAM_LIBRARY_ID || '';
@@ -33,15 +49,12 @@ export function isBunnyVideo(input: string): boolean {
  *       若 Bunny 端驗章失敗，請對照官方文件調整下方 update() 的串接順序。
  * 回傳 null 代表未設定 env 或非 Bunny 影片（呼叫端應退回原始網址處理）。
  */
-export function signBunnyEmbedUrl(videoUrlOrId: string, expiresInSeconds = 30 * 60): string | null {
+export async function signBunnyEmbedUrl(videoUrlOrId: string, expiresInSeconds = 30 * 60): Promise<string | null> {
   const videoId = extractBunnyVideoId(videoUrlOrId);
   if (!videoId || !LIBRARY_ID || !TOKEN_KEY) return null;
 
   const expires = Math.floor(Date.now() / 1000) + expiresInSeconds;
-  const token = crypto
-    .createHash('sha256')
-    .update(TOKEN_KEY + videoId + expires)
-    .digest('hex');
+  const token = toHex(await sha256(TOKEN_KEY + videoId + expires));
 
   return `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?token=${token}&expires=${expires}&autoplay=false`;
 }
@@ -51,7 +64,7 @@ export function signBunnyEmbedUrl(videoUrlOrId: string, expiresInSeconds = 30 * 
  * 演算法為 Bunny CDN URL Token Authentication：base64url(sha256_raw(SecurityKey + path + expires [+ ip]))。
  * 需設定 BUNNY_CDN_HOSTNAME 與 BUNNY_TOKEN_AUTH_KEY。
  */
-export function signBunnyHlsUrl(videoUrlOrId: string, userIp?: string, expiresInSeconds = 6 * 60 * 60): string | null {
+export async function signBunnyHlsUrl(videoUrlOrId: string, userIp?: string, expiresInSeconds = 6 * 60 * 60): Promise<string | null> {
   const host = process.env.BUNNY_CDN_HOSTNAME || '';
   const videoId = extractBunnyVideoId(videoUrlOrId);
   if (!videoId || !host || !TOKEN_KEY) return null;
@@ -60,14 +73,7 @@ export function signBunnyHlsUrl(videoUrlOrId: string, userIp?: string, expiresIn
   const path = `/${videoId}/playlist.m3u8`;
   let base = TOKEN_KEY + path + expires;
   if (userIp) base += userIp;
-  const token = crypto
-    .createHash('sha256')
-    .update(base)
-    .digest('base64')
-    .replace(/\n/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  const token = toBase64Url(await sha256(base));
 
   return `https://${host}${path}?token=${token}&expires=${expires}`;
 }
