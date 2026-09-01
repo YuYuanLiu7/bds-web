@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { Bell } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -60,14 +59,6 @@ export default async function AdminLayout({
               產品新訊
             </Link>
             
-            {/* Notification Bell */}
-            <button className="relative p-1 text-slate-400 hover:text-slate-600 transition focus:outline-none">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
-                9+
-              </span>
-            </button>
-
             {/* Separator */}
             <div className="h-4 w-px bg-slate-200"></div>
 
