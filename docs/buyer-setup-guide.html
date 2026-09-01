@@ -582,8 +582,18 @@ NEXT_PUBLIC_PAYUNI_MERID   = 你的商店代號（同上）</pre>
     <h3>6-3. 填鑰匙（你的 <code class="inline">.env.local</code> 已經有全部的值，照著搬）</h3>
     <p>Cloudflare 把鑰匙分成<strong>兩個地方</strong>放（這是它的規定，跳不掉）。我列超清楚，照做就好。</p>
     <p style="margin-top:10px;"><strong>🗄️ 地方 1：執行時的鑰匙（網站「跑起來」要用）</strong><br>
-    位置：你的 Worker → <strong>Settings → Variables and Secrets</strong>。把下面<strong>全部</strong>加進去。其中這 7 個機密，類型請選 <strong>Secret（加密）</strong>、其餘選 <strong>Text</strong>：<br>
-    <code class="inline">NEXTAUTH_SECRET</code>、<code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>、<code class="inline">PAYUNI_HASH_KEY</code>、<code class="inline">PAYUNI_HASH_IV</code>、<code class="inline">RESEND_API_KEY</code>、<code class="inline">BUNNY_TOKEN_AUTH_KEY</code>、<code class="inline">BUNNY_STREAM_API_KEY</code>。</p>
+    位置：你的 Worker → <strong>Settings → Variables and Secrets</strong>。</p>
+    <div class="box good">
+      <p class="box-title">⚡ 最快：用「Import variables」整份貼上，不用一個一個打</p>
+      <p>這個畫面有一個 <strong>Import variables</strong>（貼上 .env 內容一次匯入多個）。<strong>直接把你電腦上的 <code class="inline">.env.local</code> 整份內容貼進去</strong>即可，一次全部匯入。貼完再做下面 3 個小調整就好：</p>
+      <ol class="dolist" style="margin-top:6px;">
+        <li><strong>把這 7 個機密改成「Secret（加密）」</strong>（貼進來預設都是一般 Text；為安全把這幾個點一下改成 Secret）：<br>
+        <code class="inline">NEXTAUTH_SECRET</code>、<code class="inline">SUPABASE_SERVICE_ROLE_KEY</code>、<code class="inline">PAYUNI_HASH_KEY</code>、<code class="inline">PAYUNI_HASH_IV</code>、<code class="inline">RESEND_API_KEY</code>、<code class="inline">BUNNY_TOKEN_AUTH_KEY</code>、<code class="inline">BUNNY_STREAM_API_KEY</code>。</li>
+        <li><strong><code class="inline">NEXTAUTH_URL</code></strong>：你 .env.local 裡多半是 <code class="inline">localhost</code>，先<strong>刪成空白</strong>，等 6-4 拿到正式測試網址再回來填。</li>
+        <li>確認 <strong><code class="inline">ENABLE_PAYMENT_SIMULATION</code> 是 <code class="inline">false</code></strong>（本機測試若設成 true，一定要改回 false，否則有人能免費開通會員）。</li>
+      </ol>
+    </div>
+    <p>（下面是完整清單，供你核對貼進去的內容有沒有齊。）</p>
     <div class="box warn">
       <p class="box-title">⚠️ 重要：只填「值」，不要把括號裡的說明文字打進去</p>
       <p>下面每行 <code class="inline">=</code> 右邊若是「括號說明」，那是<strong>叫你填自己的值</strong>，不是要你照打。標「留空」的欄位，就整格<strong>空白</strong>（連說明都別輸入）。<br>
