@@ -37,9 +37,37 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
   const emit = () => { if (ref.current) onChange(ref.current.innerHTML); };
 
+  // 記住使用者在編輯區內的選取範圍。原因：「樣式下拉」與「顏色選擇器」等原生控制項
+  // 一被點擊就會搶走焦點、讓選取消失，導致 formatBlock/foreColor 作用在空選取上 → 看似沒反應。
+  // 這裡在編輯時持續記錄選取，套用指令前再還原，讓所有工具都正常運作。
+  const savedRange = useRef<Range | null>(null);
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      if (ref.current && ref.current.contains(range.commonAncestorContainer)) {
+        savedRange.current = range;
+      }
+    }
+  };
+  const restoreSelection = () => {
+    const sel = window.getSelection();
+    if (savedRange.current && sel) {
+      sel.removeAllRanges();
+      sel.addRange(savedRange.current);
+    }
+  };
+
   const cmd = (command: string, val: string = '') => {
     ref.current?.focus();
-    try { document.execCommand(command, false, val); } catch { /* 舊瀏覽器忽略 */ }
+    restoreSelection();
+    const isColor = command === 'foreColor' || command === 'hiliteColor' || command === 'backColor';
+    try {
+      // 顏色類指令改以 CSS 樣式輸出（<span style="color">），與顯示端消毒白名單相容
+      if (isColor) { try { document.execCommand('styleWithCSS', false, 'true'); } catch { /* 忽略 */ } }
+      document.execCommand(command, false, val);
+    } catch { /* 舊瀏覽器忽略 */ }
+    saveSelection();
     emit();
   };
 
@@ -137,7 +165,9 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        onInput={emit}
+        onInput={() => { saveSelection(); emit(); }}
+        onKeyUp={saveSelection}
+        onMouseUp={saveSelection}
         onBlur={emit}
         data-placeholder={placeholder || '請輸入內容…'}
         className="px-4 py-3 min-h-[160px] max-h-[420px] overflow-y-auto outline-none text-sm text-slate-800 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-slate-300"
