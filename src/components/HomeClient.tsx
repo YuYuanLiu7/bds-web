@@ -103,7 +103,7 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
   return (
     <div className="w-full flex flex-col bg-white">
 
-      {/* 0. Hero 文字標題與主要 CTA */}
+      {/* 0. Hero 文字標題（課程就在下方，故不再放多餘的「瀏覽課程」按鈕） */}
       <section className="max-w-[1200px] mx-auto w-full px-6 pt-12 md:pt-16 text-center select-none">
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
           {settings.slogan || 'BDS By Doing So'}
@@ -111,14 +111,6 @@ export default function HomeClient({ settings, courses }: HomeClientProps) {
         <p className="mt-3 text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
           專為硬體・半導體・醫材產業打造的業務開發與銷售課程
         </p>
-        <div className="mt-6">
-          <Link
-            href="/courses"
-            className="inline-flex items-center bg-primary hover:bg-primary-hover text-white rounded-lg px-6 py-3 font-semibold transition"
-          >
-            瀏覽課程
-          </Link>
-        </div>
       </section>
 
       {/* 1. Hero Carousel Banner Slider */}
