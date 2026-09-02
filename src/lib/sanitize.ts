@@ -37,7 +37,30 @@ const filter = new FilterXSS({
   css: {}, // 啟用 cssfilter 預設安全白名單（color/background/border/padding/font-* 等）
 });
 
+// 舊式 <font color/size/face> 以「HTML 屬性」上色，會被前台 Tailwind `prose` 的 CSS 蓋掉
+// （行內 style 才蓋得過）。這裡先把 <font ...> 轉成帶 inline style 的 <span>，
+// 再交給 xss 消毒（style 值仍會過 cssfilter 白名單，安全）。如此舊內容也一併正常顯示。
+const FONT_SIZE_MAP: Record<string, string> = {
+  '1': '0.75rem', '2': '0.875rem', '3': '1rem', '4': '1.125rem',
+  '5': '1.5rem', '6': '2rem', '7': '3rem',
+};
+function fontTagsToInlineSpan(html: string): string {
+  return html
+    .replace(/<font\b([^>]*)>/gi, (_m, attrs: string) => {
+      const clean = (v?: string) => (v || '').replace(/[<>"';]/g, '').trim();
+      const color = clean(/color\s*=\s*"?([^"\s>]+)"?/i.exec(attrs)?.[1]);
+      const size = clean(/size\s*=\s*"?([1-7])"?/i.exec(attrs)?.[1]);
+      const face = clean(/face\s*=\s*"([^"]+)"/i.exec(attrs)?.[1]);
+      const styles: string[] = [];
+      if (color) styles.push(`color:${color}`);
+      if (size && FONT_SIZE_MAP[size]) styles.push(`font-size:${FONT_SIZE_MAP[size]}`);
+      if (face) styles.push(`font-family:${face}`);
+      return styles.length ? `<span style="${styles.join(';')}">` : '<span>';
+    })
+    .replace(/<\/font>/gi, '</span>');
+}
+
 export function sanitizeHtml(dirty: string | null | undefined): string {
   if (!dirty) return '';
-  return filter.process(dirty);
+  return filter.process(fontTagsToInlineSpan(dirty));
 }
