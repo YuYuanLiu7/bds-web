@@ -39,6 +39,8 @@ export interface CoverFlowCarouselProps {
   className?: string;
   /** 主題重點色（預設金色；可傳入品牌色）。用於眉標線、CTA、分頁點與置中卡光暈。 */
   accent?: string;
+  /** 區塊主題：dark=深底（預設）、light=淺底（與白底網站一致）。 */
+  variant?: "dark" | "light";
   onCtaClick?: (item: CarouselItem) => void;
 }
 
@@ -97,12 +99,22 @@ export function CoverFlowCarousel({
   autoplayDelay = 5000,
   className = "",
   accent = "#c5a880",
+  variant = "dark",
   onCtaClick,
 }: CoverFlowCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const touchStartX = useRef(0);
   const total = items.length;
+
+  // 深/淺主題的少數差異點（卡片本身有深色漸層蒙版，兩種底色下都好看）
+  const isLight = variant === "light";
+  const sectionBg = isLight ? "#f8fafc" : "#0c0a09";
+  const sectionColor = isLight ? "#0f172a" : "#ffffff";
+  const navBg = isLight ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.55)";
+  const navBorder = isLight ? "1px solid rgba(15,23,42,0.12)" : "1px solid rgba(255,255,255,0.2)";
+  const navColor = isLight ? "#0f172a" : "#ffffff";
+  const dotInactive = isLight ? "rgba(15,23,42,0.2)" : "rgba(255,255,255,0.25)";
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % total);
@@ -149,8 +161,8 @@ export function CoverFlowCarousel({
     <section
       className={`relative w-full min-h-[600px] flex items-center justify-center overflow-hidden py-12 select-none ${className}`}
       style={{
-        backgroundColor: "#0c0a09",
-        color: "#ffffff",
+        backgroundColor: sectionBg,
+        color: sectionColor,
         fontFamily: "system-ui, -apple-system, sans-serif",
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -158,27 +170,29 @@ export function CoverFlowCarousel({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Background Ambience */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <img
-          src={items[currentIndex]?.img}
-          alt="ambience background"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            filter: "brightness(0.22) blur(32px)",
-            transform: "scale(1.15)",
-            transition: "opacity 1000ms ease, filter 1000ms ease",
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(circle at center, rgba(12,10,9,0.3) 0%, rgba(12,10,9,0.92) 100%)",
-          }}
-        />
-      </div>
+      {/* Background Ambience（僅深色主題顯示；淺色主題維持乾淨白底、與全站一致） */}
+      {!isLight && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <img
+            src={items[currentIndex]?.img}
+            alt="ambience background"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              filter: "brightness(0.22) blur(32px)",
+              transform: "scale(1.15)",
+              transition: "opacity 1000ms ease, filter 1000ms ease",
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(circle at center, rgba(12,10,9,0.3) 0%, rgba(12,10,9,0.92) 100%)",
+            }}
+          />
+        </div>
+      )}
 
       <div className="relative w-full max-w-6xl mx-auto px-4 z-10 flex flex-col items-center">
         {/* Eyebrow */}
@@ -443,9 +457,9 @@ export function CoverFlowCarousel({
             width: "46px",
             height: "46px",
             borderRadius: "50%",
-            backgroundColor: "rgba(0,0,0,0.55)",
-            border: "1px solid rgba(255,255,255,0.2)",
-            color: "#ffffff",
+            backgroundColor: navBg,
+            border: navBorder,
+            color: navColor,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -470,9 +484,9 @@ export function CoverFlowCarousel({
             width: "46px",
             height: "46px",
             borderRadius: "50%",
-            backgroundColor: "rgba(0,0,0,0.55)",
-            border: "1px solid rgba(255,255,255,0.2)",
-            color: "#ffffff",
+            backgroundColor: navBg,
+            border: navBorder,
+            color: navColor,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -497,7 +511,7 @@ export function CoverFlowCarousel({
                 height: "8px",
                 width: idx === currentIndex ? "28px" : "8px",
                 borderRadius: "9999px",
-                backgroundColor: idx === currentIndex ? accent : "rgba(255,255,255,0.25)",
+                backgroundColor: idx === currentIndex ? accent : dotInactive,
                 border: "none",
                 cursor: "pointer",
                 boxShadow: idx === currentIndex ? `0 0 10px ${accent}b3` : "none",

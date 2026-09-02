@@ -34,5 +34,5 @@ export default function CourseCoverflow({
 
   if (items.length === 0) return null;
 
-  return <CoverFlowCarousel items={items} sectionLabel={sectionLabel} accent={accent} />;
+  return <CoverFlowCarousel items={items} sectionLabel={sectionLabel} accent={accent} variant="light" />;
 }
