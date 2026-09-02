@@ -62,10 +62,15 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     ref.current?.focus();
     restoreSelection();
     const isColor = command === 'foreColor' || command === 'hiliteColor' || command === 'backColor';
+    // formatBlock（標題/內文/引用）在 Chromium 需要 <tag> 角括號格式，只傳 'H1' 部分版本會無效
+    let value = val;
+    if (command === 'formatBlock' && value && !value.startsWith('<')) {
+      value = `<${value.toLowerCase()}>`;
+    }
     try {
       // 顏色類指令改以 CSS 樣式輸出（<span style="color">），與顯示端消毒白名單相容
       if (isColor) { try { document.execCommand('styleWithCSS', false, 'true'); } catch { /* 忽略 */ } }
-      document.execCommand(command, false, val);
+      document.execCommand(command, false, value);
     } catch { /* 舊瀏覽器忽略 */ }
     saveSelection();
     emit();
