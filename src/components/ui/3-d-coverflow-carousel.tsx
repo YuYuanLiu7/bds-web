@@ -222,22 +222,22 @@ export function CoverFlowCarousel({
               zIndex = 30;
               filter = "brightness(1)";
             } else if (offset === 1) {
-              transform = "translateX(380px) scale(0.82) rotateY(-22deg)";
-              opacity = 0.65;
+              transform = "translateX(300px) scale(0.8) rotateY(-20deg)";
+              opacity = 0.7;
               zIndex = 20;
-              filter = "brightness(0.75)";
+              filter = "brightness(0.78)";
             } else if (offset === 2) {
-              transform = "translateX(680px) scale(0.66) rotateY(-34deg)";
-              opacity = 0.38;
+              transform = "translateX(520px) scale(0.62) rotateY(-32deg)";
+              opacity = 0.4;
               zIndex = 10;
               filter = "brightness(0.55) blur(1px)";
             } else if (offset === total - 1) {
-              transform = "translateX(-380px) scale(0.82) rotateY(22deg)";
-              opacity = 0.65;
+              transform = "translateX(-300px) scale(0.8) rotateY(20deg)";
+              opacity = 0.7;
               zIndex = 20;
-              filter = "brightness(0.75)";
+              filter = "brightness(0.78)";
             } else if (offset === total - 2) {
-              transform = "translateX(-680px) scale(0.66) rotateY(34deg)";
+              transform = "translateX(-520px) scale(0.62) rotateY(32deg)";
               opacity = 0.38;
               zIndex = 10;
               filter = "brightness(0.55) blur(1px)";
@@ -249,8 +249,8 @@ export function CoverFlowCarousel({
                 onClick={() => !isCenter && goToSlide(idx)}
                 style={{
                   position: "absolute",
-                  width: "min(92vw, 480px)",
-                  height: "min(57.5vw, 300px)",
+                  width: "min(88vw, 440px)",
+                  height: "min(52vw, 264px)",
                   borderRadius: "18px",
                   overflow: "hidden",
                   backgroundColor: "#171311",
