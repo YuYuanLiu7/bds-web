@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   ChevronLeft,
   ChevronRight
@@ -10,7 +11,9 @@ import type { SiteSettings } from '@/lib/site-settings';
 import { Course } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
 import { useSettings } from '@/components/SettingsProvider';
-import CourseCoverflow from '@/components/CourseCoverflow';
+// 3D 課程動畫改為「僅瀏覽器端渲染」（ssr:false），不佔用伺服器運算時間，
+// 降低首頁在 Cloudflare Workers 免費版的 CPU 用量（避免 Error 1102）。
+const CourseCoverflow = dynamic(() => import('@/components/CourseCoverflow'), { ssr: false });
 
 // 僅取用到的 session 欄位；目前首頁未直接使用 session，保留以維持呼叫端介面相容
 interface SessionLike {
